@@ -1,2 +1,2 @@
-# br-insight
-Blade Runner Insight - Website and Library
+# Blade Runner Insight
+This repository contains all static files for the [Blade Runner Insight](www.br-insight.com) website. 
