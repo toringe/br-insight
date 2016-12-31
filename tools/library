@@ -7,16 +7,18 @@
 
 # Core modules
 import os
+from datetime import datetime
+from shutil import copyfile
 
 # Third party modules
 from docopt import docopt
-import html5lib
+from bs4 import BeautifulSoup
+import pymmd
 
 usage = """
 Usage:
     library list
     library prep ARTICLES...
-    library -h | --help
 
 Options:
     -h --help   Show this help description
@@ -24,18 +26,53 @@ Options:
 """
 
 
-# Transform article(s) from markdown to html and apply to template
+# Load a spesific template file and return a html5lib xml.etree instance
+def load_template(filename, library):
+    path = library + '/../assets/templates/'
+    return BeautifulSoup(open(path + filename), 'html.parser')
+
+# Transform markdown source to html and apply template
 def prep(articlelist, library):
     for article in articlelist:
-        md = library + '/' + article + '/article.md'
-        print(md)
-        if os.path.isfile(md):
-            print("file exists")
-        else:
-            print('Unable to find {}'.format(md))
+        apath = library + '/' + article + '/'
+        mdfile = apath + '/article.md'
 
+        if not os.path.isfile(mdfile):
+            print('Warning: {} not found'.format(mdfile))
+            continue
+
+        # Load article from markdown source
+        with open(mdfile, 'r') as mdfp:
+            md = mdfp.read()
+        mdtitle = pymmd.value(md, 'title')
+        mdauthor = pymmd.value(md, 'author')
+        mdhtml = pymmd.convert(md, ext=pymmd.SNIPPET)
+        article = BeautifulSoup(mdhtml, 'html.parser')
+
+        # Load html template
+        template = load_template('article.html', library)
+
+        # Modify template
+        template.title.contents[0].replace_with(mdtitle)
+        template.section.header.h2.contents[0].replace_with(mdtitle)
+        template.section.header.div.p.contents[0].replace_with(mdauthor)
+        cyear = template.find('section', {'id': 'footer'}).ul.li.span
+        cyear.contents[0].replace_with(str(datetime.now().year))
+        acontent = template.find('section', {'id': 'wrapper'}). \
+                            find('div', {'class': 'wrapper'}).div
+        acontent.contents[0].replace_with(article)
+
+        # Save article html 
+        html = template.prettify('utf-8')
+        with open(apath + '/index.html', 'wb') as fp:
+            fp.write(html)
+
+        # Add local CSS to article
+        csstemplate = library + '/../assets/templates/article.css'
+        copyfile(csstemplate, apath + '/article.css')
 
 def main():
+
     # Argument parser
     args = docopt(usage)
 
