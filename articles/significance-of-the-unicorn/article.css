@@ -1,0 +1,41 @@
+/*
+	Local style sheet for article
+*/
+
+	@import url('https://fonts.googleapis.com/css?family=Lora');
+	@import url('https://fonts.googleapis.com/css?family=Catamaran');
+	@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+	@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+	@import url('https://fonts.googleapis.com/css?family=Quicksand');
+
+	body {
+		font-family: "Source Sans Pro", Helvetica, sans-serif;
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("cover.jpg");
+	}
+
+	#content {
+		text-align: justify;
+	}
+
+	#footer .inner .copyright {
+		border: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	@media screen and (max-width: 1280px) {
+		#wrapper > header {
+			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("cover.jpg");
+		}
+
+		#footer {
+			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("cover.jpg");
+		}
+		
+	}
+
+	@media screen and (min-width: 1280px) {
+		body {
+			font-family: "Open Sans", Helvetica, sans-serif;
+		}
+	}
