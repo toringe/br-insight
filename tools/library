@@ -52,10 +52,14 @@ def prep(articlelist, library):
         # Load html template
         template = load_template('article.html', library)
 
+        # Prefix some elements
+        pagetitle = 'Blade Runner Insight - ' + mdtitle
+        author = 'By ' + mdauthor
+
         # Modify template
-        template.title.contents[0].replace_with(mdtitle)
+        template.title.contents[0].replace_with(pagetitle)
         template.section.header.h2.contents[0].replace_with(mdtitle)
-        template.section.header.div.p.contents[0].replace_with(mdauthor)
+        template.section.header.div.p.contents[0].replace_with(author)
         cyear = template.find('section', {'id': 'footer'}).ul.li.span
         cyear.contents[0].replace_with(str(datetime.now().year))
         acontent = template.find('section', {'id': 'wrapper'}). \
