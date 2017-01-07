@@ -12,6 +12,20 @@
 		text-align: justify;
 	}
 
+	a.footnote {
+		vertical-align: super;
+		font-size: smaller;
+	}
+
+	.footnotes {
+		font-size: smaller;
+	}
+
+	#imgauthor {
+		font-size: smaller;
+		color: gray;
+	}
+
 	#wrapper > header {
 		text-align: left;
 	}
