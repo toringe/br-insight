@@ -46,7 +46,7 @@ def prep(articlelist, library):
             md = mdfp.read()
         mdtitle = pymmd.value(md, 'title')
         mdauthor = pymmd.value(md, 'author')
-        mdhtml = pymmd.convert(md, ext=pymmd.SNIPPET)
+        mdhtml = pymmd.convert(md, ext=pymmd.SNIPPET+pymmd.NOTES)
         article = BeautifulSoup(mdhtml, 'html.parser')
 
         # Load html template
