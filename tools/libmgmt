@@ -46,6 +46,7 @@ def prep(articlelist, library):
             md = mdfp.read()
         mdtitle = pymmd.value(md, 'title')
         mdauthor = pymmd.value(md, 'author')
+        mdimgauthor = pymmd.value(md, 'cauthor')
         mdhtml = pymmd.convert(md, ext=pymmd.SNIPPET+pymmd.NOTES)
         article = BeautifulSoup(mdhtml, 'html.parser')
 
@@ -55,6 +56,9 @@ def prep(articlelist, library):
         # Prefix some elements
         pagetitle = 'Blade Runner Insight - ' + mdtitle
         author = 'By ' + mdauthor
+        cover = ''
+        if len(mdimgauthor) != 0 :
+            cover = 'Image artwork by ' + mdimgauthor
 
         # Modify template
         template.title.contents[0].replace_with(pagetitle)
@@ -64,6 +68,12 @@ def prep(articlelist, library):
         cyear.contents[0].replace_with(str(datetime.now().year))
         acontent = template.find('section', {'id': 'wrapper'}). \
                             find('div', {'class': 'wrapper'}).div
+        # Add artwork author
+        cover_tag = article.new_tag('div', id='imgauthor')
+        cover_tag.string = cover
+        article.append(cover_tag)
+
+        # Insert article into main template
         acontent.contents[0].replace_with(article)
 
         # Save article html 
