@@ -18,7 +18,7 @@ import pymmd
 usage = """
 Usage:
     library list
-    library prep ARTICLES...
+    library add ARTICLES...
 
 Options:
     -h --help   Show this help description
@@ -31,8 +31,8 @@ def load_template(filename, library):
     path = library + '/../assets/templates/'
     return BeautifulSoup(open(path + filename), 'html.parser')
 
-# Transform markdown source to html and apply template
-def prep(articlelist, library):
+# Add article by transform markdown source to html and apply template
+def add(articlelist, library):
     for article in articlelist:
         apath = library + '/' + article + '/'
         mdfile = apath + '/article.md'
@@ -85,6 +85,7 @@ def prep(articlelist, library):
         csstemplate = library + '/../assets/templates/article.css'
         copyfile(csstemplate, apath + '/article.css')
 
+
 def main():
 
     # Argument parser
@@ -103,11 +104,11 @@ def main():
         exit()
 
     # Prep article
-    if args['prep']:
+    if args['add']:
         if args['ARTICLES'][0] == 'all':
-            prep(os.listdir(library), library)
+            add(os.listdir(library), library)
         else:
-            prep(args['ARTICLES'], library)
+            add(args['ARTICLES'], library)
 
 if __name__ == "__main__":
     main()
