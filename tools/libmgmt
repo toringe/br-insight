@@ -7,18 +7,28 @@
 
 # Core modules
 import os
+import textwrap
 from datetime import datetime
 from shutil import copyfile
+from glob import glob
 
 # Third party modules
 from docopt import docopt
 from bs4 import BeautifulSoup
+from wand.image import Image
+from sumy.parsers.html import HtmlParser
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
 import pymmd
 
 usage = """
 Usage:
     library list
     library add ARTICLES...
+    library reindex
 
 Options:
     -h --help   Show this help description
@@ -26,15 +36,10 @@ Options:
 """
 
 
-# Load a spesific template file and return a html5lib xml.etree instance
-def load_template(filename, library):
-    path = library + '/../assets/templates/'
-    return BeautifulSoup(open(path + filename), 'html.parser')
-
 # Add article by transform markdown source to html and apply template
 def add(articlelist, library):
     for article in articlelist:
-        apath = library + '/' + article + '/'
+        apath = library + '/' + article
         mdfile = apath + '/article.md'
 
         if not os.path.isfile(mdfile):
@@ -51,7 +56,8 @@ def add(articlelist, library):
         article = BeautifulSoup(mdhtml, 'html.parser')
 
         # Load html template
-        template = load_template('article.html', library)
+        path = library + '/../assets/templates/article.html'
+        template = BeautifulSoup(open(path), 'html.parser')
 
         # Prefix some elements
         pagetitle = 'Blade Runner Insight - ' + mdtitle
@@ -85,6 +91,55 @@ def add(articlelist, library):
         csstemplate = library + '/../assets/templates/article.css'
         copyfile(csstemplate, apath + '/article.css')
 
+        # Create cropped version of cover art
+        coverimg = apath + '/cover.jpg'
+        cropimg = apath + '/cover-crop.jpg'
+        if not os.path.isfile(coverimg):
+            print('Warning: {} not found'.format(coverimg))
+            continue
+        cthumb = Image(filename=coverimg)
+        cthumb.crop(width=505, height=295, gravity='center')
+        cthumb.save(filename=cropimg)
+
+
+# Rebuild Libary index page
+def reindex(library):
+
+    # Get library template 
+    path = library + '/../assets/templates/library.html'
+    libtemp = BeautifulSoup(open(path), 'html.parser')
+
+    for apath in glob(library+'/*/'):
+
+        # Read article markdown
+        mdfile = apath + '/article.md'
+        with open(mdfile, 'r') as mdfp:
+            md = mdfp.read()
+        mdtitle = pymmd.value(md, 'title')
+        print(mdtitle)
+
+        # Auto-summarize article
+        lang = 'english'
+        mdhtml = pymmd.convert(md, ext=pymmd.SNIPPET+pymmd.NOTES)
+        parser = HtmlParser.from_string(mdhtml, None, Tokenizer(lang))
+        stemmer = Stemmer(lang)
+        summarizer = Summarizer(stemmer)
+        summarizer.stop_words = get_stop_words(lang)
+        summary = ''.join(map(str, summarizer(parser.document, 5)))
+
+        # Create new block of tags
+        adir = os.path.basename(os.path.normpath(apath))
+        ahref = adir + '/index.html'
+        alink = libtemp.new_tag('a', href=ahref, **{'class':'image'})
+        aimg = libtemp.new_tag('img', src=adir+'/cover-crop.jpg', alt='')
+        atitle = libtemp.new_tag('h3', **{'class':'major'})
+        atitle.string = mdtitle
+        asum = libtemp.new_tag('p')
+        asum.string = summary[:160].rsplit(' ', 1)[0]
+        aread = libtemp.new_tag('a', href=ahref, **{'class':'special'})
+        ablock = libtemp.new_tag('article')
+        print(asum.string)
+        exit()
 
 def main():
 
@@ -109,6 +164,10 @@ def main():
             add(os.listdir(library), library)
         else:
             add(args['ARTICLES'], library)
+
+    # Rebuild library index
+    if args['reindex']:
+        reindex(library)
 
 if __name__ == "__main__":
     main()
