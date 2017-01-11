@@ -1,0 +1,35 @@
+/*
+	Style overrides for Library
+*/
+@import url('https://fonts.googleapis.com/css?family=Quicksand|Noto+Sans');
+
+	body {
+		font-family: "Noto Sans", Helvetica, sans-serif;
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-library.jpg");
+		text-align: justify;
+	}
+
+	#wrapper > header {
+		text-align: left;
+	}
+
+	#footer .inner .copyright {
+		border: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	@media screen and (max-width: 1280px) {
+		body {
+			font-family: "Quicksand", Helvetica, sans-serif;
+		}
+		#wrapper > header {
+			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-library.jpg");
+		}
+
+		#footer {
+			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-library.jpg");
+		}
+		
+	}
+
