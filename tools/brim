@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+###############################################################################
+# Description: Library maintenance tool for Blade Runner Insight
+# Author:      Tor Inge Skaar
+# License:     MIT
+###############################################################################
+
+# Core modules
+import os
+import re
+import random
+import textwrap
+from datetime import datetime
+from shutil import copyfile
+from glob import glob
+
+# Third party modules
+from docopt import docopt
+from bs4 import BeautifulSoup
+from wand.image import Image
+from sumy.parsers.html import HtmlParser
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+from tqdm import tqdm
+import pymmd
+
+usage = """
+Blade Runner Insight Manager
+
+Usage:
+    brim lib list
+    brim lib add ARTICLES...
+    brim lib reindex
+    brim feature ARTICLE
+
+Options:
+    -h --help   Show this help description
+
+"""
+
+# Read markdown article and return a dictionary with metadata and content
+def get_article(mdfile, extensions):
+
+    if not os.path.isfile(mdfile):
+        exit('ERROR: {} not found'.format(mdfile))
+
+    with open(mdfile, 'r') as mdfp:
+        md = mdfp.read()
+
+    article = {}
+    article['title'] = pymmd.value(md, 'title')
+    article['author'] = pymmd.value(md, 'author')
+    article['artist'] = pymmd.value(md, 'cauthor')
+    article['html'] = pymmd.convert(md, ext=extensions)
+
+    return article
+
+
+# Save soup object as html to specified filepath
+def save_html(soup, path):
+    html = soup.prettify('utf-8')
+    with open(path, 'wb') as fp:
+        fp.write(html)
+
+
+# Add article by transform markdown source to html and apply template
+def add(articlelist, library):
+    for article in tqdm(articlelist):
+
+        # Directory path of article
+        apath = library + '/' + article
+
+        # Load article from markdown
+        a = get_article(apath + '/article.md', pymmd.SNIPPET+pymmd.NOTES)
+        asoup = BeautifulSoup(a['html'], 'html.parser')
+
+        # Load library template
+        path = library + '/../assets/templates/article.html'
+        template = BeautifulSoup(open(path), 'html.parser')
+
+        # Prefix some elements
+        pagetitle = 'Blade Runner Insight - ' + a['title']
+        author = 'By ' + a['author']
+        cover = ''
+        if len(a['artist']) != 0 :
+            cover = 'Image artwork by ' + a['artist']
+
+        # Modify template
+        template.title.contents[0].replace_with(pagetitle)
+        template.section.header.h2.contents[0].replace_with(a['title'])
+        template.section.header.div.p.contents[0].replace_with(author)
+        cyear = template.find('section', {'id': 'footer'}).ul.li.span
+        cyear.contents[0].replace_with(str(datetime.now().year))
+        acontent = template.find('section', {'id': 'wrapper'}). \
+                            find('div', {'class': 'wrapper'}).div
+        # Add artwork author
+        cover_tag = asoup.new_tag('div', id='imgauthor')
+        cover_tag.string = cover
+        asoup.append(cover_tag)
+
+        # Insert article into main template
+        acontent.contents[0].replace_with(asoup)
+
+        # Save article html
+        save_html(template, apath + '/index.html')
+
+        # Add local CSS to article
+        csstemplate = library + '/../assets/templates/article.css'
+        copyfile(csstemplate, apath + '/article.css')
+
+        # Create cropped version of cover art for library index page
+        coverimg = apath + '/cover.jpg'
+        cropimg = apath + '/cover-crop.jpg'
+        if not os.path.isfile(coverimg):
+            print('Warning: {} not found'.format(coverimg))
+            continue
+        cthumb = Image(filename=coverimg)
+        cthumb.crop(width=505, height=295, gravity='center')
+        cthumb.save(filename=cropimg)
+
+        # Create squared version of cover art for featured show case
+        sqfile = apath + '/cover-sq.jpg'
+        sqimg = Image(filename=coverimg)
+        sqimg.transform(resize='x276')
+        sqimg.crop(0, 0, 276, 276)
+        sqimg.save(filename=sqfile)
+
+
+# Auto-summarize html content using sumy and return number of sentences
+def autosum(htmlstr, sentences):
+    lang = 'english'
+    parser = HtmlParser.from_string(htmlstr, None, Tokenizer(lang))
+    stemmer = Stemmer(lang)
+    summarizer = Summarizer(stemmer)
+    summarizer.stop_words = get_stop_words(lang)
+    return summarizer(parser.document, sentences)
+
+
+# Crop text on word boundaries at the given length
+def wordcrop(content, length, suffix='...'):
+    # Remove citation references
+    content = re.sub(r'\[.+?\]\s*', '', content)
+    if len(content) <= length:
+        return content
+    else:
+        return content[:length].rsplit(' ', 1)[0]+suffix
+
+
+# Rebuild Libary index page
+def reindex(library):
+
+    # Get library template as a soup object
+    path = library + '/../assets/templates/library.html'
+    libtemp = BeautifulSoup(open(path), 'html.parser')
+
+    print('Rebuilding Library index file')
+
+    # Loop through all articles in the library
+    for apath in tqdm(glob(library+'/*/')):
+
+        # Read article markdown
+        a = get_article(apath + '/article.md', pymmd.SNIPPET)
+
+        # Auto-summarize article
+        txtsum = ''.join(map(str, autosum(a['html'], 1)))
+
+        # Create new article tag block
+        adir = os.path.basename(os.path.normpath(apath))
+        ahref = adir + '/index.html'
+        alink = libtemp.new_tag('a', href=ahref, **{'class':'image'})
+        aimg = libtemp.new_tag('img', src=adir+'/cover-crop.jpg', alt='')
+        atitle = libtemp.new_tag('h3', **{'class':'major'})
+        atitle.string = a['title']
+        asum = libtemp.new_tag('p')
+        asum.string = (txtsum[:160] + '...') if len(txtsum) > 160 else txtsum
+        aread = libtemp.new_tag('a', href=ahref, **{'class':'special'})
+        aread.string = 'Read more'
+        ablock = libtemp.new_tag('article')
+        alink.append(aimg)
+        ablock.append(alink)
+        ablock.append(atitle)
+        ablock.append(asum)
+        ablock.append(aread)
+
+        # Append new block to template
+        libtemp.find('section', {'id': 'four'}).section.append(ablock)
+
+    # Finally save the template to index file
+    save_html(libtemp, library + '/index.html')
+
+
+# Set the featured article on the home page
+def feature(article, library):
+
+    # Directory path of article
+    apath = library + '/' + article
+
+    # Load markdown
+    a = get_article(apath + '/article.md', pymmd.SNIPPET)
+
+    # Load home template
+    path = library + '/../assets/templates/home.html'
+    home = BeautifulSoup(open(path), 'html.parser')
+
+    # Modify the feature section
+    fsection = home.find('section', {'id': 'two'})
+    fsection.div.a.img['src'] = apath + '/cover-sq.jpg'
+    fsection.div.a['href'] = apath + '/index.html'
+    fsection.div.h2.string = a['title']
+    fsection.div.div.a['href'] = apath + '/index.html'
+
+    # Remove all existing paragraphs
+    for p in fsection.findAll('p'):
+        p.extract()
+
+    # Get a few sentences that summarizes the article
+    sentences = autosum(a['html'], 3)
+    sump = ""
+    for s in sentences:
+        sen = str(s)
+        if len(sen) > 160:
+            sump += wordcrop(str(s), 160) + ' '
+        else:
+            sump += sen + '... '
+
+    # Add the sentences as paragraphs
+    div = fsection.find('div', 'content')
+    faheader = home.new_tag('small', id='faheader')
+    faheader.string = "Featured Article"
+    newp = home.new_tag('p')
+    newp.string = sump
+    div.insert(0, faheader)
+    div.insert(3, newp)
+
+    #for i, sen in enumerate(txtsum):
+    #    newp = home.new_tag('p')
+    #    newp.string = str(sen)
+    #    div.insert(i+2, newp)
+
+    # Finally save the template to index file
+    save_html(home, library + '/../index.html')
+
+    print('Featured article set: {}'.format(a['title']))
+
+
+# Return a list of all articles
+def get_articles(library):
+    os.chdir(library)
+    return [x[:-1] for x in glob('*/')]
+
+
+def main():
+
+    # Argument parser
+    args = docopt(usage)
+
+    # We need to know the path of the library of articles
+    library = os.environ.get('BRILIB')
+    if library is None:
+        print("Environment variable 'BRILIB' is not set. Please set it to the "
+              "current path of the directory containing all articles")
+        exit(2)
+
+    # List all articles
+    if args['list']:
+        print('\n'.join(get_articles(library)))
+        exit()
+
+    # Prep article
+    if args['add']:
+        if args['ARTICLES'][0] == 'all':
+            add(get_articles(library), library)
+        else:
+            add(args['ARTICLES'], library)
+
+    # Rebuild library index
+    if args['reindex']:
+        reindex(library)
+
+    # Set featured article
+    if args['feature']:
+        if args['ARTICLE'] == 'random':
+            feature(random.choice(get_articles(library)), library)
+        else:
+            feature(args['ARTICLE'], library)
+
+
+if __name__ == "__main__":
+    main()
