@@ -3,7 +3,7 @@ title: An Analysis of Blade Runner
 author: Mark Lachniel
 date: 23-11-1998
 cover: cover.jpg
-cauthor: elclon 
+cauthor: Christopher Shy
 taxonomy:
 	category: article
 summary:

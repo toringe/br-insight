@@ -11,7 +11,7 @@ summary:
 	size: 100
 ---
 
-This dissertation was written between September 1997 and February 1998, and formed part of the final examination for my undergraduate degree in English Literature and Philosophy, at Manchester University, England. I would like to thank Dr. Marcus Wood, formerly of Manchester University and currently teaching at the University of Sussex. As my dissertation supervisor, he offered advice and judgement which were hugely helpful. It goes without saying that any errors are my own.
+*This dissertation was written between September 1997 and February 1998, and formed part of the final examination for my undergraduate degree in English Literature and Philosophy, at Manchester University, England. I would like to thank Dr. Marcus Wood, formerly of Manchester University and currently teaching at the University of Sussex. As my dissertation supervisor, he offered advice and judgement which were hugely helpful. It goes without saying that any errors are my own.*
 
 ### Introduction
 
@@ -31,7 +31,7 @@ Blade Runner uses its own terminology: the clones of the film are described as '
 
 > Early in the 21st Century, the TYRELL CORPORATION advanced Robot evolution into the Nexus phase - a being virtually identical to a human - known as a Replicant. The NEXUS-6 Replicants were superior in strength and agility, and at least equal in intelligence, to the genetic engineers who created them. Replicants were used Off-world as slave labor, in the hazardous exploration and colonisation of other planets. After a bloody mutiny by a NEXUS-6 combat team in an Off-world colony, Replicants were declared illegal on Earth - under penalty of death. Special police squads - BLADE RUNNER UNITS - had orders to shoot to kill, upon detection, any trespassing Replicants. This was not called execution. It was called retirement.
 
-This crawl introduces us to some of the terminology used in the film - such as replicants and blade runners - but much more interestingly, it can be seen to have an element of bias, also. The replicants are specifically referred to as slaves. The text also mentions that they are retired, but suggests that this is more or less synonymous with execution, WE are allowed to ponder this deliberately emotive language for a few moments, perhaps long enough to intuitively feel some sympathy for the replicants before a single one has even been seen, before the words LOS ANGELES, NOVEMBER 2019 fill the screen, and the film proper begins.
+This crawl introduces us to some of the terminology used in the film - such as replicants and blade runners - but much more interestingly, it can be seen to have an element of bias, also. The replicants are specifically referred to as slaves. The text also mentions that they are retired, but suggests that this is more or less synonymous with execution, we are allowed to ponder this deliberately emotive language for a few moments, perhaps long enough to intuitively feel some sympathy for the replicants before a single one has even been seen, before the words LOS ANGELES, NOVEMBER 2019 fill the screen, and the film proper begins.
 
 The fade from black is marked by the sound of an explosion, and the first image of the film, the cityscape, is revealed. Los Angeles, the City of Angels, is a hellish, endless maze of giant, industrial buildings; an oil refinery spews flames into the night sky, which is an ashen, polluted grey. A flying vehicle emerges from the fog, and shoots past the screen. Lightning strikes a building, to no apparent effect. This is a place of poison and decay, and it is hard to believe that human could inhabit it.
 
@@ -294,20 +294,35 @@ Even Deckard's total, all-encompassing belief in his own existence - what one mi
 ### Bibliograpy
 
 - Bakhtin, The Dialogic Imagination (translated by Caryl Emerson and Michael Holquist), University of Texas Press, Austin, 1990
+
 - Baudrillard, Jean, Simulations (translated by Foss/Patton/Beitdamman), Semiotext(e) (Semiotext(e) Foreign Agents Series), New York, 1983
+
 - Benet, William Rose, The Readers Encyclopedia of World Literature and the Arts, George Harrap &amp; Co, New York, 1948
+
 - Bentham, Jeremy, Panopticon
+
 - The Good News Bible
+
 - Ceram, C W, Gods, Graves and Scholars: The Story of Archaeology (translated by E B Garside), Victor Gollancz, 1954
+
 - Dennis, Denise, Black History for Beginners, Readers and Writers publishing, New York, 1984
+
 - Elkins, Stanley M, Slavery: A Problem for American Institutuional and Intellectual Life, University of Chicago Press, Chicago, 1963
+
 - Ferrari, Enrique Lafuen, Goya: Complete Etchings, Aquatints and Lithographs, 2nd ed, Thames and Hudson, London 1963
+
 - Kerman, Judith b (ed), Retrofitting Blade Runner:Issues in Ridley Scott's Blade Runner and Philip K Dick's Do Androids Dream of Electric Sheep?, Bowling Green State University Press, Bowling Green, Ohio, 1991
+
 - Milton, John, Paradise Lost
+
 - Sammon, Paul M, Future Noir: The Making of Blade Runner, Harper Prism, 1996
+
 - Selden, Raman, A Readers Guide to Contemporary Literary Theory, Harvester Wheatsheaf, London, 1993
+
 - Strantii, Dominic, An Introduction to the Theories of Popular Culture, Routledge, London, 1996
+
 - Wheale, Nigel, The Postmodern Arts: An Introductory Reader, Routledge, London, 1996
+
 - Van Oust, Jon, 2019: Off-World; Blade Runner FAQ, http://kzsu.stanford.edu/uwi/br/off-world.html
 
 [^1]: Sammon, Future Noir: The Making of Blade Runner, 1996, pg 314

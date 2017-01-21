@@ -1,5 +1,5 @@
 ---
-title: Appreciation & Assessment of the Director's Cut
+title: Appreciation & Assessment of Dir. Cut
 author: Adrian McOran-Campbell
 cover: cover.png
 cauthor: Joey Mason

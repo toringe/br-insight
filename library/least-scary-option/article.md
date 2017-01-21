@@ -2,7 +2,7 @@
 title: The Least Scary Option 
 author: Stephen Rowley 
 cover: cover.jpg
-cauthor: Brijesh Lala
+cauthor: Syd Mead
 date: 09-03-2000
 taxonomy:
 	category: article

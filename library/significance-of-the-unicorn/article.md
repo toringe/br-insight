@@ -57,6 +57,6 @@ Scott: The innuendo is still there. The French get it immediately! I think it's 
 Scott intended the unicorn scene to be in the 1982 theatrical release, but the producers vetoed the idea as "too arty".
 
 Written by
-Murray Chapman
+**Murray Chapman**
 
 Copyright Murray Chapman, 1998.
