@@ -1,81 +1,95 @@
 /*
-	Style overrides for Library
+	Style overrides for Home page
 */
-@import url('https://fonts.googleapis.com/css?family=Quicksand|Noto+Sans');
 
+@font-face {
+	font-family: 'Noto Sans';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Noto Sans'), local('NotoSans'), url('/assets/fonts/notosans.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+					}
+
+@font-face {
+	font-family: 'Quicksand';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Quicksand Regular'), local('Quicksand-Regular'), url('/assets/fonts/quicksand.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+}
+
+body {
+	font-family: "Noto Sans", Helvetica, sans-serif;
+	background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
+	text-align: justify;
+}
+
+p.right {
+	text-align: right;
+}
+
+p.left {
+	text-align: left;
+}
+
+p.signed {
+	color: #8c3b3c;
+	font-weight: bold;
+	padding-right: 2em;
+}
+
+#wrapper > header {
+	text-align: left;
+}
+
+.logo {
+	max-width: 100%;
+	height: auto;
+}
+
+/* Red featured article */
+.wrapper.spotlight.style2 {
+	background-color: #8c3b3c;
+}
+.wrapper.spotlight.style2:before, .wrapper.spotlight.style2:after {
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='0,100 100,0 100,100' style='fill:%238c3b3c%3B' /%3E%3C/svg%3E");
+}
+
+#faheader {
+	color: #9a5354;
+	text-transform: uppercase;
+}
+
+h3.major {
+	text-align: left;
+}
+
+#banner h2 {
+	border-bottom: none;
+	margin-bottom: -1em;
+	padding-bottom: 0em;
+}
+
+#footer .inner .copyright {
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+
+@media screen and (max-width: 1280px) {
 	body {
-		font-family: "Noto Sans", Helvetica, sans-serif;
-		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
-		text-align: justify;
+		font-family: "Quicksand", Helvetica, sans-serif;
 	}
-
-	p.right {
-		text-align: right;
-	}
-
-	p.left {
-		text-align: left;
-	}
-
-	p.signed {
-		color: #8c3b3c;
-		font-weight: bold;
-		padding-right: 2em;
-	}
-
-	#faheader {
-		color: #9a5354;
-		text-transform: uppercase;
-	}
-
 	#wrapper > header {
-		text-align: left;
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
 	}
 
-	.logo {
-		max-width: 100%;
-		height: auto;
+	#footer {
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
 	}
 
-	/* Red featured article */
-	.wrapper.spotlight.style2 {
-		background-color: #8c3b3c;
-	}
-	.wrapper.spotlight.style2:before, .wrapper.spotlight.style2:after {
-		background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='0,100 100,0 100,100' style='fill:%238c3b3c%3B' /%3E%3C/svg%3E");
+	#banner {
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
 	}
 
-	h3.major {
-		text-align: left;
-	}
-
-	#banner h2 {
-		border-bottom: none;
-		margin-bottom: -1em;
-		padding-bottom: 0em;
-	}
-
-	#footer .inner .copyright {
-		border: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	@media screen and (max-width: 1280px) {
-		body {
-			font-family: "Quicksand", Helvetica, sans-serif;
-		}
-		#wrapper > header {
-			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
-		}
-
-		#footer {
-			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
-		}
-		
-		#banner {
-			background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
-		}
-		
-	}
-
+}
