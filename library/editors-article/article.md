@@ -1,5 +1,6 @@
 ---
 title: Editor's Article
+author: Tor Inge Skaar
 cover: cover.jpg
 date: 03-11-1995
 taxonomy:
@@ -27,6 +28,4 @@ It's unknown to us how much Tyrell actually know about "the little people" down 
 
 Eldon Tyrell is a hard man to see, and he who can't "see" can not understand where he came from or have any memories, nor a personality . You can see when Pris hides among Sebastian's toys, that she has painted black around her eyes. That's because she doesn't want to be seen, but also to show that she won't see everything we humans take for granted. The replicants are at the end of their four year life span, and this provokes a struggle and a search for own identity and a chance to extend that life they had just began to discover. That humanistic gesture Roy Batty does when he saves Deckard apparently for no reason whatsoever, is his way to express his respect of life which Roy has caught a glimpse of, despite the fact that he now realize that it is time to die.
 
-Written by
-
-Tor Inge Skaar, 1995
+Written by *Tor Inge Skaar*
