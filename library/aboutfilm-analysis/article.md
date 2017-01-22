@@ -4,11 +4,7 @@ author: Carlo Cavagna
 cover: cover.png
 cauthor: Brijesh Lala
 date: 28-07-2000  
-taxonomy:
-	category: article
-summary:
-	enabled: true
-	size: 100
+copyright: AboutFilm.com and Carlo Cavagna, 2000. 
 ---
 
 Like most of the best science fiction, Blade Runner is not really concerned with pseudo-scientific gobbledy-gook. Despite the presence of aliens, alternate realities, or fantastical futures, the best science fiction asks, what does it mean to be human? What is the nature of consciousness? Of life? In exploring these issues, a science fiction universe can have an advantage over a "standard" fiction setting, because it gives writers greater freedom and a larger milieu in which to pose their questions. The best science fiction investigates the essence of life using conflicts out of the bounds of our contemporary world as a catalyst. (Star Trek also does this.)
@@ -77,7 +73,5 @@ The possibility that Deckard is a replicant adds an extra dimension to the film,
 
 Certain questions must necessarily remain unanswered because Scott doesn't want us to know for sure Deckard is human or replicant. Had Scott explained everything, it would have removed all doubts, and thus removed the intrigue of the Director's Cut. The theatrical release is a superior science fiction movie, but additional questions and themes explored by the Director's Cut makes it a masterpiece, and one of the most talked-about science fiction movies of all time.
 
-Written by
-Carlo Cavagna
+Written by **Carlo Cavagna**
 
-Copyright AboutFilm.com and Carlo Cavagna, 2000. 
