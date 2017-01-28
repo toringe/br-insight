@@ -1,14 +1,11 @@
 ---
-title: Humans & Technology: What Separates Them? 
+title: Humans & Technology: What Separates Them?
 author: Thomas Gramstad
 cover: cover.jpg
-cauthor: Joey Mason 
-date: 05-03-2000  
-taxonomy:
-	category: article
-summary:
-	enabled: true
-	size: 100
+cauthor: Joey Mason
+date: 05-03-2000
+copyright: Thomas Gramstad, Morgenbladet 13 - 16 May, 1994
+source: http://www.ifi.uio.no/~thomas/artikler/blade-runner.html
 ---
 
 The movie Blade Runner (1982) is loaded with contrasts and contradictions, and at the same exotic and typical of it's time. It's a full blown action film full of symbolism and ambiguity. It became instantly a cult movie and a visual icon for cyberpunks.
@@ -21,9 +18,9 @@ From now on I'll assume that the reader has seen at least one of the two version
 
 Let's first compare DC and TV. There are three main differences in the contents between them:
 
-    * Deckard's narration has been removed in DC.
-    * The Unicorn-Dream scene has been added to the DC.
-    * The "Happy-ending" from TV has been removed in DC.
+* Deckard's narration has been removed in DC.
+* The Unicorn-Dream scene has been added to the DC.
+* The "Happy-ending" from TV has been removed in DC.
 
 Regarding the "happy ending", one must conclude with the fact that this ending was added to satisfy the production company, which believed the American audience would demand a happy ending. This scene contradicts both visually and stylistically with the rest of BR. (The scene was, by the way, cut from The Shining (Stanley Kubrick, 1980) and just pasted on to BR). The direct and inconclusive ending in DC is more in accordance with the original plot, theme and style of BR. The "happy-ending" in TV are therefore simply an element of noise (despite the quite excellent music).
 
@@ -33,8 +30,8 @@ The effects of the first two elements (listed above) are on the other hand drama
 
 Deckard narration i TV has the following effects:
 
-   1. Deckard is established as main character, and becomes the character the audience gets to know best.
-   2. It gives the illusion that Deckard has full control over the situation. Since all that happens is part of Deckard's retrospect, the audience can then assume Deckard's survival and probably his victory in the battle.
+1. Deckard is established as main character, and becomes the character the audience gets to know best.
+2. It gives the illusion that Deckard has full control over the situation. Since all that happens is part of Deckard's retrospect, the audience can then assume Deckard's survival and probably his victory in the battle.
 
 On the contrarily, in DC Deckard is just one of the main characters, no different than Rachael, Roy and Pris. This give the relationship between Roy and Pris same emphasis and priority (well, almost) as between Deckard and Rachael. This introduces an uncertainty factor to the audience, and the question; "who are the bad guys, and good guys?" becomes more ambiguous. This, without doubt, was the director's initial intention. It becomes more evident that the audience's sympathy is divided among several parties.
 
@@ -82,42 +79,9 @@ It is reason to question the extensive and superficial conception that Blade Run
 
 However the movie is melancholic due to the surroundings and circumstances displayed. Another reason would be the short (Roy) or uncertain (Rachael and Deckard) longevity of that which is gained.
 
-The expression and the title "Blade Runner" directly reflects the name of the elite police unit that "retires" rouge replicants. But the expression can also be perceived as an innuendo of the fragile balance between the human and the artificial; the organic and the technological, which is being displayed through the whole movie, and also is so perfectly formulated in Rachael's two questions to Deckard; _"Have you ever retired a human by mistake?"_ and _"You know that Voight-Kampf test of yours? Did you ever take that test yourself?"_
+The expression and the title "Blade Runner" directly reflects the name of the elite police unit that "retires" rouge replicants. But the expression can also be perceived as an innuendo of the fragile balance between the human and the artificial; the organic and the technological, which is being displayed through the whole movie, and also is so perfectly formulated in Rachael's two questions to Deckard; *"Have you ever retired a human by mistake?"* and *"You know that Voight-Kampf test of yours? Did you ever take that test yourself?"*
 Where exactly does this boundary between the human and the artificial go? Has it been abolished?
 
 The expression "Blade Runner" is also an interesting self reference, since the film itself balances on a thin line in its ambiguous presentation of the main(?) character Deckard's identity (human or replicant?). It's well worth noticing that the film would not have been so rich in content and meaning if one of the two possibilities were excluded. The doubt in Deckard's true identity will forever be with us; the openness of this question is an inevitable part of this movie's mythological identity, just like the doubt of whether there exists a distinction between humans and technology is an inevitable part of the identity of the cyberpunk's culture.
 
-### References
-
-[^1]: Blade Zone, The Blade Runner fan club: http://www.bladezone.com/
-
-Blade Runner Insight:
-http://www.br-insight.com
-
-Offworld:
-http://scribble.com/uwi/br/off-world.html
-
-Blade Runner FAQ:
-http://www.bit.net.au/~muzzle/bladerunner/
-
-The Official Blade Runner On-Line Magazine:
-http://www.devo.com/bladerunner/
-
-Blade Runner scripts:
-http://www.bladezone.com/contents/books/scripts/index.html
-
-Blade Runner Replicant Site:
-http://www.webcity.it:80/bladerunner/index1-e.html
-
-The Blade Runner web ring:
-http://www.geocities.com/Hollywood/Lot/4438/bladering.html
-
-Android World:
-http://www.androidworld.com/
-
-This article's original location: <a href="http://www.ifi.uio.no/~thomas/artikler/blade-runner.html">http://www.ifi.uio.no/~thomas/artikler/blade-runner.html</a> (in norwegian)
-
-Written by
-**Thomas Gramstad**
-
-Copyright Thomas Gramstad, Morgenbladet 13 - 16 May, 1994. 
+Written by **Thomas Gramstad**

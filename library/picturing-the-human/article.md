@@ -12,7 +12,7 @@ summary:
 ---
 
 ### Acknowledging Human Mortality
- 
+
 It would seem advisable to begin this interpretation of the film with an uncontroversial claim, so let us note at the outset that Blade Runner is explicitly concerned with the question of what it is to be a human being: indeed, since it ignores many of the expectations usually catered to by films in the genre of detective-thriller (eg complexities of plotting or concealment of the identities and purposes of the criminals) and of science fiction (eg focusing on technology rather than people, or employing exotic and alien backdrops) in order to allow its thematic questioning of humanity to dominate the sequence of events, it might be more accurate to describe the film as being obsessed with the matter obsessed in the way the leader of the replicants is obsessed with his quest for life, for a life which is on a par with that of human beings. To show that Roy Batty misconceives this quest as one for more life as if a replicant might become human by living longer is the goal of the film.
 
 In the course of this quest, many erroneous answers to the original question are canvassed and rejected. By endowing the replicants with intelligence levels and physical strength at least equal to that of any human being, it is made very clear from the beginning that the possession of such capacities goes no way towards settling the ontological status of their possessors; in fact, rather than confirming the replicants as candidates for humanity, the fine-honed perfection and virtuosity of their physical and mental skills tends to cast doubt upon their candidature this, I take it, is why those scenes in which the replicants manifest their invulnerability to extremes of heat and cold (in the hygienic chill of the eye laboratory or the hot water in which J. F. Sebastian boils his egg) tend to alienate the viewer from Leon and Pris.
@@ -151,11 +151,10 @@ Blade Runner does, however, offer a certain set of suggestions about how a direc
 
 Film-making thus presents itself as no more (and no less) than a specific way in which one human being can acknowledge or fail to acknowledge the humanity of others a challenge which faces us all in every moment of our lives. The camera's potential for dehumanizing its subjects can be matched by its capacity to translate them into screened images with their humanity preserved, and so it cannot provide the director with a scapegoat upon which to load the responsibility for a failure of acknowledgement or with a crutch which makes authentic acknowledgement any easier to achieve. This truth about the responsibilities of the director does not, however, remove the responsibilities of the viewer. The camera if responsibly utilized by the director may show us all the evidence, all the facts of the matter, everything that is the case and that may be relevant to evaluating the humanity of its subjects, but it cannot acknowledge their humanity for us. That remains the task of the viewer.
 
+Written by *Stephen Mulhall*
+
 [^1]: Cf the detailed treatment of these themes in his book The Claim of Reason (OUP, Oxford: 1979).
 
 [^2]: For more detail on this issue, cf Stanley Cavell, The World Viewed (Harvard University Press, Cambridge MA: 1971).
 
 [^3]: Collected in Poetry, Language, Thought (Harper and Row, New York: 1971), trans. A. Hofstadter.
-
-Written by
-*Stephen Mulhall*
