@@ -81,15 +81,15 @@ h3.major {
 		font-family: "Quicksand", Helvetica, sans-serif;
 	}
 	#wrapper > header {
-		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("/assets/img/bg-index.gif");
 	}
 
 	#footer {
-		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("/assets/img/bg-index.gif");
 	}
 
 	#banner {
-		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("../img/bg-index.gif");
+		background-image: linear-gradient(to top, rgba(46, 49, 65, 0.8), rgba(46, 49, 65, 0.8)), url("/assets/img/bg-index.gif");
 	}
 
 }
