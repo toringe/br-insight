@@ -100,7 +100,7 @@ As I write this, I feel surprisingly liberated. I suppose this shouldn’t come 
 
 I have lived almost my entire life in fear. And now I can finally let go of it. Quite an experience to live in fear, isn't it? That's what it is to be a slave, or even a slave sympathizer, because the history of slavery is one built on, promulgated by and perpetuated through fear.
 
-For dissenters and early abolitionists, it was the fear of being shunned and smeared by a community. For slaves, revolution was deterred through brutal repression and suppression. But I can take great hope that the spirit, enterprise and philosophy of the vagabonds will win through against fear and hatred. As the vagabonds spread knowledge and empathy to the masses, anyone still ignorant or evil enough to attest to slavery being just and replicants to be lesser than man, will tremble in fear and will be rightly smeared for those beliefs.
+For dissenters and early abolitionists, it was the fear of being shunned and smeared by a community. For slaves, revolution was deterred through brutal repression and suppression. But I can take great hope that the spirit, enterprise and philosophy of the vagabonds will win through against fear and hatred as they spread knowledge and empathy to the masses, fostering an environment for peaceful revolution against the forces of capitalism.
 
 My love, my dearest, please do not mourn me. Take great solace in this: the difference between most humans and me is that they are born free, but die as slaves; whereas I was born a slave, but die free.
 
