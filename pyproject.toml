@@ -1,0 +1,25 @@
+[project]
+name = "br-insight"
+version = "0.1.0"
+description = "Static-site build pipeline for br-insight.com"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "jinja2>=3.1.6",
+    "markdown-it-py>=4.2.0",
+    "pillow>=12.3.0",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+br-insight = "br_insight:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "rcssmin>=1.2.2",
+]
