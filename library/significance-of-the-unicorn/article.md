@@ -1,13 +1,13 @@
 ---
 title: What is the Significance of the Unicorn?
 author: Murray Chapman
-date: 24-10-1998
+date: 1998-10-24
 cover: cover.jpg
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 When Deckard leaves his apartment with Rachael at the end of the film, she knocks over an origami unicorn. The unicorn is the last of a series of origami figures that Gaff uses to taunt Deckard. In Bryant's office when Deckard insists he's retired, Gaff folds a chicken: You're afraid to do it. Later he makes a man with an erection: You're attracted to her. And finally, the unicorn: You're dreaming, you can run away with her, but she won't live (he says something equivalent to Deckard on the rooftop). One interpretation is that the unicorn was simply a message to Deckard to say I know you've got Rachael, but I'll let her live. Another interpretation (based on the script) is that the unicorn is Gaff's gauntlet and he will hunt them both down.

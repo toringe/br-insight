@@ -2,12 +2,12 @@
 title: Editor's Article
 author: Tor Inge Skaar
 cover: cover.jpg
-date: 03-11-1995
+date: 1995-11-03
 taxonomy:
     category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 The launch of Blade Runner Director's Cut in 1992 provoked many discussions on which version was the original version, and what the differences was. Most people agreed to that the 1992-version was the best, because that was how Ridley Scott in the first place had planed the film to be like. Scott made a finished version already in 1981, but Warner disliked the film so much that they almost recreated it. And this is one argument used by the ones that support the idea that this and only this is the version that is meant to be the original. But as I have been trying to say, this it not the time nor the place for that discussion. It's endless.

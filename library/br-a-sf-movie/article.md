@@ -1,14 +1,14 @@
 ---
 title: Blade Runner, a Science-Fiction Movie?
 author: Tony Chang
-date: 14-07-1999
+date: 1999-07-14
 cover: cover.jpg
-cauthor: Nostrildarmus 
+cauthor: Nostrildarmus
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 In the movie industry today, it is hard to place movies into one single classification. There are just too many categories to consider, all of which are very broad and have a thin line in the criteria that is required by each. What one perceives to be a dramatic film, another may describe as an action-adventure movie. This diversity is resulted from the lack of discrete definitions in articulating what a particular assortment is supposed to be. So, people are forced to provide their own definition of every individual category and decide whether or not the selected film corresponds. In addition, the filmmakers themselves are placing a greater burden on the viewers, for they do not produce the film to target a specific audience or place their own work into a specific category. Besides, categories are unimportant, for movies should be judged by the quality of their content and the way they proved their theme rather than fulfilling the requirements of a single genera. In regards to Blade Runner, I placed it into a very broad category, science fiction. However, the decision was hard to establish because many aspects of the movie fits into the criteria for a number of different classes. Possibilities that were debated include action, romance, suspense and even classic.

@@ -1,14 +1,14 @@
 ---
-title: Blade Runner - a Postmodernist View 
+title: Blade Runner - a Postmodernist View
 author: Jean-Paul Gossman
 cover: cover.jpg
 cauthor: Chris Thornley
-date: 11-04-2001
+date: 2001-04-11
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 > The Postmodern reply to the Modern consists of recognizing that the past, since it cannot be destroyed, because it's destruction leads to silence, must be revisited : not innocently but with irony '. Umberto Eco, Postmodernist Fiction.

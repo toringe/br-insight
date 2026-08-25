@@ -1,14 +1,14 @@
 ---
-title: Christian Symbolism  
-author: Dan Newland  
-date: 05-12-1997
+title: Christian Symbolism
+author: Dan Newland
+date: 1997-12-05
 cover: cover.jpg
 cauthor: DanielMurrayART
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 > This paper was originally written for a Science Fiction in the Cinema class in 1991. Since that time I have placed on a newsgroup or two, and have had numerous friends read it, but I have done very little editing or improvement. As such, the essay is much the same today as it was then. I am not even sure that this is terribly novel, but it is nonetheless a reading of the film that I find to be both plausible and affecting. I do not claim to be inside Ridley Scott's brain. Regardless of its accuracy, I hope you enjoy the ideas in it, and would very much like to hear feedback on them. - Dan.

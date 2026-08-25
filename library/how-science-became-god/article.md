@@ -3,12 +3,12 @@ title: How Science Became God in Blade Runner
 author: Tony Schloss
 cover: cover.jpg
 cauthor: Karl Fitzgerald
-date: 07-08-2006
+date: 2006-08-07
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 In one of the most acclaimed science fiction movies of all time, Ridley Scott presents us with a beautiful and scary vision of the future. It is a vision that has sparked many debates throughout many genres, including, film, literature and science. In Blade Runner, released in 1982, we are faced with a post-apocalyptic Los Angeles, full of darkness, acid rain and decay. Within this picture are three scientists who, together, paint a very different picture of the science and scientists of the future. Each one of them has a purpose in the scientific world and also in society as a whole. In this study, we will find that there are both literary and realistic origins of the representation that we are faced with in the movie.

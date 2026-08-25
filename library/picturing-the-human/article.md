@@ -3,12 +3,12 @@ title: Picturing the Human
 author: Stephen Mulhall
 cover: cover.jpg
 cauthor: cpn-blowfish
-date: 16-12-2002
+date: 2002-12-16
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 ### Acknowledging Human Mortality

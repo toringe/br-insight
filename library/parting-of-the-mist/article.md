@@ -1,13 +1,13 @@
 ---
-title: The Parting of the Mist  
+title: The Parting of the Mist
 author: Joseph Reagle Jr.
 cover: cover.jpg
-date: 02-12-1997  
+date: 1997-12-02
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 The conflict between the blade runner Deckard and the off world replicants is the central force of Ridley Scott's Blade Runner. This conflict not only provides the means of narrative movement, but the philosophical and symbolical stimulation that engages one's mental and visual appetite.

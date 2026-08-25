@@ -1,14 +1,14 @@
 ---
 title: An Analysis of Blade Runner
 author: Mark Lachniel
-date: 23-11-1998
+date: 1998-11-23
 cover: cover.jpg
 cauthor: Christopher Shy
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Welcome to 21st century earth. The firmament flashes with belching mushroom clouds of fire and smoke. The rain falls, as it always does, soaking the fouled earth below. Far below the dark clouds and torrential rains sprawls a city of glass and steel. The human race exists, as it always has, but the numbers dwindle as crime and pollution drive the people to Off-world locations in search of the literal and proverbial new world. It is a time of change, and the beginning of a new era, embodied through the mythical quest of a single man....a Blade Runner.

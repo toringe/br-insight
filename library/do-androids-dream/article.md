@@ -3,12 +3,12 @@ title: Do Androids Dream of Electric Sheep? - No Really, Do They?
 author: André Møllerhaug
 cover: cover.png
 cauthor: betsyman
-date: 21-01-2001
+date: 2001-01-21
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Philip K. Dick's book "Do Androids Dream of Electric Sheep" is an all time science fiction classic, actualised by the screen adaptation "Blade Runner". The book, and the film, rise questions about the meeting of machine and man, this is particularly the case in the way we wonder after have read or seen the book or movie: Is Deckard an android?

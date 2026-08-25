@@ -3,12 +3,12 @@ title: Appreciation & Assessment of Dir. Cut
 author: Adrian McOran-Campbell
 cover: cover.png
 cauthor: Joey Mason
-date: 27-04-2001
+date: 2001-04-27
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 This film deserves a higher status than that of cult, and is much more than just an acceptable homage to Philip K Dick, author of many original science-fiction novels, often laced with philosophical perspectives on reality and human dependencies. The film is multi-layered; thrilling and unsettling, part dark science fiction and detective film noir, realistic and dream-like, intelligent, mature, artistic and powerful. Purely on the surface, it has a visual richness which is wonderfully atmospheric (enhanced by the soundtrack of Vangelis), drawing one into a dystopic vision of the future which is not only a sprawling, technological metropolis, but an empty, soulless place. It is a film which not only incorporates the strong themes presented by Dick (disillusionment and control) but also adds its own sorbefacient mood, which though aloof and tragic includes through its characters a sense of life's contained desperation. They are withdrawn, living in a mellow dream but primarily lonesome and in need of basic human love or compassion. The indication that many people have left Earth for the (deluded?) attraction of a utopian, resort-style Off-World colony increases the sense of their world as forgotten and abandoned. The characters seem random, everyday people of the city, but through the story are united by an accepting will to survive because there is nothing else, nothing but fear. Death to the replicants is represented by their own heightened sense of mortality and the outside embodiment of the Blade Runners; stalkers such as the weary Deckard.

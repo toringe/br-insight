@@ -2,13 +2,13 @@
 title: Analysis of an Itch
 author: Justin Case
 cover: cover.jpg
-cauthor: Jurei Chan 
-date: 25-11-2002
+cauthor: Jurei Chan
+date: 2002-11-25
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Blade Runner, directed by Ridley Scott, is brimming with symbolism. Each symbol can be correlated with the many different themes throughout the movie. Death plays a role in all of larger messages, and not surprisingly this film style is film noire. Almost every line of the movie can be expanded from it's literal meaning into a broader theme. The line with the most interesting double meaning is Leon's "Nothing is worse than an itch you can never scratch". Even with his class C intelligence rating, he has summed up Rachael's, Deckard's, and his own situation. Which is a terrible dilemma without an easy solution.

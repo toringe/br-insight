@@ -3,12 +3,12 @@ title: The Replicant I Used to Know
 author: Niclas Hermansson
 cover: cover.jpg
 cauthor: SpoonyBardess
-date: 01-08-2001
+date: 2001-08-01
 taxonomy:
     category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 ## Another installment in the web serial “Deck-a-rep?”

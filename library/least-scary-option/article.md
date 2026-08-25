@@ -1,14 +1,14 @@
 ---
-title: The Least Scary Option 
-author: Stephen Rowley 
+title: The Least Scary Option
+author: Stephen Rowley
 cover: cover.jpg
 cauthor: Syd Mead
-date: 09-03-2000
+date: 2000-03-09
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 *How and why does Blade Runner, a film about the future L.A., image that city in terms of the New York modernist metropolis?*

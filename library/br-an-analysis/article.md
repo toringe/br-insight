@@ -1,14 +1,14 @@
 ---
-title: Blade Runner: an Analysis
+title: "Blade Runner: an Analysis"
 author: Unknown
-date: 04-08-1998
+date: 1998-08-04
 cover: cover.jpg
 cauthor: Warner Bros.
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Bladerunner is a cult classic Science Fiction film. What is a Science Fiction Film you ask? What makes Bladerunner a Science Fiction film? Moreover, what makes it a classic? Once we know that, we can move on to take a look at the portrait of society that Bladerunner paints.

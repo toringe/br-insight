@@ -1,14 +1,14 @@
 ---
 title: An Analysis of a Science-Fiction Movie
 author: Samantha Ricker
-date: 17-10-1998
+date: 1998-10-17
 cover: cover.jpg
 cauthor: Syd Mead
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 All movies must follow criteria that typifies them into a specific genre of film. For example, a romantic movie must create a chemistry between two characters. A good suspense movie must include a plot with several twists and turns in it. There are three criteria that can be used to judge whether or not a particular movie is a good science fiction film. These criteria include: a source of conflict; beleivable characters, images, and story; and well developed, visually appealing special effects. The movie Blade Runner has traditionally been categorized as a science fiction movie. It can be categorized as such because it does indeed follow the specified criteria.

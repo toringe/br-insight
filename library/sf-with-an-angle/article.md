@@ -1,14 +1,14 @@
 ---
 title: Science-Fiction with an Angle
 author: Maria Caldwell
-date: 11-08-1998
+date: 1998-08-11
 cover: cover.jpg
 cauthor: filipehattori
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Bladerunner is a science fiction film that is focused on the human struggle for identity. While Bladerunner is science fiction, the movie is also a means of communicating complex ideas, such as "What defines the human?" A science fiction movie that attempts to convey such messages to the audience needs to fulfill certain criteria to be effective.

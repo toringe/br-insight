@@ -1,14 +1,14 @@
 ---
-title: What Defines Human? 
+title: What Defines Human?
 author: Jens Brandt
 cover: cover.jpg
 cauthor: keapt
-date: 16-07-2000  
+date: 2000-07-16
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 What if a nuclear war made the world virtually uninhabitable? What if science produced a robot, physicaly indistinguishable from human beings? What if one was forced to unravel the difference between human and machine for the sole purpose of maintaining the belief that we are not all machines. The answer to especially the latter question can be found in another question; Do androids dream of electric sheep?

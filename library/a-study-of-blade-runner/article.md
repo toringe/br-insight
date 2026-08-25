@@ -3,12 +3,12 @@ title: A Study of Ridley Scott's Blade Runner
 author: Majid Salim
 cover: cover.jpg
 cauthor: SoundNinja
-date: 08-12-2002
+date: 2002-12-08
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 *This dissertation was written between September 1997 and February 1998, and formed part of the final examination for my undergraduate degree in English Literature and Philosophy, at Manchester University, England. I would like to thank Dr. Marcus Wood, formerly of Manchester University and currently teaching at the University of Sussex. As my dissertation supervisor, he offered advice and judgement which were hugely helpful. It goes without saying that any errors are my own.*

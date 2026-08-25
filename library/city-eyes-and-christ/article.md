@@ -1,14 +1,14 @@
 ---
 title: The City, Eyes and Christ
 author: Amotz Zakai
-date: 12-03-2001
+date: 2001-03-12
 cover: cover.jpg
-cauthor: elclon 
+cauthor: elclon
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 When Blade Runner came out in 1982, it dazzled audiences with its representation of humanity's fallen social and technological structure. Utilizing unparalleled set design, the film presented a dark visual predicament of our future through the use of monstrous industrial environments, out-of-control scientific advancements, and urban decay.

@@ -2,13 +2,13 @@
 title: Blade Runner Demystified
 author: Wez Mills
 cover: cover.jpg
-cauthor: Alexander Brox 
-date: 10-07-2001
+cauthor: Alexander Brox
+date: 2001-07-10
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Blade Runner's narrative begins before the film starts, with the aid of a written account of events which occurred during the year 2000 - 2017. White writing was used on a black background. It tells the viewer that in the 21st century robots have been made which are almost identical to humans but the are stronger and intelligent. They were used in off world colonies until they mutinied and had to be exterminated. Blade runner units had the job to get rid of them by what was known as retirement. This summary sets the scene for events which come later in the film.

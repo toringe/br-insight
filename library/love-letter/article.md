@@ -3,12 +3,12 @@ title: Love Letter to a Human from a Replicant
 author: Mansour Chow
 cover: cover.jpg
 cauthor: alexstress
-date: 01-10-2018
+date: 2018-10-01
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 My love. My one love. My only true love.

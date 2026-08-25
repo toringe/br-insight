@@ -3,12 +3,12 @@ title: The Measure of a Man
 author: Jonathan Blanton
 cover: cover.jpg
 cauthor: Matt Ferguson
-date: 18-04-2002
+date: 2002-04-18
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Historically, sentience has been fairly easy to define. Humans are sentient; animals are not. Prior to the twentieth century, humans were the only beings that could write poems, perform mathematical computations, and make complex machines. Therefore, only humans were sentient. However, with the rise of computers, sentience becomes harder to define. It is now possible to write a computer program that can carry on a conversation so skillfully that it is difficult, if not impossible, to distinguish its responses from those of a human. Can such a program be defined as "sentient"? Phrased more generally, the question becomes, "Can any artificial life form really be considered alive?" The 1980's movie Blade Runner seems to answer in the affirmative.

@@ -3,12 +3,12 @@ title: How & Why the Movie is Different
 author: Jeffrey James Oleniacz
 cover: cover.jpg
 cauthor: Dan Mumford
-date: 15-07-2001
+date: 2001-07-15
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Writers often choose a situation specifically to illustrate their points, but a very similar premise can be used to prove either side of an argument with equal effectiveness. Philip K. Dick's novel, *"Do Androids Dream of Electric Sheep?"*, inspired the much more well-known film *"Blade Runner"*. Both works involve the same topics: androids hiding on Earth, humans hunting them down, and the shades of gray involving the distinction between man and machine. Although some of the characters and plot elements remain relatively unchanged, the film drastically alters the style and presentation to support a view almost completely contrary to that of the book.

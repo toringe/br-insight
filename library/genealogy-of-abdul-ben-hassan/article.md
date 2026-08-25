@@ -2,13 +2,13 @@
 title: Genealogy of Abdul Ben Hassan
 author: Muhammed Hozien
 cover: cover.jpg
-cauthor: Nellor 
-date: 07-11-2001
+cauthor: Nellor
+date: 2001-11-07
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Blade Runner (Scott, 82/92) a complex film with many underlying themes. One of these themes is the issue of race. Race is presented at many different levels in the film that has many other themes such as what it is to be human, vision, disutopia, the environment, nostalgia, ethics, revolt, class struggle, materialism, clutter, etc. to go into any of these themes in detail would require a separate detailed paper for each of the concurrent themes. The film presents L.A. of the future as a hellish place complete with an inferno. The film is also teeming with different races mostly Asians. In this paper I would like to deal with both representations of race, namely the replicants - as the other - a coded non-white race and the various races that we literally see in the film.

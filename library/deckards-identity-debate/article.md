@@ -3,12 +3,12 @@ title: Deckard's Identity Debate
 author: Multiple Sources
 cover: cover.png
 cauthor: exmakina
-date: 03-09-1996
+date: 1996-09-03
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 ## The "No" Arguments

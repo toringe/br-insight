@@ -1,11 +1,16 @@
 ---
-title: Humans & Technology: What Separates Them?
+title: "Humans & Technology: What Separates Them?"
 author: Thomas Gramstad
 cover: cover.jpg
 cauthor: Joey Mason
-date: 05-03-2000
+date: 2000-03-05
 copyright: Thomas Gramstad, Morgenbladet 13 - 16 May, 1994
 source: http://www.ifi.uio.no/~thomas/artikler/blade-runner.html
+taxonomy:
+  category: article
+summary:
+  enabled: true
+  size: 100
 ---
 
 The movie Blade Runner (1982) is loaded with contrasts and contradictions, and at the same exotic and typical of it's time. It's a full blown action film full of symbolism and ambiguity. It became instantly a cult movie and a visual icon for cyberpunks.

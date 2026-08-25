@@ -3,12 +3,12 @@ title: The World 2019 - A Worn Down Hell
 author: Niclas Hermansson
 cover: cover.jpg
 cauthor: Justin Van Genderen
-date: 17-12-2005
+date: 2005-12-17
 taxonomy:
-	category: article
+  category: article
 summary:
-	enabled: true
-	size: 100
+  enabled: true
+  size: 100
 ---
 
 Director Ridley Scott's mesmerising imagery conveys an age of fear and despair, apathy and alienation - a future without a future. Contrary to many classical dystopias, the horrifying message is seldom explicit. Scott utilises the full strenght of the visual media.
