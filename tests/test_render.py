@@ -362,19 +362,21 @@ class TestBuildPipeline:
         assert f'"datePublished": "{iso}"' in text
         assert f'"mainEntityOfPage": "https://www.br-insight.com/library/{article.slug}/"' in text
 
-    def test_toc_threshold_on_real_corpus(self, built):
-        from br_insight.articles import load_all, extract_toc
+    def test_toc_aside_presence_matches_heading_threshold(self, built):
+        """Aside appears exactly when the article clears the ≥3-heading bar."""
+        from br_insight.articles import extract_toc, load_all
 
         out, _ = built
-        with_toc = [a for a in load_all(REPO_ROOT) if extract_toc(a.html)]
-        without = [a for a in load_all(REPO_ROOT) if not extract_toc(a.html)]
-        assert with_toc, "expected some articles to clear the TOC threshold"
-        assert '<aside class="toc"' in (
-            out / "library" / with_toc[0].slug / "index.html"
-        ).read_text(encoding="utf-8")
-        assert '<aside class="toc"' not in (
-            out / "library" / without[0].slug / "index.html"
-        ).read_text(encoding="utf-8")
+
+        def total(nodes) -> int:
+            return sum(1 + total(n["children"]) for n in nodes)
+
+        for article in load_all(REPO_ROOT):
+            expected = total(extract_toc(article.html)) >= 3
+            text = (out / "library" / article.slug / "index.html").read_text(
+                encoding="utf-8"
+            )
+            assert ('<aside class="toc"' in text) is expected, article.slug
 
     def test_pager_orders_newer_before_older(self, built):
         from br_insight.articles import load_all
@@ -409,6 +411,164 @@ class TestBuildPipeline:
         text = sample.read_text(encoding="utf-8")
         assert text.count("data-focus-hide") >= 3
         assert '<div class="progress" aria-hidden="true"></div>' in text
+
+
+# ---------------------------------------------------------------------------
+# Finding 1: TOC aside requires ≥3 h2/h3 headings (threshold applied by build)
+# ---------------------------------------------------------------------------
+
+SHORT_TOC_SLUGS = (
+    "br-a-sf-movie",            # 2 h2/h3
+    "city-eyes-and-christ",     # 1
+    "deckards-identity-debate", # 2
+    "how-science-became-god",   # 1
+    "picturing-the-human",      # 2
+    "replicant-i-used-to-know", # 1
+    "sf-with-an-angle",         # 2
+)
+
+
+def _toc_entry_count(article) -> int:
+    from br_insight.articles import extract_toc
+
+    def total(nodes) -> int:
+        return sum(1 + total(n["children"]) for n in nodes)
+
+    return total(extract_toc(article.html))
+
+
+class TestBuildTocThreshold:
+    def test_build_drops_toc_below_three_headings(self, monkeypatch, tmp_path):
+        """Unit: build() applies the ≥3 branch — 2 headings → no aside,
+        3 headings → aside, everything else on the corpus untouched."""
+        from dataclasses import replace
+
+        import br_insight.render as render_mod
+        from br_insight.articles import load_all as real_load_all
+
+        two_headings = '<h2 id="a">A</h2><h3 id="b">B</h3><p>x</p>'
+        three_headings = (
+            '<h2 id="a">A</h2><h3 id="b">B</h3>'
+            '<h2 id="c">C</h2><p>x</p>'
+        )
+
+        def fake_load_all(root):
+            swaps = {
+                "love-letter": two_headings,
+                "measure-of-a-man": three_headings,
+            }
+            return [
+                replace(a, html=swaps[a.slug]) if a.slug in swaps else a
+                for a in real_load_all(root)
+            ]
+
+        monkeypatch.setattr(render_mod, "load_all", fake_load_all)
+        out = tmp_path / "build"
+        render_mod.build(REPO_ROOT, out)
+
+        short = (out / "library" / "love-letter" / "index.html").read_text(
+            encoding="utf-8"
+        )
+        long = (out / "library" / "measure-of-a-man" / "index.html").read_text(
+            encoding="utf-8"
+        )
+        assert '<aside class="toc"' not in short
+        assert '<aside class="toc"' in long
+
+
+class TestTocThresholdCorpus:
+    def test_known_short_articles_have_no_toc_aside(self, built):
+        out, _ = built
+        from br_insight.articles import load_all
+
+        by_slug = {a.slug: a for a in load_all(REPO_ROOT)}
+        for slug in SHORT_TOC_SLUGS:
+            assert slug in by_slug  # the known offenders are still in the corpus
+            assert _toc_entry_count(by_slug[slug]) < 3
+            text = (out / "library" / slug / "index.html").read_text(
+                encoding="utf-8"
+            )
+            assert '<aside class="toc"' not in text, slug
+
+    def test_long_articles_do_show_toc_aside(self, built):
+        out, _ = built
+        from br_insight.articles import load_all
+
+        by_slug = {a.slug: a for a in load_all(REPO_ROOT)}
+        for slug in ("a-study-of-blade-runner", "what-defines-human"):
+            assert _toc_entry_count(by_slug[slug]) >= 3
+            text = (out / "library" / slug / "index.html").read_text(
+                encoding="utf-8"
+            )
+            assert '<aside class="toc"' in text, slug
+
+
+# ---------------------------------------------------------------------------
+# Finding 2: og:image/JSON-LD image falls back to cover.jpg when the declared
+# front-matter cover file is missing on disk (never edits article.md data)
+# ---------------------------------------------------------------------------
+
+MISSING_COVER_SLUGS = ("aboutfilm-analysis", "deckards-identity-debate")
+PRESENT_COVER_PNG_SLUGS = ("appreciation-assessment-of-dircut", "do-androids-dream")
+
+
+class TestOgImageCoverFallback:
+    @staticmethod
+    def _emitted_image_urls(text: str) -> tuple[str, str]:
+        og = re.search(r'property="og:image" content="([^"]+)"', text).group(1)
+        ld = re.search(r'"image": "([^"]+)"', text).group(1)
+        return og, ld
+
+    def test_missing_declared_cover_falls_back_to_cover_jpg(self, built):
+        out, _ = built
+        from br_insight.articles import load_all
+
+        articles = {a.slug: a for a in load_all(REPO_ROOT)}
+        for slug in MISSING_COVER_SLUGS:
+            article = articles[slug]
+            declared = REPO_ROOT / "library" / slug / article.cover
+            assert article.cover != "cover.jpg"  # declares something else…
+            assert not declared.is_file()        # …and it is missing on disk
+            urls = self._emitted_image_urls(
+                (out / "library" / slug / "index.html").read_text(encoding="utf-8")
+            )
+            expected = f"https://www.br-insight.com/library/{slug}/cover.jpg"
+            assert urls == (expected, expected), slug
+
+    def test_existing_declared_cover_is_used_as_is(self, built):
+        out, _ = built
+        from br_insight.articles import load_all
+
+        articles = {a.slug: a for a in load_all(REPO_ROOT)}
+        for slug in PRESENT_COVER_PNG_SLUGS:
+            article = articles[slug]
+            assert article.cover == "cover.png"
+            assert (REPO_ROOT / "library" / slug / "cover.png").is_file()
+            urls = self._emitted_image_urls(
+                (out / "library" / slug / "index.html").read_text(encoding="utf-8")
+            )
+            expected = f"https://www.br-insight.com/library/{slug}/cover.png"
+            assert urls == (expected, expected), slug
+
+    def test_jsonld_image_defaults_to_front_matter_cover_and_honors_override(
+        self, site
+    ):
+        """Without ``og_cover`` the JSON-LD image stays the front-matter value;
+       an ``og_cover`` override (computed by build) wins."""
+        from html import unescape
+
+        article = SimpleNamespace(slug="voight-kampff-test", cover="cover.png",
+                                  title="t", author="a", summary="s",
+                                  date=datetime.datetime(2024, 5, 1))
+        plain = unescape(render_template("base.html", site=site, article=article))
+        _, ld = self._emitted_image_urls(plain)
+        assert ld.endswith("/library/voight-kampff-test/cover.png")
+
+        overridden = unescape(render_template(
+            "base.html", site=site, article=article, og_cover="cover.jpg"
+        ))
+        _, ld = self._emitted_image_urls(overridden)
+        assert ld.endswith("/library/voight-kampff-test/cover.jpg")
 
 
 # ---------------------------------------------------------------------------

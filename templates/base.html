@@ -48,7 +48,7 @@
     "description": {{ article.summary | tojson }},
     "author": {"@type": "Person", "name": {{ article.author | tojson }}},
     "datePublished": "{{ article.date.strftime('%Y-%m-%d') }}",
-    "image": "{{ site.base_url }}/library/{{ article.slug }}/{{ article.cover }}",
+    "image": "{{ site.base_url }}/library/{{ article.slug }}/{{ og_cover | default(article.cover) }}",
     "mainEntityOfPage": "{{ canonical_url }}"
   }
   </script>

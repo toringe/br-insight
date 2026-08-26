@@ -19,6 +19,15 @@ from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE_DIR = REPO_ROOT / "templates"
 
+# A Contents aside is only worth rendering when there is enough structure
+# to navigate; fewer h2/h3 headings than this means no aside.
+TOC_MIN_HEADINGS = 3
+
+
+def _toc_heading_count(toc: list[dict]) -> int:
+    """Total h2/h3 entries across the TOC tree, children included."""
+    return sum(1 + len(entry["children"]) for entry in toc)
+
 
 class _Clock:
     """Live ``now`` global: ``year`` always reads the current wall clock.
@@ -84,6 +93,7 @@ def build(root: Path, out: Path) -> list[Path]:
         newer = articles[index - 1] if index > 0 else None
         older = articles[index + 1] if index + 1 < len(articles) else None
         width, height = _cover_size(root, article.slug, cover_sizes)
+        toc = extract_toc(article.html)
         html = render_template(
             "article.html",
             site=site,
@@ -91,7 +101,8 @@ def build(root: Path, out: Path) -> list[Path]:
             newer=newer,
             older=older,
             related=related(article, articles),
-            toc=extract_toc(article.html),
+            toc=toc if _toc_heading_count(toc) >= TOC_MIN_HEADINGS else [],
+            og_cover=_og_cover(root, article),
             cover_width=width,
             cover_height=height,
             now=now,
@@ -110,3 +121,14 @@ def _cover_size(
         with Image.open(root / "library" / slug / "cover.jpg") as image:
             cache[slug] = image.size
     return cache[slug]
+
+
+def _og_cover(root: Path, article) -> str:
+    """Social-image filename for ``article``.
+
+    The front-matter ``cover`` when it exists on disk under
+    ``library/<slug>/``, else the physically guaranteed ``cover.jpg``
+    (social cards must never point at a 404).
+    """
+    declared = root / "library" / article.slug / article.cover
+    return article.cover if declared.is_file() else "cover.jpg"

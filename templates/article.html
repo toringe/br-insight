@@ -6,7 +6,7 @@
 {% block title %}{{ article.title }}{% endblock %}
 {% block description %}{{ article.summary }}{% endblock %}
 {% block canonical_path %}library/{{ article.slug }}/{% endblock %}
-{% block og_image %}/library/{{ article.slug }}/{{ article.cover }}{% endblock %}
+{% block og_image %}/library/{{ article.slug }}/{{ og_cover | default(article.cover) }}{% endblock %}
 
 {% block content %}
 <article class="article">
