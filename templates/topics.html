@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Topics{% endblock %}
+{% block description %}Browse every Blade Runner Insight essay by category or tag — one link per topic, each with its essay count.{% endblock %}
+{% block canonical_path %}topics/{% endblock %}
+
+{% block content %}
+<section class="library">
+  <div class="container">
+    <header class="page-head">
+      <p class="eyebrow">Browse by topic</p>
+      <h1>Topics</h1>
+      <p class="page-head__lead">The archive sliced two ways — start from a category for wide-angle readings or follow a single tag down its narrow thread.</p>
+    </header>
+
+    <nav class="topic-cloud" aria-label="Categories">
+      <h2 class="eyebrow" id="topics-categories-title">Categories</h2>
+      <ul class="topic-cloud__list" role="list">
+        {%- for topic in categories %}
+        <li><a class="topic-cloud__link topic-cloud__link--category" href="{{ topic.href }}">{{ topic.name }} · {{ topic.count }}</a></li>
+        {%- endfor %}
+      </ul>
+    </nav>
+
+    <nav class="topic-cloud" aria-label="All tags">
+      <h2 class="eyebrow" id="topics-tags-title">All tags</h2>
+      <p class="page-head__meta">
+        {%- for topic in tags %}
+        <a class="chip" href="{{ topic.href }}">{{ topic.name }} · {{ topic.count }}</a>
+        {%- endfor %}
+      </p>
+    </nav>
+  </div>
+</section>
+{% endblock %}

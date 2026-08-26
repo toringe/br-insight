@@ -427,6 +427,7 @@ class TestBuildPipeline:
         expected.add(Path("about.html"))   # Task 11
         expected.add(Path("404.html"))     # Task 11
         expected.add(Path("error.html"))   # Task 11: byte-twin of 404
+        expected.add(Path("topics") / "index.html")  # fix r1: topics hub
         expected.add(Path("sitemap.xml"))  # Task 11
         expected.add(Path("feed.xml"))     # Task 11
         return expected
@@ -669,6 +670,40 @@ class TestOgImageCoverFallback:
         ))
         _, ld = self._emitted_image_urls(overridden)
         assert ld.endswith("/library/voight-kampff-test/cover.jpg")
+
+
+# ---------------------------------------------------------------------------
+# Fix round 1: primary-nav hrefs must resolve to built outputs (no orphans)
+# ---------------------------------------------------------------------------
+
+
+def _nav_href_to_path(href: str) -> Path:
+    """Map a nav href to its expected output path.
+
+    Directory-style hrefs (``/library/``) map to ``<dir>/index.html``;
+    file-style hrefs (``/about.html``) map to the file itself. The root
+    ``/`` maps to ``index.html`` — these two styles cover every alias we
+    ship, so no extra alias table is needed.
+    """
+    if href.endswith("/"):
+        return Path(href.strip("/")) / "index.html"
+    return Path(href.lstrip("/"))
+
+
+class TestNavHrefsResolveToBuiltOutputs:
+    def test_every_site_nav_href_resolves_to_a_built_output(self, built):
+        out, written = built
+        site = SiteConfig.load(REPO_ROOT)
+        outputs = {p.relative_to(out) for p in written}
+        assert len(site.nav) >= 3  # sanity: config nav is actually populated
+        for item in site.nav:
+            assert _nav_href_to_path(item.href) in outputs, item.href
+
+    def test_topics_nav_href_not_an_orphan(self, built):
+        """Regression: `Topics → /topics/` shipped before any page was
+        built there — every nav click 404'd on production."""
+        out, _ = built
+        assert (out / "topics" / "index.html").is_file()
 
 
 # ---------------------------------------------------------------------------

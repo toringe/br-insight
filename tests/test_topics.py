@@ -205,6 +205,94 @@ class TestTopicTemplateAnatomy:
 
 
 # ---------------------------------------------------------------------------
+# Fix round 1: /topics/ hub page (nav "Topics" orphan fix)
+# ---------------------------------------------------------------------------
+
+
+class TestTopicsHubTemplate:
+    def _render(self):
+        from br_insight.config import SiteConfig
+        from br_insight.render import render_template, topic_pages
+
+        topics = topic_pages(corpus())
+        categories = [t for t in topics if t["kind"] == "category"]
+        tags = [t for t in topics if t["kind"] == "tag"]
+        return (
+            render_template(
+                "topics.html",
+                site=SiteConfig.load(REPO_ROOT),
+                categories=categories,
+                tags=tags,
+            ),
+            categories,
+            tags,
+        )
+
+    def test_header_eyebrow_h1_and_real_intro(self):
+        html, _, _ = self._render()
+        assert '<p class="eyebrow">Browse by topic</p>' in html
+        assert "<h1>Topics</h1>" in html
+        lead = html[html.index('class="page-head__lead"'):]
+        lead_text = lead[lead.index(">") + 1 : lead.index("</p>")]
+        # one real sentence of copy — not lorem, not empty
+        assert len(lead_text) >= 40 and "lorem" not in lead_text.lower()
+
+    def test_categories_section_lists_all_eight_with_counts(self):
+        html, categories, _ = self._render()
+        section = html[
+            html.index('aria-label="Categories"'):
+            html.index('aria-label="All tags"')
+        ]
+        for topic in categories:
+            href = f'href="{topic["href"]}"'
+            assert href in section, topic["name"]
+            link = section[section.index(href):]
+            label = link[link.index(">") + 1 : link.index("</a>")]
+            assert str(topic["count"]) in label, topic["name"]
+        assert section.count("/topics/") == len(categories)
+
+    def test_tags_section_lists_every_used_tag_as_chip_links(self):
+        used = {tag for a in corpus() for tag in a.tags}
+        html, _, tags = self._render()
+        assert len(tags) == len(used) == 29
+        section = html[html.index('aria-label="All tags"'):]
+        for topic in tags:
+            chip = f'class="chip" href="{topic["href"]}"'
+            assert chip in section, topic["name"]
+            label = section[section.index(topic["href"]):]
+            assert f'· {topic["count"]}</a>' in label, topic["name"]
+
+
+@pytest.fixture(scope="module")
+def built_hub(tmp_path_factory):
+    from br_insight.render import build
+
+    out = tmp_path_factory.mktemp("hub_build")
+    build(REPO_ROOT, out)
+    return out
+
+
+class TestBuiltTopicsHub:
+    def test_topics_index_html_written(self, built_hub):
+        page = built_hub / "topics" / "index.html"
+        text = page.read_text(encoding="utf-8")
+        assert "<h1>Topics</h1>" in text
+        assert "<title>Topics — Blade Runner Insight</title>" in text
+
+    def test_hub_links_resolve_to_built_pages(self, built_hub):
+        import re
+
+        from br_insight.render import topic_pages
+
+        text = (built_hub / "topics" / "index.html").read_text(encoding="utf-8")
+        built_hrefs = {t["href"] for t in topic_pages(corpus())}
+        hub_hrefs = set(re.findall(r'href="(/topics/[^"]+)"', text))
+        assert hub_hrefs == built_hrefs
+        for href in hub_hrefs:
+            assert (built_hub / href.lstrip("/") / "index.html").is_file(), href
+
+
+# ---------------------------------------------------------------------------
 # Build pipeline output
 # ---------------------------------------------------------------------------
 
@@ -225,7 +313,7 @@ class TestBuiltTopicRoutes:
         from br_insight.render import topic_pages
 
         topics = topic_pages(corpus())
-        expected = set()
+        expected = {Path("topics") / "index.html"}  # hub route (fix r1)
         for t in topics:
             parts = ["topics"]
             if t["kind"] == "tag":

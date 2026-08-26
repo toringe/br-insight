@@ -78,6 +78,7 @@ class TestSitemap:
         base = SiteConfig.load(REPO_ROOT).base_url
         assert f"{base}/" in locs
         assert f"{base}/library/" in locs
+        assert f"{base}/topics/" in locs  # fix r1: topics hub indexed
         assert f"{base}/about.html" in locs
         for topic in topic_pages(corpus()):
             assert f"{base}{topic['href']}" in locs

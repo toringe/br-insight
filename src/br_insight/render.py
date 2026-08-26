@@ -188,14 +188,17 @@ def sitemap_entries(
     """All indexable routes as ``{"loc", "lastmod"}``.
 
     Articles carry their own publish date as ``lastmod``; every index
-    route (home, library, about, topics) gets the build date.
+    route (home, library, topics hub, about) gets the build date.
     """
     today = now.date().isoformat()
 
     def entry(path: str, lastmod: str) -> dict:
         return {"loc": f"{site.base_url}{path}", "lastmod": lastmod}
 
-    entries = [entry(p, today) for p in ("/", "/library/", "/about.html")]
+    entries = [
+        entry(p, today)
+        for p in ("/", "/library/", "/topics/", "/about.html")
+    ]
     entries += [entry(t["href"], today) for t in topic_pages(articles)]
     entries += [
         entry(f"/library/{article.slug}/", article.date.date().isoformat())
@@ -277,9 +280,10 @@ def build(root: Path, out: Path) -> list[Path]:
     """Render every article page plus the site's index surfaces.
 
     Returns the list of written paths: ``library/<slug>/index.html``,
-    ``library/index.html``, the root ``index.html``, one page per used
-    category/tag under ``topics/``, ``about.html``, byte-twin
-    ``404.html`` + ``error.html``, ``sitemap.xml``, and ``feed.xml``.
+    ``library/index.html``, the root ``index.html``, the ``topics/``
+    hub, one page per used category/tag under ``topics/``,
+    ``about.html``, byte-twin ``404.html`` + ``error.html``,
+    ``sitemap.xml``, and ``feed.xml``.
     Sources, covers and legacy assets are read-only inputs. The wall
     clock is sampled once so a single run stays self-consistent.
     """
@@ -338,8 +342,24 @@ def build(root: Path, out: Path) -> list[Path]:
 
     # Topic pages: derive routes from the enriched corpus (never the raw
     # vocabularies) so an empty topic can't exist. Category pages sit at
-    # depth 2; tag pages at depth 3.
-    for topic in topic_pages(articles):
+    # depth 2; tag pages at depth 3. The same descriptors feed the hub
+    # page at /topics/ (the primary-nav "Topics" target).
+    topics = topic_pages(articles)
+    hub_page = out / "topics" / "index.html"
+    hub_page.parent.mkdir(parents=True, exist_ok=True)
+    hub_page.write_text(
+        render_template(
+            "topics.html",
+            site=site,
+            categories=[t for t in topics if t["kind"] == "category"],
+            tags=[t for t in topics if t["kind"] == "tag"],
+            now=now,
+        ),
+        encoding="utf-8",
+    )
+    written.append(hub_page)
+
+    for topic in topics:
         parts = ["topics"] + (["tag"] if topic["kind"] == "tag" else []) + [topic["slug"]]
         topic_page = out.joinpath(*parts, "index.html")
         topic_page.parent.mkdir(parents=True, exist_ok=True)
