@@ -1,0 +1,34 @@
+{#- Reusable article card (library grid; article-page related cards may reuse).
+
+    Expects an ``a`` with: slug, title, author, minutes, category, tags, date.
+    ``prefix`` is the relative asset depth ("../", "../../"). Data attributes
+    drive the client-side filter module without any extra DOM queries.
+-#}
+{% macro card(a, prefix) %}
+<article class="card"
+  data-category="{{ a.category }}"
+  data-tags="{{ a.tags | join(' ') }}"
+  data-author="{{ a.author }}"
+  data-decade="{{ a.date | decade }}"
+  data-minutes="{{ a.minutes }}"
+  data-date="{{ a.date.strftime('%Y-%m-%d') }}">
+  <a class="card__cover" href="/library/{{ a.slug }}/" tabindex="-1" aria-hidden="true">
+    <img
+      src="{{ prefix }}library/{{ a.slug }}/cover-crop.jpg"
+      alt="" loading="lazy" width="505" height="295">
+  </a>
+  <div class="card__body">
+    <h3 class="card__title"><a href="/library/{{ a.slug }}/">{{ a.title }}</a></h3>
+    <p class="card__meta">
+      <a class="chip" data-link="author" href="/library/?author={{ a.author | urlencode }}">{{ a.author }}</a>
+      <span class="card__reading-time">{{ a.minutes }} min read</span>
+    </p>
+    <p class="card__tax">
+      <span class="chip chip--category">{{ a.category }}</span>
+      {%- for tag in a.tags %}
+      <a class="chip chip--tag" data-link="tag" href="/library/?tag={{ tag | urlencode }}">{{ tag }}</a>
+      {%- endfor %}
+    </p>
+  </div>
+</article>
+{% endmacro %}

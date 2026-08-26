@@ -320,7 +320,7 @@ def _tree_hash(out: Path) -> str:
     import hashlib
 
     digest = hashlib.sha256()
-    for path in sorted((out / "library").glob("*/index.html")):
+    for path in sorted(out.rglob("index.html")):
         digest.update(path.relative_to(out).as_posix().encode())
         digest.update(path.read_bytes())
     return digest.hexdigest()
@@ -333,9 +333,10 @@ class TestBuildPipeline:
         out, written = built
         slugs = {a.slug for a in load_all(REPO_ROOT)}
         expected = {Path("library") / slug / "index.html" for slug in slugs}
+        expected.add(Path("library") / "index.html")  # Task 9: library listing
         actual = {p.relative_to(out) for p in written}
         assert actual == expected
-        assert len(written) == 29
+        assert len(written) == 30
 
     def test_build_is_idempotent(self, tmp_path):
         from br_insight.render import build

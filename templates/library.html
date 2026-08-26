@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% set asset_prefix = "../" %}
+
+{% block title %}Library{% endblock %}
+{% block description %}In-depth analysis of Blade Runner — browse every essay by category, tag, decade, or author.{% endblock %}
+{% block canonical_path %}library/{% endblock %}
+
+{% from "partials/card.html" import card %}
+
+{% block content %}
+<section class="library">
+  <div class="container">
+    <header class="page-head">
+      <h1>Library</h1>
+      <p class="page-head__lead">In-depth analysis of Blade Runner and its themes — every essay in the archive, filterable by category, tag, decade, and author.</p>
+    </header>
+
+    <form class="filter-bar" data-filter-bar aria-label="Filter articles">
+      <div class="filter-bar__row">
+        <p class="filter-bar__label">Category</p>
+        {%- for category in categories %}
+        <button type="button" class="chip" data-group="category" data-value="{{ category }}" aria-pressed="false">{{ category }}</button>
+        {%- endfor %}
+      </div>
+      <div class="filter-bar__row">
+        <p class="filter-bar__label">Tag</p>
+        {%- for tag in tags %}
+        <button type="button" class="chip" data-group="tag" data-value="{{ tag }}" aria-pressed="false">{{ tag }}</button>
+        {%- endfor %}
+      </div>
+      <div class="filter-bar__row">
+        <p class="filter-bar__label">Decade</p>
+        {%- for d in decades %}
+        <button type="button" class="chip" data-group="decade" data-value="{{ d }}" aria-pressed="false">{{ d }}</button>
+        {%- endfor %}
+      </div>
+      <div class="filter-bar__row">
+        <p class="filter-bar__label">Author</p>
+        {%- for author in authors %}
+        <button type="button" class="chip" data-group="author" data-value="{{ author }}" aria-pressed="false">{{ author }}</button>
+        {%- endfor %}
+      </div>
+      <div class="filter-bar__row filter-bar__row--sort">
+        <p class="filter-bar__label" id="sort-label">Sort</p>
+        <select name="sort" data-sort aria-labelledby="sort-label">
+          <option value="" selected>Newest first</option>
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="longest">Longest read</option>
+          <option value="shortest">Shortest read</option>
+          <option value="az">Title A–Z</option>
+        </select>
+      </div>
+    </form>
+
+    <p class="library__empty" data-empty hidden>No essays match those filters — clear a chip or two and try again.</p>
+
+    <div class="grid grid--cards" data-grid>
+      {%- for a in articles %}
+      {{ card(a, asset_prefix) }}
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="../assets/js/modules/filter.js"></script>
+{% endblock %}

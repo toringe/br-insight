@@ -3,6 +3,8 @@
 Task 7 scope: environment setup + ``render_template`` helper.
 Task 8 scope: ``build()`` fans the corpus out to
 ``library/<slug>/index.html`` pages with relative asset depth.
+Task 9 scope: ``decade``/``facets`` helpers and the
+``library/index.html`` listing page (server-rendered cards + chips).
 """
 
 from __future__ import annotations
@@ -29,6 +31,26 @@ def _toc_heading_count(toc: list[dict]) -> int:
     return sum(1 + len(entry["children"]) for entry in toc)
 
 
+def decade(date: datetime.date) -> str:
+    """Decade label for a date: ``1996-11-30`` → ``"1990s"``."""
+    return f"{date.year // 10 * 10}s"
+
+
+def facets(articles) -> dict[str, list[str]]:
+    """Distinct filter vocabularies for the library page.
+
+    Categories/tags/authors sort A-Z; decades stay chronological
+    (``1990s`` before ``2000s``, which plain string sort would break).
+    """
+    decades = {decade(article.date) for article in articles}
+    return {
+        "categories": sorted({a.category for a in articles}),
+        "tags": sorted({tag for a in articles for tag in a.tags}),
+        "authors": sorted({a.author for a in articles}),
+        "decades": sorted(decades, key=lambda d: int(d[:-1])),
+    }
+
+
 class _Clock:
     """Live ``now`` global: ``year`` always reads the current wall clock.
 
@@ -51,6 +73,7 @@ def get_env() -> Environment:
         lstrip_blocks=True,
     )
     env.globals["now"] = _Clock()
+    env.filters["decade"] = decade
     return env
 
 
@@ -111,6 +134,21 @@ def build(root: Path, out: Path) -> list[Path]:
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(html, encoding="utf-8")
         written.append(destination)
+
+    library_page = out / "library" / "index.html"
+    library_page.parent.mkdir(parents=True, exist_ok=True)
+    library_page.write_text(
+        render_template(
+            "library.html",
+            site=site,
+            articles=articles,
+            **facets(articles),
+            current_path="library/",
+            now=now,
+        ),
+        encoding="utf-8",
+    )
+    written.append(library_page)
     return written
 
 

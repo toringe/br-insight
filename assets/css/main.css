@@ -433,6 +433,15 @@ a {
 
 /* --- Chips (category/tag; `.is-active` or aria-current marks selection) ---- */
 
+button.chip,
+a.chip {
+  background: none;
+}
+
+button.chip {
+  cursor: pointer;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -515,7 +524,8 @@ a.chip:hover {
     box-shadow 200ms ease;
 }
 
-.card:hover {
+.card:hover,
+.card:focus-within {
   transform: translateY(-3px);
   border-color: var(--line-strong);
   box-shadow: var(--shadow-md);
@@ -534,7 +544,8 @@ a.chip:hover {
   transition: transform 320ms ease;
 }
 
-.card:hover .card__cover img {
+.card:hover .card__cover img,
+.card:focus-within .card__cover img {
   transform: scale(1.04);
 }
 
@@ -590,6 +601,75 @@ a.chip:hover {
   letter-spacing: .1em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* --- Page head + library ---------------------------------------------------- */
+
+.library {
+  padding-block: var(--space-xl);
+}
+
+@media (min-width: 1024px) {
+  .library {
+    padding-block: var(--space-2xl);
+  }
+}
+
+.page-head__lead {
+  max-width: 60ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  margin-block: var(--space-l);
+  padding: var(--space-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.filter-bar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.filter-bar__label {
+  min-width: 5.5em;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.filter-bar select {
+  padding: .3em .85em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  background: var(--bg-1);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .08em;
+}
+
+.filter-bar select:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.library__empty {
+  padding: var(--space-l);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  text-align: center;
 }
 
 /* --- Reading progress bar --------------------------------------------------- */
