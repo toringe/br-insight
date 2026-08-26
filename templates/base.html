@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+{#- One-shot hero flicker-in is gated at build time: the root attribute only
+    appears when every fx flag chain agrees. Reduced motion neutralizes it
+    in CSS; Task 13 owns any runtime toggles. -#}
+{% set fx_welcome = site.fx.enabled and site.fx.flicker.enabled and site.fx.flicker.welcome %}
+<html lang="en"{% if fx_welcome %} data-fx-welcome{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -56,6 +60,8 @@
 
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/source-serif-4-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/source-serif-4-latin-400italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="{{ asset_prefix }}assets/img/favicon.png" type="image/png">
 
   {#- Critical CSS placeholder: children may inline ≤ 8 KB of above-the-fold CSS. -#}

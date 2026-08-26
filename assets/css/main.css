@@ -71,8 +71,10 @@
   --text-bright: #e9f1fa;
   --code-bg: #0d131c;
 
-  /* Type stacks — display face self-hosted latin subset; body is zero-cost. */
+  /* Type stacks — display + prose faces self-hosted latin subsets; body is
+     zero-cost system stack; data/labels run on the mono stack. */
   --font-display: "Chakra Petch", system-ui, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas,
@@ -208,6 +210,30 @@ ol[role="list"] {
   font-weight: 600;
   font-display: swap;
   src: url("../fonts/chakra-petch-latin-600.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Prose face: Source Serif 4 — the reading voice against the techy display
+   type (human/replicant duality). Latin subset, woff2-only, swap. */
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/source-serif-4-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/source-serif-4-latin-400italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
     U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
     U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
@@ -475,7 +501,41 @@ a.chip:hover {
   text-shadow: 0 0 8px rgba(0, 229, 255, .5);
 }
 
+/* --- Eyebrow ("Esper scan" label) ------------------------------------------ */
+/* Signature section marker: mono uppercase letterspaced amber with literal
+   [BRACKETS] drawn by pseudo-elements so screen readers hear the clean label.
+   Encodes real metadata/section names only — never decoration for its own
+   sake. `h2.eyebrow` keeps previous section-header spacing when an eyebrow
+   replaces a heading element. */
+
+.eyebrow {
+  color: var(--amber);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  content: "[";
+  margin-inline-end: .35em;
+}
+
+.eyebrow::after {
+  content: "]";
+  margin-inline-start: .2em;
+}
+
+h2.eyebrow {
+  margin-bottom: var(--space-m);
+}
+
 /* --- Byline ---------------------------------------------------------------- */
+
+.article__category {
+  margin-bottom: var(--space-2xs);
+}
 
 .byline {
   display: flex;
@@ -576,6 +636,7 @@ a.chip:hover {
 
 .card__summary {
   color: var(--muted);
+  font-family: var(--font-serif);
   font-size: var(--fs-sm);
   line-height: 1.55;
 }
@@ -676,15 +737,6 @@ a.chip:hover {
 /* Hero, featured-of-month spotlight, archive stats band, topic cloud.
    Sections stack full-bleed; inner .container keeps them on the measure. */
 
-.home-heading {
-  margin-bottom: var(--space-m);
-  color: var(--text-bright);
-  font-family: var(--font-display);
-  font-size: var(--fs-lg);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-
 .hero {
   padding-block: var(--space-xl);
   background:
@@ -692,6 +744,10 @@ a.chip:hover {
     linear-gradient(180deg, var(--bg-1), var(--bg-0));
   border-bottom: 1px solid var(--line);
   text-align: center;
+}
+
+.hero__kicker {
+  margin-bottom: var(--space-xs);
 }
 
 .hero__title {
@@ -752,7 +808,10 @@ a.chip:hover {
 }
 
 .featured__body > :first-child { margin-block-start: 0; }
-.featured__summary { color: var(--muted); }
+.featured__summary {
+  color: var(--muted);
+  font-family: var(--font-serif);
+}
 
 .featured__title { margin-block: var(--space-2xs) var(--space-3xs); }
 
@@ -762,6 +821,11 @@ a.chip:hover {
   padding-block: var(--space-m);
   border-block: 1px solid var(--line);
   background: var(--bg-1);
+}
+
+.stats-band__label {
+  margin-bottom: var(--space-2xs);
+  text-align: center;
 }
 
 .home-stats {
@@ -840,14 +904,8 @@ a.topic-cloud__link:focus-visible {
   font-size: var(--fs-sm);
 }
 
-.toc__title {
+.toc .eyebrow {
   margin-bottom: var(--space-xs);
-  color: var(--muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
 }
 
 .toc ul {
@@ -1074,6 +1132,7 @@ main {
 
 .prose {
   max-width: var(--measure);
+  font-family: var(--font-serif);
   font-size: var(--fs-base);
   line-height: 1.7;
 }
@@ -1315,6 +1374,22 @@ main {
   color: var(--pink);
   text-shadow: 0 0 calc(var(--fx-flicker-strength) * 140px) rgba(255, 46, 136, .8),
     0 0 calc(var(--fx-flicker-strength) * 40px) rgba(255, 46, 136, .5);
+}
+
+/* Welcome flicker-in: ONE page-load moment on the home hero wordmark, keyed
+   to the build-time html[data-fx-welcome] flag (fx.enabled + flicker.enabled
+   + flicker.welcome). Lighter dedicated variant of neon-flicker; the reduced-
+   motion blanket below neutralizes it. No other element animates from this. */
+@keyframes welcome-flicker {
+  0%        { opacity: 0; }
+  10%, 18%  { opacity: 1; }
+  14%       { opacity: .3; }
+  24%       { opacity: .5; }
+  30%, 100% { opacity: 1; }
+}
+
+html[data-fx-welcome] .hero__title {
+  animation: welcome-flicker 950ms linear 1;
 }
 
 /* --------------------------------------------------------------------------

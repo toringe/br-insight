@@ -116,6 +116,77 @@ class TestArticleContext:
         assert og_title in html
 
 
+class TestDesignDirectionRetrofit:
+    """Task 10b: serif prose face, welcome-flicker gating, shipped fonts."""
+
+    @pytest.fixture
+    def css(self):
+        return (REPO_ROOT / "assets/css/main.css").read_text(encoding="utf-8")
+
+    def test_serif_token_face_and_preloads(self, site, css):
+        assert "--font-serif" in css
+        assert 'font-family: "Source Serif 4"' in css
+        assert "font-display: swap" in css
+        assert css.count("source-serif-4-latin-400") == 2  # face + italic face
+        html = render_template("base.html", site=site)
+        assert html.count("source-serif-4-latin-400") == 2  # two preloads
+
+    def test_serif_fonts_shipped_within_budget(self, css):
+        fonts = sorted((REPO_ROOT / "assets/fonts").glob("source-serif-*.woff2"))
+        sizes = {p.name: p.stat().st_size for p in fonts}
+        assert set(sizes) == {
+            "source-serif-4-latin-400.woff2",
+            "source-serif-4-latin-400italic.woff2",
+        }
+        assert all(size <= 22 * 1024 for size in sizes.values())
+        assert sum(sizes.values()) <= 45 * 1024
+
+    def test_serif_applied_to_prose_and_summaries(self, css):
+        prose = css[css.index(".prose {"):]
+        assert "font-family: var(--font-serif)" in prose[:200]
+        card = css[css.index(".card__summary {"):]
+        assert "var(--font-serif)" in card[:300]
+        featured = css[css.index(".featured__summary {"):]
+        assert "var(--font-serif)" in featured[:200]
+
+    def test_welcome_flicker_attr_present_by_default(self, site):
+        html = render_template("base.html", site=site)
+        assert '<html lang="en" data-fx-welcome>' in html
+
+    @pytest.mark.parametrize(
+        "fx",
+        [
+            None,  # master switch off
+            "flicker_off",  # flicker.enabled off
+            "welcome_off",  # welcome off alone
+        ],
+    )
+    def test_welcome_flicker_attr_absent_when_flags_false(self, site, fx):
+        from dataclasses import replace
+
+        if fx is None:
+            modified_fx = replace(site.fx, enabled=False)
+        elif fx == "flicker_off":
+            modified_fx = replace(
+                site.fx, flicker=replace(site.fx.flicker, enabled=False)
+            )
+        else:
+            modified_fx = replace(
+                site.fx, flicker=replace(site.fx.flicker, welcome=False)
+            )
+        html = render_template(
+            "base.html", site=replace(site, fx=modified_fx)
+        )
+        assert "data-fx-welcome" not in html
+
+    def test_welcome_flicker_gated_in_css(self, css):
+        assert "html[data-fx-welcome] .hero__title" in css
+        rule_at = css.index("html[data-fx-welcome] .hero__title")
+        # gated rule sits below the reduced-motion blanket in the cascade file
+        blanket_at = css.index("@media (prefers-reduced-motion: reduce)")
+        assert blanket_at > rule_at
+
+
 class TestBlocksHaveDefaults:
     def test_bare_render_does_not_explode(self, site):
         html = render_template("base.html", site=site)
@@ -242,6 +313,12 @@ class TestArticleAnatomy:
         assert '<time datetime="2024-05-01">May 2024</time>' in html
         assert "6 min read" in html
 
+    def test_category_eyebrow_above_byline(self, html):
+        assert '<p class="eyebrow article__category">article</p>' in html
+        assert (
+            html.index("article__category") < html.index('class="byline"')
+        )
+
     def test_relative_asset_depth(self, html):
         assert 'href="../../assets/css/main.min.css"' in html
         assert 'href="../../assets/fonts/chakra-petch-latin-400.woff2"' in html
@@ -263,6 +340,8 @@ class TestArticleAnatomy:
         )
         assert '<aside class="toc"' in html
         assert 'href="#two"' in html
+        # TOC aside title is the [CONTENTS] eyebrow
+        assert '<p class="eyebrow" id="toc-title">Contents</p>' in html
 
     def test_no_toc_aside_when_below_threshold(self, html):
         assert '<aside class="toc"' not in html

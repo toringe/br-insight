@@ -163,6 +163,10 @@ class TestLibraryAnatomy:
         assert "[data-empty]" in html or "data-empty" in html
         assert "hidden" in html
 
+    def test_empty_state_copy_and_clear_action(self, html):
+        assert "No essays match those filters." in html
+        assert 'class="btn btn--ghost" data-clear-filters>Clear filters</button>' in html
+
     def test_filter_module_script_tag(self, html):
         assert '<script type="module" src="../assets/js/modules/filter.js">' in html
 
@@ -431,3 +435,66 @@ class TestFilterJsContract:
         data = json.loads(run_init(filter_mod, "?sort=bogus"))
         assert data["sortValue"] == ""
         assert data["order"] == ["Vanishing", "Alias"]
+
+    def test_clear_filters_resets_state_sort_and_params(self, filter_mod):
+        """reset() clears chips, sort, and URL params; full list is restored."""
+        snippet = f"""
+        const cards = [
+          {{ dataset: {{ category: 'Film Analysis', tags: 'noir', author: 'A',
+            decade: '2000s', minutes: '9', date: '2001-02-01',
+            title: 'Vanishing' }}, hidden: false }},
+          {{ dataset: {{ category: 'Characters', tags: 'eyes', author: 'B',
+            decade: '1980s', minutes: '4', date: '1982-06-25',
+            title: 'Alias' }}, hidden: false }},
+        ];
+        const placed = [];
+        const grid = {{
+          querySelectorAll: () => [...cards],
+          appendChild(card) {{ placed.push(card.dataset.title); }},
+        }};
+        const select = {{ value: "", addEventListener() {{}} }};
+        let lastUrl = null;
+        const clearHandlers = [];
+        const clearBtn = {{
+          addEventListener(name, fn) {{ clearHandlers.push(fn); }},
+        }};
+        const doc = {{
+          querySelector(sel) {{
+            if (sel === "[data-grid]") return grid;
+            if (sel === "[data-sort]") return select;
+            if (sel === "[data-clear-filters]") return clearBtn;
+            return null;
+          }},
+          addEventListener() {{}},
+          defaultView: {{
+            location: {{ search: "?tag=noir&sort=az", pathname: "/library/", hash: "" }},
+            history: {{
+              replaceState(_s, _t, url) {{ lastUrl = url; }},
+            }},
+          }},
+        }};
+        init(doc);
+        const filteredHidden = cards.map((c) => c.hidden);
+        const afterFiltered = placed.length;
+        for (const fn of clearHandlers) fn();
+        console.log(JSON.stringify({{
+          filteredHidden,
+          hiddenAfterReset: cards.map((c) => c.hidden),
+          orderAfterReset: placed.slice(afterFiltered),
+          selectValueAfterReset: select.value,
+          lastUrl,
+        }}));
+        """
+        script = f'import {{ init }} from "{filter_mod.as_uri()}";\n{snippet}\n'
+        proc = subprocess.run(
+            [node, "--input-type=module", "--eval", script],
+            capture_output=True, text=True, timeout=30,
+        )
+        assert proc.returncode == 0, proc.stderr
+        data = json.loads(proc.stdout)
+        # incoming ?tag=noir hides the non-matching card
+        assert data["filteredHidden"] == [False, True]
+        assert data["hiddenAfterReset"] == [False, False]
+        assert data["orderAfterReset"] == ["Vanishing", "Alias"]  # server order
+        assert data["selectValueAfterReset"] == ""
+        assert data["lastUrl"] == "/library/"

@@ -230,10 +230,9 @@ class TestHomeAnatomy:
         author_at = html.index("K. Deckard")
         reading_at = html.index("min read")
         summary_at = html.index("A machine to measure empathy.")
-        read_at = html.index(">Read</a>")
+        read_at = html.index(">Read essay</a>")
         assert -1 < cover_at < title_at < author_at < reading_at < summary_at < read_at
-        assert "Featured analysis" in html
-        assert ">August</span>" in html
+        assert "Featured analysis · August" in html
 
     def test_featured_skips_when_absent(self):
         from br_insight.render import render_template
@@ -242,6 +241,7 @@ class TestHomeAnatomy:
             "home.html", site=SiteConfig.load(REPO_ROOT), **_ctx(featured=None)
         )
         assert "Featured analysis" not in plain
+        assert "Read essay" not in plain
 
     def test_stats_band_text(self, html):
         assert ">29 essays · 12 authors · 79,321 words · est. 1996</" in html
@@ -283,6 +283,33 @@ class TestHomeAnatomy:
         nav = html[html.index("<nav"):html.index("</nav>")]
         home_line = next(line for line in nav.split("\n") if '>Home</a>' in line)
         assert 'href="/" aria-current="page"' in home_line
+
+
+class TestEyebrowSignature:
+    """Task 10b: exactly five "Esper scan" eyebrows on the home page."""
+
+    def test_all_five_eyebrows_with_labels(self, html):
+        assert html.count('class="eyebrow') == 5
+        for label in (
+            ">The Archive<",
+            ">Featured analysis · August<",
+            ">Thirty years online<",
+            ">Browse by topic<",
+            ">Recent additions<",
+        ):
+            assert label in html
+
+    def test_hero_kicker_precedes_site_name(self, html):
+        assert html.index("hero__kicker") < html.index('class="hero__title"')
+
+    def test_stats_label_precedes_essay_counts(self, html):
+        assert (
+            html.index("stats-band__label")
+            < html.index('class="home-stats"')
+        )
+
+    def test_no_legacy_headings_remain(self, html):
+        assert "home-heading" not in html
 
 
 # ---------------------------------------------------------------------------
@@ -369,3 +396,9 @@ class TestBuildHomePage:
         text = (built_home / "index.html").read_text(encoding="utf-8")
         current_month = datetime.date.today().strftime("%B")
         assert current_month in text
+
+    def test_built_home_carries_five_eyebrows_and_welcome_attr(self, built_home):
+        text = (built_home / "index.html").read_text(encoding="utf-8")
+        assert text.count('class="eyebrow') == 5
+        # real site config has the full fx chain on: root attr emitted
+        assert "<html lang=\"en\" data-fx-welcome>" in text

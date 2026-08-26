@@ -25,11 +25,13 @@
       {% include "partials/credit.html" %}
     </figure>
 
+    <p class="eyebrow article__category">{{ article.category }}</p>
+
     {% include "partials/byline.html" %}
 
     {% if toc %}
     <aside class="toc" aria-labelledby="toc-title">
-      <p class="toc__title" id="toc-title">Contents</p>
+      <p class="eyebrow" id="toc-title">Contents</p>
       <ul>
         {%- for item in toc %}
         <li>

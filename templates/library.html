@@ -54,7 +54,10 @@
       </div>
     </form>
 
-    <p class="library__empty" data-empty hidden>No essays match those filters — clear a chip or two and try again.</p>
+    <p class="library__empty" data-empty hidden>
+      No essays match those filters.
+      <button type="button" class="btn btn--ghost" data-clear-filters>Clear filters</button>
+    </p>
 
     <div class="grid grid--cards" data-grid>
       {%- for a in articles %}

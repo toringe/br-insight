@@ -23,6 +23,8 @@ fx:
   enabled: true            # master switch — flips everything off
   atmosphere_toggle: true  # show user-facing toggle in header
   rain:    {enabled: true, density: 120, speed: 1.0, tier_auto: true}
-  flicker: {enabled: true}
+  flicker:
+    enabled: true
+    welcome: true  # one-shot hero flicker-in; consumed by fx.js (Task 13)
   scanlines: {enabled: true}
   grain:   {enabled: true}

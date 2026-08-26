@@ -7,6 +7,7 @@
 {% block content %}
 <section class="hero">
   <div class="container">
+    <p class="eyebrow hero__kicker">The Archive</p>
     <h1 class="hero__title">{{ site.name }}</h1>
     <p class="hero__tagline">{{ site.tagline }}</p>
     <p class="hero__anniversary">Thirty years of Blade Runner analysis — online since 1996.</p>
@@ -22,7 +23,7 @@
 {%- if featured %}
 <section class="featured" aria-labelledby="featured-title">
   <div class="container">
-    <h2 class="home-heading" id="featured-title">Featured analysis <span class="home-heading__month">{{ featured_month }}</span></h2>
+    <h2 class="eyebrow" id="featured-title">Featured analysis · {{ featured_month }}</h2>
     <article class="featured__card">
       <a class="featured__cover" href="/library/{{ featured.slug }}/" tabindex="-1" aria-hidden="true">
         <img
@@ -37,7 +38,7 @@
           <span class="card__reading-time">{{ featured.minutes }} min read</span>
         </p>
         <p class="featured__summary">{{ featured.summary }}</p>
-        <p class="featured__read"><a class="btn btn--ghost" href="/library/{{ featured.slug }}/">Read</a></p>
+        <p class="featured__read"><a class="btn btn--ghost" href="/library/{{ featured.slug }}/">Read essay</a></p>
       </div>
     </article>
   </div>
@@ -46,6 +47,7 @@
 
 <section class="stats-band" aria-label="Archive statistics">
   <div class="container">
+    <p class="eyebrow stats-band__label">Thirty years online</p>
     <p class="home-stats">{{
       "{:d} essays · {:d} authors · {:,} words · est. {:d}".format(
         stats.essays, stats.authors, stats.words, site.established
@@ -57,7 +59,7 @@
 <section class="topics" aria-labelledby="topics-title">
   <div class="container">
     <nav class="topic-cloud" aria-label="Topics">
-      <h2 class="home-heading" id="topics-title">Explore topics</h2>
+      <h2 class="eyebrow" id="topics-title">Browse by topic</h2>
       <ul class="topic-cloud__list" role="list">
         {%- for topic in topics %}
         <li><a class="topic-cloud__link{% if '/topics/tag/' not in topic.href %} topic-cloud__link--category{% endif %}" href="{{ topic.href }}">{{ topic.label }}</a></li>
@@ -69,7 +71,7 @@
 
 <section class="recent" aria-labelledby="recent-title">
   <div class="container">
-    <h2 class="home-heading" id="recent-title">Recent additions</h2>
+    <h2 class="eyebrow" id="recent-title">Recent additions</h2>
     <div class="grid grid--cards">
       {%- for a in recent %}
       {{ card(a, asset_prefix | default('/')) }}

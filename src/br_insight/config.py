@@ -142,6 +142,14 @@ class FxToggle:
 
 
 @dataclass(frozen=True)
+class FlickerFx:
+    """Neon-flicker switches (``welcome`` is consumed by fx.js — Task 13)."""
+
+    enabled: bool
+    welcome: bool
+
+
+@dataclass(frozen=True)
 class RainFx:
     """Tunable parameters for the client-side rain effect."""
 
@@ -158,7 +166,7 @@ class FxConfig:
     enabled: bool
     atmosphere_toggle: bool
     rain: RainFx
-    flicker: FxToggle
+    flicker: FlickerFx
     scanlines: FxToggle
     grain: FxToggle
 
@@ -198,7 +206,7 @@ _SITE_DEFAULTS: dict = {
         "enabled": True,
         "atmosphere_toggle": True,
         "rain": {"enabled": True, "density": 120, "speed": 1.0, "tier_auto": True},
-        "flicker": {"enabled": True},
+        "flicker": {"enabled": True, "welcome": True},
         "scanlines": {"enabled": True},
         "grain": {"enabled": True},
     },
@@ -226,7 +234,10 @@ def _build_fx(data: Mapping) -> FxConfig:
             speed=float(data["rain"]["speed"]),
             tier_auto=bool(data["rain"]["tier_auto"]),
         ),
-        flicker=FxToggle(bool(data["flicker"]["enabled"])),
+        flicker=FlickerFx(
+            enabled=bool(data["flicker"]["enabled"]),
+            welcome=bool(data["flicker"]["welcome"]),
+        ),
         scanlines=FxToggle(bool(data["scanlines"]["enabled"])),
         grain=FxToggle(bool(data["grain"]["enabled"])),
     )

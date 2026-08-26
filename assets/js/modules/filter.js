@@ -5,6 +5,7 @@
  * and state syncs to ?category=&tag=&author=&decade=&sort= so filtered
  * views are shareable. Incoming params are applied on load too, so
  * author/tag chip links elsewhere deep-link straight into a filtered view.
+ * A Clear filters action resets chips, sort, and params to the full list.
  *
  * Exports pure helpers (parseParams, toSearch, matches, compareCards)
  * for testing; init() wires the prerendered DOM.
@@ -89,6 +90,7 @@ export function init(doc = document) {
   const bar = doc.querySelector("[data-filter-bar]");
   const emptyMessage = doc.querySelector("[data-empty]");
   const select = doc.querySelector("[data-sort]");
+  const clearBtn = doc.querySelector("[data-clear-filters]");
   const originalOrder = new Map(
     [...grid.querySelectorAll(".card")].map((card, i) => [card, i])
   );
@@ -121,6 +123,15 @@ export function init(doc = document) {
       sort = select.value;
       render();
     });
+  }
+
+  if (clearBtn) clearBtn.addEventListener("click", reset);
+
+  function reset() {
+    for (const g of GROUPS) state[g].clear();
+    sort = "";
+    if (select) select.value = "";
+    render();
   }
 
   function toggle(group, value) {

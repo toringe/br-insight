@@ -268,9 +268,16 @@ class TestSiteConfigDefaults:
         assert fx.rain == config.RainFx(
             enabled=True, density=120, speed=1.0, tier_auto=True
         )
-        assert fx.flicker == config.FxToggle(enabled=True)
+        assert fx.flicker == config.FlickerFx(enabled=True, welcome=True)
         assert fx.scanlines == config.FxToggle(enabled=True)
         assert fx.grain == config.FxToggle(enabled=True)
+
+    def test_flicker_welcome_defaults_on_and_overrides_independently(self, tmp_path):
+        _write_site(tmp_path, "")
+        assert config.SiteConfig.load(tmp_path).fx.flicker.welcome is True
+        _write_site(tmp_path, "fx:\n  flicker:\n    welcome: false\n")
+        fx = config.SiteConfig.load(tmp_path).fx
+        assert fx.flicker == config.FlickerFx(enabled=True, welcome=False)
 
     def test_unknown_top_level_key_warns_loudly(self, tmp_path):
         _write_site(tmp_path, "bogus_key: 1\n")
@@ -352,6 +359,7 @@ class TestRealSiteYaml:
             slug="postmodernist-view", fallback="monthly-rotation"
         )
         assert site.social.twitter == "brinsight"
+        assert site.fx.flicker == config.FlickerFx(enabled=True, welcome=True)
         assert [item.label for item in site.nav] == [
             "Home", "Library", "Topics", "About",
         ]
