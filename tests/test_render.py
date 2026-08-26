@@ -151,7 +151,8 @@ class TestDesignDirectionRetrofit:
 
     def test_welcome_flicker_attr_present_by_default(self, site):
         html = render_template("base.html", site=site)
-        assert '<html lang="en" data-fx-welcome>' in html
+        assert '<html lang="en" data-fx-rain data-fx-scanlines data-fx-grain' \
+            ' data-fx-flicker data-fx-welcome>' in html
 
     @pytest.mark.parametrize(
         "fx",

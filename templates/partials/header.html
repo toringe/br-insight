@@ -20,7 +20,7 @@
         <span>Search</span>
         <kbd class="search-btn__hint" aria-hidden="true">⌘K</kbd>
       </button>
-      {%- if site.fx.atmosphere_toggle %}
+      {%- if site.fx.enabled and site.fx.atmosphere_toggle %}
       <button type="button" class="btn btn--ghost fx-btn" data-fx-toggle data-focus-hide aria-pressed="true">
         Atmosphere
       </button>

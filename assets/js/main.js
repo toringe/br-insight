@@ -16,6 +16,7 @@ import { init as initEndnav } from "./modules/endnav.js";
 import { init as initFocus } from "./modules/focus.js";
 import { init as initMemory } from "./modules/memory.js";
 import { init as initShortcuts } from "./modules/shortcuts.js";
+import { init as initFx } from "./modules/fx.js";
 
 function safe(name, fn) {
   try {
@@ -32,6 +33,13 @@ safe("endnav", () => initEndnav());
 safe("focus", () => initFocus());
 safe("memory", () => initMemory());
 safe("shortcuts", () => initShortcuts());
+
+// Cinematic FX (Task 13): feature-detection gate — the build either embeds
+// window.__FX__ or omits it entirely; no payload means nothing to run.
+safe("fx", () => {
+  if (typeof window === "undefined" || !window.__FX__) return;
+  initFx();
+});
 
 // --- Mobile menu -----------------------------------------------------------
 

@@ -244,6 +244,32 @@ class _Clock:
         return datetime.datetime.now().year
 
 
+def fx_config(site: SiteConfig) -> dict | None:
+    """Client FX payload for ``window.__FX__`` (Task 13).
+
+    Mirrors ``site.fx`` effect-by-effect as plain JSON-able data; the
+    master switch never travels to the client (when off, the whole
+    payload is omitted and the runtime module stays inert).
+    """
+    if not site.fx.enabled:
+        return None
+    return {
+        "enabled": site.fx.enabled,
+        "rain": {
+            "enabled": site.fx.rain.enabled,
+            "density": site.fx.rain.density,
+            "speed": site.fx.rain.speed,
+            "tier_auto": site.fx.rain.tier_auto,
+        },
+        "flicker": {
+            "enabled": site.fx.flicker.enabled,
+            "welcome": site.fx.flicker.welcome,
+        },
+        "scanlines": {"enabled": site.fx.scanlines.enabled},
+        "grain": {"enabled": site.fx.grain.enabled},
+    }
+
+
 def get_env() -> Environment:
     """Shared Jinja2 environment loading ``templates/`` from the repo root."""
     env = Environment(
@@ -253,6 +279,7 @@ def get_env() -> Environment:
         lstrip_blocks=True,
     )
     env.globals["now"] = _Clock()
+    env.globals["fx_config"] = fx_config
     env.filters["decade"] = decade
     return env
 

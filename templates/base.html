@@ -2,8 +2,13 @@
 {#- One-shot hero flicker-in is gated at build time: the root attribute only
     appears when every fx flag chain agrees. Reduced motion neutralizes it
     in CSS; Task 13 owns any runtime toggles. -#}
-{% set fx_welcome = site.fx.enabled and site.fx.flicker.enabled and site.fx.flicker.welcome %}
-<html lang="en"{% if fx_welcome %} data-fx-welcome{% endif %}>
+{%- set _fx = site.fx -%}
+{%- set fx_rain = _fx.enabled and _fx.rain.enabled -%}
+{%- set fx_scanlines = _fx.enabled and _fx.scanlines.enabled -%}
+{%- set fx_grain = _fx.enabled and _fx.grain.enabled -%}
+{%- set fx_flicker = _fx.enabled and _fx.flicker.enabled -%}
+{%- set fx_welcome = fx_flicker and _fx.flicker.welcome -%}
+<html lang="en"{% if fx_rain %} data-fx-rain{% endif %}{% if fx_scanlines %} data-fx-scanlines{% endif %}{% if fx_grain %} data-fx-grain{% endif %}{% if fx_flicker %} data-fx-flicker{% endif %}{% if fx_welcome %} data-fx-welcome{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -89,6 +94,13 @@
   <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button>
 
   {% block scripts %}{% endblock %}
+  {#- Cinematic FX payload (Task 13): plain config truth for the runtime
+      module; fx.js decides what actually runs (atmosphere toggle, focus
+      mode, reduced motion). Omitted entirely when fx.enabled is false. -#}
+  {% set fx_payload = fx_config(site) %}
+  {%- if fx_payload %}
+  <script>window.__FX__={{ fx_payload | tojson }};</script>
+  {%- endif %}
   <script type="module" src="{{ asset_prefix }}assets/js/main.js"></script>
 </body>
 </html>

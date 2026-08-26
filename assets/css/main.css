@@ -1343,9 +1343,13 @@ main {
   opacity: var(--fx-rain-opacity);
 }
 
-/* Scanlines: static overlay, pure CSS */
+/* Scanlines: static overlay, pure CSS; paints only while its presence flag
+   lives on <html> (build sets it from YAML, fx.js keeps it honest). */
 .fx-layer--scanlines {
   opacity: var(--fx-scanline-opacity);
+}
+
+html[data-fx-scanlines] .fx-layer--scanlines {
   background: repeating-linear-gradient(
     to bottom,
     rgba(3, 8, 14, .5) 0 1px,
@@ -1353,14 +1357,18 @@ main {
   );
 }
 
-/* Grain: static overlay; Task 13 supplies the noise paint (SVG data URI)
-   via background-image on this hook — opacity knob already live here. */
+/* Grain: static overlay of SVG fractal noise, same presence-flag gating. */
 .fx-layer--grain {
   opacity: var(--fx-grain-opacity);
 }
 
-/* Neon flicker: applied sparingly to accent glyphs/markings (.neon).
-   Dip depth scales with --fx-flicker-strength so tuning stays in tokens. */
+html[data-fx-grain] .fx-layer--grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Neon flicker: applied sparingly to accent glyphs/markings (.neon), and
+   only while the flicker flag lives on <html>. Dip depth scales with
+   --fx-flicker-strength so tuning stays in tokens. */
 @keyframes neon-flicker {
   0%, 84%, 100% { opacity: 1; }
   86%           { opacity: calc(1 - var(--fx-flicker-strength) * 4); }
@@ -1369,7 +1377,7 @@ main {
   95%           { opacity: 1; }
 }
 
-.neon {
+html[data-fx-flicker] .neon {
   animation: neon-flicker 7s linear infinite;
 }
 
@@ -1399,6 +1407,16 @@ main {
 
 html[data-fx-welcome] .hero__title {
   animation: welcome-flicker 950ms linear 1;
+}
+
+/* Runtime blanket (fx.js): atmosphere toggle off, focus mode, or reduced
+   motion — every FX layer gone, all flicker motion dead, no exceptions. */
+html[data-fx-off] .fx-layer {
+  display: none !important;
+}
+
+html[data-fx-off] .neon {
+  animation: none !important;
 }
 
 /* --------------------------------------------------------------------------

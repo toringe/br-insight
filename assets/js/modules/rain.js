@@ -1,0 +1,240 @@
+/**
+ * Rain — cinematic canvas streaks (Task 13).
+ *
+ * Fixed full-viewport <canvas> behind content (.fx-layer--rain shell,
+ * z-index 80, pointer-events none). Config flows from window.__FX__
+ * (density / speed / tier_auto); visual tuning lives in --fx-* CSS vars.
+ *
+ * Runtime discipline:
+ *   - ~30fps cap via timestamp accumulation inside one rAF loop (no setInterval)
+ *   - visibilitychange pauses completely (loop cancelled, timers dropped)
+ *   - debounced resize re-seeds the buffer (DPR-aware, capped at 2x)
+ *   - FPS watchdog (tier_auto): rolling 2s frame average > 24ms halves the
+ *     drop density once, then pauses rain permanently with a console.info
+ *
+ * Pure helpers are exported for the test harness; importing this module
+ * never touches the DOM — createRain() must be called explicitly.
+ */
+
+const REFERENCE_WIDTH = 1280;
+const MIN_SCALE = 0.4;
+const MIN_DROPS = 12;
+export const FRAME_BUDGET_MS = 24;
+const TIER_FLOOR = 8;
+const TIER_DOWNGRADE_DIVISOR = 2;
+
+const TARGET_INTERVAL_MS = 1000 / 30;
+const WATCHDOG_WINDOW_MS = 2000;
+const WATCHDOG_MIN_SAMPLES = 30;
+const DPR_CAP = 2;
+const WIND_ANGLE = -0.06; // radians (~-3.4°): slight diagonal lean
+const RESIZE_DEBOUNCE_MS = 150;
+
+/** Drop count for a viewport width: linear scale below REFERENCE_WIDTH,
+ * clamped so thin viewports never fall under an atmospheric minimum. */
+export function dropsForWidth(density, width) {
+  const scale = Math.min(1, width / REFERENCE_WIDTH);
+  return Math.max(MIN_DROPS, Math.round(density * Math.max(scale, MIN_SCALE)));
+}
+
+/** Watchdog tier step: halve the density, floored so tiers terminate. */
+export function downgradeTier(density) {
+  return Math.max(TIER_FLOOR, Math.round(density / TIER_DOWNGRADE_DIVISOR));
+}
+
+/** Ladder: hold -> downgrade (once) -> pause permanently. */
+export function watchdogVerdict(avgFrameMs, downgradesDone) {
+  if (!(avgFrameMs > FRAME_BUDGET_MS)) return "hold";
+  return downgradesDone < 1 ? "downgrade" : "pause";
+}
+
+const UX = Math.sin(WIND_ANGLE); // unit wind vector components
+const UY = Math.cos(WIND_ANGLE);
+
+export function createRain(doc, opts = {}) {
+  try {
+    return buildRain(doc, opts);
+  } catch {
+    return { stop() {} };
+  }
+}
+
+function buildRain(doc, opts = {}) {
+  const win = doc.defaultView;
+  if (!win) return { stop() {} };
+
+  const speed = Number(opts.speed) > 0 ? Number(opts.speed) : 1;
+  const tierAuto = opts.tierAuto !== false;
+  let density = Math.max(1, Math.round(Number(opts.density) || 0));
+
+  const shell = doc.createElement("div");
+  shell.className = "fx-layer fx-layer--rain";
+  const canvas = doc.createElement("canvas");
+  canvas.id = "fx-rain";
+  canvas.setAttribute("aria-hidden", "true");
+  shell.appendChild(canvas);
+  doc.body.appendChild(shell);
+
+  const ctx = canvas.getContext("2d", { alpha: true });
+  if (!ctx) {
+    shell.remove();
+    return { stop() {} };
+  }
+
+  let cssWidth = 0;
+  let cssHeight = 0;
+  let drops = [];
+  let tierDowns = 0;
+
+  function newDrop(fromTop) {
+    const len = 8 + Math.random() * 18;
+    return {
+      x: Math.random() * (cssWidth + 40) - 40,
+      y: fromTop ? -len : Math.random() * cssHeight,
+      len,
+      vy: (280 + Math.random() * 240) * speed,
+      alpha: 0.14 + Math.random() * 0.5,
+      thick: Math.random() < 0.86 ? 1 : 2,
+    };
+  }
+
+  function makeDrops(count) {
+    const next = drops.slice(0, count);
+    while (next.length < count) next.push(newDrop(false));
+    return next;
+  }
+
+  function resize() {
+    cssWidth = win.innerWidth;
+    cssHeight = win.innerHeight;
+    const dpr = Math.min(DPR_CAP, win.devicePixelRatio || 1);
+    canvas.width = Math.round(cssWidth * dpr);
+    canvas.height = Math.round(cssHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drops = makeDrops(dropsForWidth(density, cssWidth));
+  }
+
+  // --- Frame loop -----------------------------------------------------------
+
+  let rafId = 0;
+  let running = false;
+  let pausedForPerf = false;
+  let lastTime = 0;
+  let acc = 0;
+  let samples = [];
+
+  function pruneSamples(now) {
+    while (samples.length && now - samples[0].t > WATCHDOG_WINDOW_MS) {
+      samples.shift();
+    }
+  }
+
+  function watchdog(now) {
+    if (!tierAuto || pausedForPerf) return;
+    pruneSamples(now);
+    if (samples.length < WATCHDOG_MIN_SAMPLES) return;
+    const avg =
+      samples.reduce((total, s) => total + s.dt, 0) / samples.length;
+    const verdict = watchdogVerdict(avg, tierDowns);
+    if (verdict === "downgrade") {
+      tierDowns += 1;
+      density = downgradeTier(density);
+      drops = makeDrops(dropsForWidth(density, cssWidth));
+      samples = [];
+    } else if (verdict === "pause") {
+      pausedForPerf = true;
+      stopLoop();
+      console.info(
+        "[bri] rain paused: sustained frame average over budget",
+      );
+    }
+  }
+
+  function paint(stepMs) {
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+    const seconds = Math.min(stepMs, 100) / 1000;
+    ctx.lineCap = "round";
+    for (const drop of drops) {
+      drop.y += drop.vy * seconds;
+      drop.x += UX * drop.vy * seconds;
+      if (drop.y - drop.len > cssHeight || drop.x < -drop.len * 2) {
+        Object.assign(drop, newDrop(true));
+        continue;
+      }
+      ctx.globalAlpha = drop.alpha;
+      ctx.strokeStyle = "#cfe9f5";
+      ctx.lineWidth = drop.thick;
+      ctx.beginPath();
+      ctx.moveTo(drop.x, drop.y);
+      ctx.lineTo(drop.x - UX * drop.len, drop.y - UY * drop.len);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function frame(now) {
+    if (!running) return;
+    rafId = win.requestAnimationFrame(frame);
+    if (!lastTime) {
+      lastTime = now;
+      return;
+    }
+    const dt = now - lastTime;
+    lastTime = now;
+    if (dt > 1000) { // long tab stall: resync instead of a giant step
+      acc = 0;
+      samples = [];
+      return;
+    }
+    acc += dt;
+    samples.push({ t: now, dt });
+    if (acc >= TARGET_INTERVAL_MS) {
+      acc %= TARGET_INTERVAL_MS;
+      watchdog(now);
+      if (!running) return; // watchdog may have paused us
+      paint(dt);
+    }
+  }
+
+  function startLoop() {
+    if (running || pausedForPerf) return;
+    running = true;
+    lastTime = 0;
+    acc = 0;
+    rafId = win.requestAnimationFrame(frame);
+  }
+
+  function stopLoop() {
+    running = false;
+    win.cancelAnimationFrame(rafId);
+  }
+
+  // --- Lifecycle ------------------------------------------------------------
+
+  let resizeTimer = 0;
+  function onResize() {
+    win.clearTimeout(resizeTimer);
+    resizeTimer = win.setTimeout(resize, RESIZE_DEBOUNCE_MS);
+  }
+
+  function onVisibility() {
+    if (doc.hidden) stopLoop();
+    else startLoop();
+  }
+
+  resize();
+  doc.addEventListener("visibilitychange", onVisibility);
+  win.addEventListener("resize", onResize);
+  startLoop();
+
+  return {
+    stop() {
+      stopLoop();
+      doc.removeEventListener("visibilitychange", onVisibility);
+      win.removeEventListener("resize", onResize);
+      win.clearTimeout(resizeTimer);
+      shell.remove();
+    },
+  };
+}
+

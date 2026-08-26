@@ -1,4 +1,46 @@
 # Blade Runner Insight
+
 This repository contains all static files for the [Blade Runner Insight](https://www.br-insight.com) website.
 
 Any updates and revisions for the articles in the Library needs to be checked in here.
+
+The site is plain HTML/CSS/JS: `_data/site.yaml` + `templates/` drive a Jinja2
+build (`uv run br-insight build --out .`), article sources live in
+`library/<slug>/article.md`, and pages load the minified CSS/JS under
+`assets/` (regenerate CSS siblings with `uv run python scripts/minify_css.py`
+after editing a source `.css`). Preview locally with
+`python3 -m http.server 8000`.
+
+## Tuning the atmosphere
+
+The cinematic FX (rain, neon flicker, scanlines, grain) are configured by
+design: every knob is data — YAML keys flip effects on/off at build time,
+CSS custom properties tune their look, and the runtime module adds user /
+accessibility gating on top. Retuning never requires touching JS.
+
+| Knob | Where | Effect |
+| --- | --- | --- |
+| `fx.enabled` | `_data/site.yaml` | Master switch; off omits the `window.__FX__` payload and all `data-fx-*` flags — the runtime stays inert |
+| `fx.atmosphere_toggle` | `_data/site.yaml` | Shows/hides the header **Atmosphere** button |
+| `fx.rain.enabled` / `.density` / `.speed` / `.tier_auto` | `_data/site.yaml` | Canvas rain; density ≈ drop count at desktop widths (scales down below 1280 px), speed multiplies fall velocity, `tier_auto` enables the FPS watchdog |
+| `fx.flicker.enabled` / `.welcome` | `_data/site.yaml` | Neon flicker on `.neon` accents; `welcome` is the one-shot hero flicker-in |
+| `fx.scanlines.enabled` / `fx.grain.enabled` | `_data/site.yaml` | Static CSS overlays behind their `html[data-fx-*]` flags |
+| `--fx-rain-opacity`, `--fx-scanline-opacity`, `--fx-grain-opacity` | `assets/css/main.css` | Overlay intensity per effect |
+| `--fx-flicker-strength` | `assets/css/main.css` | Neon dip depth + glow radius (drives both keyframes and text-shadow math) |
+| Atmosphere button | User preference | Persists to `localStorage["bri:atmosphere"]`; off sets `html[data-fx-off]` and kills every effect regardless of YAML |
+
+### Degradation behavior
+
+- Focus mode (`<html data-focus>`) and `prefers-reduced-motion` force-disable
+  everything, overriding even an enabled config (reduced motion is also
+  neutralized in CSS as a second layer).
+- The rain canvas caps itself at ~30 fps via timestamp accumulation (never
+  `setInterval`), pauses completely while the tab is hidden, re-seeds its
+  buffer on debounced resize (DPR-aware, capped at 2x), and honours
+  `document.hidden`.
+- FPS watchdog (`rain.tier_auto`): rolling 2 s frame average > 24 ms halves
+  the drop density once; still slow after that → rain pauses permanently
+  with a `console.info` note.
+- Zero-JS visitors simply get the page content without any atmosphere
+  runtime (no canvas, overlays, or button behavior); broken modules never
+  take the rest of the page down.
