@@ -1,0 +1,37 @@
+categories: [Film Analysis, Themes & Humanity, Characters, Religion & Symbolism,
+             Technology & Society, World & Setting, Novel & Adaptation, Creative Works]
+tag_vocab: [noir, visual-style, cinematography, genre, director's-cut, special-effects,
+            postmodernism, tears-in-rain, deckard, roy-batty, rachael, replicant-or-human,
+            empathy, personhood, philosophy, eyes, unicorn, dreams, christ-figure, tyrell,
+            philip-k-dick, adaptation, cloning-genetics, creator-creation, dystopia,
+            los-angeles-2019, race, fan-fiction, editorial]
+assignments:
+  a-study-of-blade-runner: {category: Film Analysis, tags: [cinematography, noir, tears-in-rain]}
+  aboutfilm-analysis: {category: Film Analysis, tags: [noir, visual-style]}
+  an-analysis-of-blade-runner: {category: Film Analysis, tags: [visual-style]}
+  analysis-of-a-sf-movie: {category: Film Analysis, tags: [genre]}
+  analysis-of-an-itch: {category: Characters, tags: [deckard]}
+  appreciation-assessment-of-dircut: {category: Film Analysis, tags: [director's-cut, noir]}
+  br-a-sf-movie: {category: Film Analysis, tags: [genre]}
+  br-an-analysis: {category: Film Analysis, tags: [special-effects]}
+  br-demystified: {category: World & Setting, tags: [dystopia]}
+  christian-symbolism: {category: Religion & Symbolism, tags: [christ-figure, tyrell]}
+  city-eyes-and-christ: {category: Religion & Symbolism, tags: [eyes, christ-figure, visual-style]}
+  deckards-identity-debate: {category: Characters, tags: [deckard, unicorn, replicant-or-human]}
+  do-androids-dream: {category: Novel & Adaptation, tags: [philip-k-dick, empathy]}
+  editors-article: {category: Themes & Humanity, tags: [editorial, eyes]}
+  genealogy-of-abdul-ben-hassan: {category: World & Setting, tags: [race]}
+  how-and-why-movie-is-different: {category: Novel & Adaptation, tags: [adaptation]}
+  how-science-became-god: {category: Technology & Society, tags: [tyrell]}
+  humans-and-technology: {category: Technology & Society, tags: [creator-creation, roy-batty]}
+  least-scary-option: {category: Technology & Society, tags: [dystopia]}
+  love-letter: {category: Creative Works, tags: [fan-fiction, rachael]}
+  measure-of-a-man: {category: Themes & Humanity, tags: [personhood, replicant-or-human]}
+  parting-of-the-mist: {category: Religion & Symbolism, tags: [dreams]}
+  picturing-the-human: {category: Themes & Humanity, tags: [philosophy, personhood]}
+  postmodernist-view: {category: Film Analysis, tags: [postmodernism, tears-in-rain]}
+  replicant-i-used-to-know: {category: Characters, tags: [empathy, deckard]}
+  sf-with-an-angle: {category: Technology & Society, tags: [cloning-genetics]}
+  significance-of-the-unicorn: {category: Religion & Symbolism, tags: [unicorn, dreams]}
+  what-defines-human: {category: Themes & Humanity, tags: [philip-k-dick, personhood]}
+  worn-down-hell: {category: World & Setting, tags: [los-angeles-2019, dystopia]}

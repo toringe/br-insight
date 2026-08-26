@@ -11,6 +11,7 @@ from pathlib import Path
 from markdown_it import MarkdownIt
 
 from br_insight import frontmatter
+from br_insight.textutils import slugify
 
 _ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _LEGACY_DATE = re.compile(r"^\d{2}-\d{2}-\d{4}$")
@@ -18,7 +19,6 @@ _BOLD = re.compile(r"(\*\*|__)(.+?)\1", re.DOTALL)
 _ITALIC = re.compile(r"(\*|_)(.+?)\1", re.DOTALL)
 _HEADING = re.compile(r"<h([1-6])>(.*?)</h\1>", re.DOTALL)
 _INLINE_TAGS = re.compile(r"<[^>]+>")
-_NON_SLUG = re.compile(r"[^a-z0-9]+")
 
 _MARKDOWN = MarkdownIt()
 
@@ -76,10 +76,6 @@ def extract_summary(body: str, size: int = 100) -> str:
     return " ".join(words[:size]) + "…"
 
 
-def _slugify(text: str) -> str:
-    return _NON_SLUG.sub("-", text.strip().lower()).strip("-")
-
-
 def render_markdown(body: str) -> str:
     """Render markdown to HTML; headings get slugified ``id`` attributes."""
     html = _MARKDOWN.render(body)
@@ -87,7 +83,7 @@ def render_markdown(body: str) -> str:
     def add_id(match: re.Match[str]) -> str:
         level, inner = match.group(1), match.group(2)
         plain = _INLINE_TAGS.sub("", inner)
-        return f'<h{level} id="{_slugify(plain)}">{inner}</h{level}>'
+        return f'<h{level} id="{slugify(plain)}">{inner}</h{level}>'
 
     return _HEADING.sub(add_id, html)
 
