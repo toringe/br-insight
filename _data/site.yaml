@@ -1,0 +1,28 @@
+# Owner-editable site settings. Values here override the code defaults in
+# src/br_insight/config.py; unknown top-level keys trigger loud warnings.
+
+name: Blade Runner Insight
+tagline: In-depth analytical perspectives on Ridley Scott's Blade Runner
+base_url: https://www.br-insight.com
+established: 1996
+
+featured:
+  slug: postmodernist-view   # empty => deterministic monthly rotation
+  fallback: monthly-rotation
+
+social:
+  twitter: brinsight
+
+nav:
+  - {label: Home, href: "/"}
+  - {label: Library, href: /library/}
+  - {label: Topics, href: /topics/}
+  - {label: About, href: /about.html}
+
+fx:
+  enabled: true            # master switch — flips everything off
+  atmosphere_toggle: true  # show user-facing toggle in header
+  rain:    {enabled: true, density: 120, speed: 1.0, tier_auto: true}
+  flicker: {enabled: true}
+  scanlines: {enabled: true}
+  grain:   {enabled: true}

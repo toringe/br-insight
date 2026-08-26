@@ -1,6 +1,7 @@
 """Tests for br_insight.config: taxonomy loading, validation, and enrichment."""
 
 import datetime
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -205,3 +206,157 @@ class TestRealCorpus:
 
 def real_taxonomy_assignments_slugs():
     return set(config.load_taxonomy(REPO_ROOT).assignments)
+
+
+# ---------------------------------------------------------------------------
+# Site config
+# ---------------------------------------------------------------------------
+
+
+def _write_site(tmp_path, text):
+    data_dir = tmp_path / "_data"
+    data_dir.mkdir(exist_ok=True)
+    (data_dir / "site.yaml").write_text(text, encoding="utf-8")
+
+
+class TestSiteConfigDefaults:
+    def test_empty_yaml_yields_complete_defaults(self, tmp_path):
+        _write_site(tmp_path, "")
+        site = config.SiteConfig.load(tmp_path)
+        assert site.name == "Blade Runner Insight"
+        assert site.tagline
+        assert site.base_url == "https://www.br-insight.com"
+        assert site.established == 1996
+        assert site.featured.slug == ""
+        assert site.featured.fallback == "monthly-rotation"
+        assert site.social.twitter == ""
+        assert [(item.label, item.href) for item in site.nav] == [
+            ("Home", "/"),
+            ("Library", "/library/"),
+            ("Topics", "/topics/"),
+            ("About", "/about.html"),
+        ]
+
+    def test_missing_yaml_file_yields_defaults(self, tmp_path):
+        site = config.SiteConfig.load(tmp_path)
+        assert site.name == "Blade Runner Insight"
+        assert site.fx.enabled is True
+
+    def test_minimal_yaml_overrides_only_given_keys(self, tmp_path):
+        _write_site(tmp_path, "name: Other Name\n")
+        site = config.SiteConfig.load(tmp_path)
+        assert site.name == "Other Name"
+        assert site.base_url == "https://www.br-insight.com"
+        assert site.fx.rain.density == 120
+
+    def test_nested_override_merges_deeply(self, tmp_path):
+        _write_site(
+            tmp_path,
+            "fx:\n  rain:\n    density: 42\n",
+        )
+        site = config.SiteConfig.load(tmp_path)
+        assert site.fx.rain.density == 42
+        assert site.fx.rain.speed == 1.0
+        assert site.fx.rain.tier_auto is True
+        assert site.fx.flicker.enabled is True
+
+    def test_fx_defaults_match_controller_ruling(self, tmp_path):
+        _write_site(tmp_path, "")
+        fx = config.SiteConfig.load(tmp_path).fx
+        assert fx.enabled is True
+        assert fx.atmosphere_toggle is True
+        assert fx.rain == config.RainFx(
+            enabled=True, density=120, speed=1.0, tier_auto=True
+        )
+        assert fx.flicker == config.FxToggle(enabled=True)
+        assert fx.scanlines == config.FxToggle(enabled=True)
+        assert fx.grain == config.FxToggle(enabled=True)
+
+    def test_unknown_top_level_key_warns_loudly(self, tmp_path):
+        _write_site(tmp_path, "bogus_key: 1\n")
+        with pytest.warns(UserWarning, match="bogus_key"):
+            site = config.SiteConfig.load(tmp_path)
+        assert site.name == "Blade Runner Insight"
+
+    def test_duplicate_top_level_key_is_rejected(self, tmp_path):
+        _write_site(tmp_path, "name: A\nname: B\n")
+        with pytest.raises(config.SiteConfigError, match="name"):
+            config.SiteConfig.load(tmp_path)
+
+
+class TestResolveFeatured:
+    def _config(self, tmp_path, slug=""):
+        base = config.SiteConfig.load(tmp_path)
+        return replace(
+            base,
+            featured=config.FeaturedConfig(
+                slug=slug, fallback=base.featured.fallback
+            ),
+        )
+
+    def test_explicit_slug_returns_that_article(self, tmp_path):
+        corpus = [_make_article("b"), _make_article("a")]
+        article = config.resolve_featured(
+            self._config(tmp_path, "a"), corpus, "202608"
+        )
+        assert article.slug == "a"
+
+    def test_explicit_unknown_slug_is_rejected_and_named(self, tmp_path):
+        corpus = [_make_article("a")]
+        with pytest.raises(config.SiteConfigError, match="ghost"):
+            config.resolve_featured(
+                self._config(tmp_path, "ghost"), corpus, "202608"
+            )
+
+    def test_rotation_is_deterministic_within_a_month(self, tmp_path):
+        corpus = [_make_article("c"), _make_article("a"), _make_article("b")]
+        first = config.resolve_featured(
+            self._config(tmp_path), corpus, "202608"
+        )
+        second = config.resolve_featured(
+            self._config(tmp_path), corpus, "202608"
+        )
+        assert first is second
+
+    def test_rotation_indexes_sorted_slugs_by_month_modulo(self, tmp_path):
+        corpus = [_make_article("c"), _make_article("a"), _make_article("b")]
+        article = config.resolve_featured(
+            self._config(tmp_path), corpus, "202608"
+        )
+        slugs = sorted(a.slug for a in corpus)
+        assert article.slug == slugs[int("202608") % len(slugs)]
+
+    def test_rotation_changes_with_the_month(self, tmp_path):
+        corpus = [_make_article("c"), _make_article("a"), _make_article("b")]
+        august = config.resolve_featured(
+            self._config(tmp_path), corpus, "202608"
+        )
+        july = config.resolve_featured(
+            self._config(tmp_path), corpus, "202607"
+        )
+        assert august.slug != july.slug
+
+    def test_rotation_with_empty_corpus_is_rejected(self, tmp_path):
+        with pytest.raises(config.SiteConfigError, match="no articles"):
+            config.resolve_featured(self._config(tmp_path), [], "202608")
+
+
+class TestRealSiteYaml:
+    def test_owner_values_load_from_repo(self):
+        site = config.SiteConfig.load(REPO_ROOT)
+        assert site.name == "Blade Runner Insight"
+        assert site.tagline
+        assert site.base_url == "https://www.br-insight.com"
+        assert site.established == 1996
+        assert site.featured == config.FeaturedConfig(
+            slug="postmodernist-view", fallback="monthly-rotation"
+        )
+        assert site.social.twitter == "brinsight"
+        assert [item.label for item in site.nav] == [
+            "Home", "Library", "Topics", "About",
+        ]
+
+    def test_real_featured_slug_resolves_against_corpus(self, real_corpus):
+        site = config.SiteConfig.load(REPO_ROOT)
+        article = config.resolve_featured(site, real_corpus, "202608")
+        assert article.slug == "postmodernist-view"
