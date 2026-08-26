@@ -1,0 +1,30 @@
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a class="site-header__brand neon neon--cyan" href="{{ site.nav[0].href if site.nav else '/' }}">{{ site.name }}</a>
+
+    <nav class="site-nav" id="primary-nav" aria-label="Primary">
+      <ul class="site-nav__list" role="list">
+        {%- for item in site.nav %}
+        <li>
+          <a class="site-nav__link" href="{{ item.href }}"{% if item.href == current_path | default('') %} aria-current="page"{% endif %}>{{ item.label }}</a>
+        </li>
+        {%- endfor %}
+      </ul>
+    </nav>
+
+    <div class="site-header__controls">
+      <button type="button" class="btn btn--ghost search-btn" data-search-open aria-haspopup="dialog" aria-controls="search-dialog">
+        <span>Search</span>
+        <kbd class="search-btn__hint" aria-hidden="true">⌘K</kbd>
+      </button>
+      {%- if site.fx.atmosphere_toggle %}
+      <button type="button" class="btn btn--ghost fx-btn" data-fx-toggle aria-pressed="true">
+        Atmosphere
+      </button>
+      {%- endif %}
+      <button type="button" class="btn btn--ghost menu-btn" data-menu-toggle aria-expanded="false" aria-controls="primary-nav">
+        Menu
+      </button>
+    </div>
+  </div>
+</header>

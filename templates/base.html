@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {#- Asset path convention: every page assumes the site is served at the
+      domain root, so chrome assets use absolute "/assets/..." URLs (no
+      per-page depth prefixes). Canonical + OG URLs are built from
+      site.base_url. -#}
+
+  {%- set page_title -%}
+    {%- block title %}{{ site.tagline }}{% endblock -%}
+  {%- endset -%}
+  {%- set meta_description -%}
+    {%- block description %}{{ site.tagline }}{% endblock -%}
+  {%- endset -%}
+  {%- set canonical_path -%}
+    {%- block canonical_path %}{% endblock -%}
+  {%- endset -%}
+  {%- set og_image -%}
+    {%- block og_image %}/assets/img/bri-logo.png{% endblock -%}
+  {%- endset -%}
+  {%- set canonical_url %}{{ site.base_url }}/{{ canonical_path.lstrip('/') }}{% endset -%}
+
+  <title>{{ page_title }} — {{ site.name }}</title>
+  <meta name="description" content="{{ meta_description }}">
+  <link rel="canonical" href="{{ canonical_url }}">
+
+  <meta property="og:site_name" content="{{ site.name }}">
+  <meta property="og:title" content="{% if article %}{{ article.title }}{% else %}{{ page_title }}{% endif %}">
+  <meta property="og:description" content="{% if article %}{{ article.summary }}{% else %}{{ meta_description }}{% endif %}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="{{ canonical_url }}">
+  <meta property="og:image" content="{{ site.base_url }}{{ og_image }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% if article %}{{ article.title }}{% else %}{{ page_title }}{% endif %}">
+  <meta name="twitter:description" content="{% if article %}{{ article.summary }}{% else %}{{ meta_description }}{% endif %}">
+  <meta name="twitter:image" content="{{ site.base_url }}{{ og_image }}">
+
+  {% if article %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": {{ article.title | tojson }},
+    "description": {{ article.summary | tojson }},
+    "author": {"@type": "Person", "name": {{ article.author | tojson }}},
+    "datePublished": "{{ article.date.strftime('%Y-%m-%d') }}",
+    "image": "{{ site.base_url }}/library/{{ article.slug }}/{{ article.cover }}",
+    "mainEntityOfPage": "{{ canonical_url }}"
+  }
+  </script>
+  {% endif %}
+
+  <link rel="preload" href="/assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/chakra-petch-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" href="/assets/img/favicon.png" type="image/png">
+
+  {#- Critical CSS placeholder: children may inline ≤ 8 KB of above-the-fold CSS. -#}
+  {% block critical_css %}{% endblock %}
+  <link rel="stylesheet" href="/assets/css/main.min.css">
+
+  {#- Speculation Rules include point: Task 14 injects a prefetch/prerender
+      <script type="speculationrules"> block here. -#}
+  {% block speculation_rules %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="progress" aria-hidden="true"></div>
+
+  {% include "partials/header.html" %}
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/footer.html" %}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

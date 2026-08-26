@@ -3,9 +3,10 @@
    Dark, cinematic, neon-noir. Single source of truth for design tokens.
 
    Sections:
-     1. Tokens            4. Layout primitives   7. FX hooks (Task 13 consumes)
-     2. Reset             5. Components          8. Print
-     3. Base type         6. Prose (articles)    9. Reduced motion
+     1. Tokens            4. Layout primitives   7. Prose (articles)
+     2. Reset             5. Components          8. FX hooks (Task 13 consumes)
+     3. Base type         6. Site chrome         9. Print
+                                                10. Reduced motion
 
    Conventions:
       - Breakpoints: 360 / 768 / 1024 / 1440 (mobile-first; base = sub-360
@@ -108,7 +109,7 @@
   --shadow-lg: 0 18px 50px rgba(2, 6, 12, .55);
   --glow-cyan: 0 0 10px rgba(0, 229, 255, .28), 0 0 30px rgba(0, 229, 255, .1);
 
-  /* Chrome metrics shared with layout/components (header lands in Task 7) */
+  /* Chrome metrics shared across pages */
   --header-h: 4rem;
   --container: 100%;
   --container-pad: clamp(1rem, 4vw, 2rem);
@@ -661,7 +662,194 @@ a.chip:hover {
 }
 
 /* --------------------------------------------------------------------------
-   6. PROSE — long-form article typography (the site's core reading surface)
+   6. SITE CHROME
+   Sticky translucent-blur header + footer shared by every page (Task 7).
+   Z-scale: fx layers 80 < progress 90 < header 95 < skip-link 100.
+   -------------------------------------------------------------------------- */
+
+/* Sticky footer: body is already min-height 100svh from the reset. */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  width: 100%;
+  flex: 1;
+}
+
+/* --- Header ---------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 95;
+  background: color-mix(in srgb, var(--bg-0) 82%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .site-header { background: var(--bg-0); }
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+  min-height: var(--header-h);
+}
+
+.site-header__brand {
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.site-header__brand:hover {
+  color: var(--cyan);
+}
+
+.site-nav {
+  margin-inline-start: auto;
+}
+
+.site-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-m);
+}
+
+.site-nav__link {
+  display: inline-block;
+  padding-block: .4em;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: color 160ms ease;
+}
+
+.site-nav__link:hover {
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, .4);
+}
+
+.site-nav__link[aria-current="page"] {
+  color: var(--cyan);
+}
+
+.site-header__controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.menu-btn {
+  display: none;
+}
+
+/* Search button's keyboard hint */
+.search-btn__hint {
+  padding: .15em .45em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .72em;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (max-width: 359.98px) {
+  .search-btn__hint { display: none; }
+}
+
+/* Mobile (<768px): nav collapses into a slide-down panel behind the menu
+   button. JS toggles data-menu-open on the header (hooks only here). */
+@media (max-width: 767.98px) {
+  .site-nav {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    display: none;
+    padding-block: var(--space-s) var(--space-m);
+    background: color-mix(in srgb, var(--bg-0) 96%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-lg);
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    .site-nav { background: var(--bg-1); }
+  }
+
+  .site-header[data-menu-open] .site-nav {
+    display: block;
+    animation: menu-slide-down 200ms ease;
+  }
+
+  .site-nav__list {
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .site-header__inner {
+    justify-content: space-between;
+  }
+
+  .site-header__controls {
+    margin-inline-start: auto;
+  }
+
+  .menu-btn {
+    display: inline-flex;
+  }
+}
+
+@keyframes menu-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-.5rem);
+  }
+}
+
+/* --- Footer ---------------------------------------------------------------- */
+
+.site-footer {
+  padding-block: var(--space-l);
+  border-top: 1px solid var(--line);
+  background: var(--bg-1);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs) var(--space-l);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+/* Discreet anniversary marker (plan: small mono-type footer line) */
+.est {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  letter-spacing: .14em;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   7. PROSE — long-form article typography (the site's core reading surface)
    -------------------------------------------------------------------------- */
 
 .prose {
@@ -843,7 +1031,7 @@ a.chip:hover {
 }
 
 /* --------------------------------------------------------------------------
-   7. FX HOOKS
+   8. FX HOOKS
    Layer shells for the atmosphere engine (Task 13). Opacity is wired to the
    --fx-* tokens exclusively: retuning happens in tokens, never in JS.
    -------------------------------------------------------------------------- */
@@ -903,11 +1091,13 @@ a.chip:hover {
 }
 
 /* --------------------------------------------------------------------------
-   8. PRINT
+   9. PRINT
    Atmosphere and chrome have no business on paper.
    -------------------------------------------------------------------------- */
 
 @media print {
+  .site-header,
+  .site-footer,
   .fx-layer,
   .progress,
   .skip-link {
@@ -921,7 +1111,7 @@ a.chip:hover {
 }
 
 /* --------------------------------------------------------------------------
-   9. REDUCED MOTION — blanket kill-switch.
+   10. REDUCED MOTION — blanket kill-switch.
    Any animation/transition anywhere collapses to effectively instant,
    regardless of what later tasks add. Smooth scrolling off too.
    -------------------------------------------------------------------------- */
