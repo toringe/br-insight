@@ -183,6 +183,33 @@ over defaults; unknown keys warn loudly.
 
 ## Phase 3 — Design system & templates
 
+### Design Direction Addendum (frontend-design skill, owner-directed retrofit)
+
+Grounding: br-insight.com is a 30-year archive of long-form film analysis; the page's single job
+is reading essays. Visual identity derives from the subject's own world: night-rain Los Angeles,
+storefront neon, Esper scan terminals, the Voight-Kampff machine.
+
+- **Palette (subject-derived, keep):** near-black blue-night surfaces + the film's lighting triad —
+  cyan (`#00e5ff`, street-sign teal), pink (`#ff2e88`, Bar/umbrella neon), amber (`#ffb347`,
+  Tyrell Corp interior). Neon is an accent discipline, never a fill.
+- **Type trio (amends Task 6):**
+  - Display/headings: Chakra Petch (as built) — used with restraint.
+  - **Body/prose (NEW): Source Serif 4** self-hosted latin subset (~400 only, `font-display: swap`)
+    for article prose and card summaries. Justification: literary body vs techy display mirrors the
+    human/replicant duality; reading-first site deserves a reading face. Fallback stack unchanged.
+  - Utility/data: system mono stack for eyebrows, est-badge, meta chips.
+- **Signature element (NEW): "Esper scan" eyebrows** — one component `.eyebrow`: mono uppercase,
+  letterspaced, amber `[BRACKETED]` label encoding REAL metadata only (category · year · read time;
+  section labels like [FEATURED ANALYSIS], [CONTENTS], [ARCHIVE]). Used on home hero kicker,
+  featured card, TOC aside title, stats band, topic cloud headers, article category line.
+  No numbered markers or decorative dividers anywhere else.
+- **Orchestrated motion (NEW):** single page-load moment on home/article hero wordmark — one
+  brief neon flicker-in (existing keyframes), gated by FX config flag `flicker.welcome` +
+  `prefers-reduced-motion`; everything else stays quiet (ambient rain remains Task 13).
+- **Copy rules (apply at every touch):** active verbs, consistent action naming ("Read essay" on
+  cards → "Reading now" states; "Back to top", not "Goto Top"); sentence case labels; empty states
+  direct ("No essays match those filters." + a Clear-filters action). No legacy template-isms.
+
 ### Task 6: Design tokens + core CSS
 
 **Files:** Create `assets/css/main.css` (+ regenerate `.min.css`; minify via
