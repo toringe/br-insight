@@ -96,6 +96,7 @@ export function init(doc = document) {
   const incoming = parseParams(doc.defaultView.location.search);
   const state = incoming.state;
   let sort = incoming.sort || "";
+  if (select && SORTS.has(sort)) select.value = sort;
 
   render();
 

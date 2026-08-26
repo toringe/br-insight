@@ -2,6 +2,7 @@
 build integration, and the client-side filter.js contract."""
 
 import datetime
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -286,6 +287,53 @@ def run_with_card(filter_mod, snippet: str) -> str:
     return proc.stdout.strip()
 
 
+def run_init(filter_mod, search: str) -> str:
+    """Wire init() against a minimal fake DOM and report select value +
+    post-render card order (default server order differs from az order)."""
+    snippet = f"""
+    const cards = [
+      {{ dataset: {{ category: 'Film Analysis', tags: 'noir', author: 'A',
+        decade: '2000s', minutes: '9', date: '2001-02-01',
+        title: 'Vanishing' }}, hidden: false }},
+      {{ dataset: {{ category: 'Characters', tags: 'eyes', author: 'B',
+        decade: '1980s', minutes: '4', date: '1982-06-25',
+        title: 'Alias' }}, hidden: false }},
+    ];
+    const placed = [];
+    const grid = {{
+      querySelectorAll: () => [...cards],
+      appendChild(card) {{ placed.push(card.dataset.title); }},
+    }};
+    const select = {{
+      value: "",
+      addEventListener() {{}},
+    }};
+    const doc = {{
+      querySelector(sel) {{
+        if (sel === "[data-grid]") return grid;
+        if (sel === "[data-sort]") return select;
+        return null;  // no filter bar / empty message in this shim
+      }},
+      addEventListener() {{}},
+      defaultView: {{
+        location: {{ search: {search!r}, pathname: "/library/", hash: "" }},
+        history: {{ replaceState() {{}} }},
+      }},
+    }};
+    init(doc);
+    console.log(JSON.stringify({{ sortValue: select.value, order: placed }}));
+    """
+    script = f'import {{ init }} from "{filter_mod.as_uri()}";\n{snippet}\n'
+    proc = subprocess.run(
+        [node, "--input-type=module", "--eval", script],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    return proc.stdout.strip()
+
+
 class TestFilterJsContract:
     @pytest.fixture(autouse=True)
     def _skip_without_node(self):
@@ -374,3 +422,12 @@ class TestFilterJsContract:
             """,
         )
         assert out == "[true,true,true,true,true,true]"
+
+    def test_init_syncs_sort_select_from_url(self, filter_mod):
+        out = run_init(filter_mod, "?sort=az")
+        assert json.loads(out)["sortValue"] == "az"
+
+    def test_init_invalid_sort_keeps_default_select_and_order(self, filter_mod):
+        data = json.loads(run_init(filter_mod, "?sort=bogus"))
+        assert data["sortValue"] == ""
+        assert data["order"] == ["Vanishing", "Alias"]
