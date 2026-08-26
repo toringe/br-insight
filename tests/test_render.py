@@ -76,7 +76,9 @@ class TestBaseChrome:
 
     def test_footer_lines(self, html):
         assert "Cover art © their respective artists" in html
-        assert ">EST. 1996 · 30 YEARS ONLINE</span>" in html
+        established = SiteConfig.load(REPO_ROOT).established
+        current = datetime.date.today().year
+        assert f">EST. {established} · {current - established} YEARS ONLINE</span>" in html
         assert "est" in html  # anniversary span carries the .est class hook
 
     def test_head_essentials(self, html):
