@@ -672,6 +672,146 @@ a.chip:hover {
   text-align: center;
 }
 
+/* --- Home ------------------------------------------------------------------- */
+/* Hero, featured-of-month spotlight, archive stats band, topic cloud.
+   Sections stack full-bleed; inner .container keeps them on the measure. */
+
+.home-heading {
+  margin-bottom: var(--space-m);
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.hero {
+  padding-block: var(--space-xl);
+  background:
+    radial-gradient(60% 80% at 50% 0%, var(--cyan-tint), transparent),
+    linear-gradient(180deg, var(--bg-1), var(--bg-0));
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+}
+
+.hero__title {
+  margin-bottom: var(--space-s);
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  letter-spacing: .04em;
+}
+
+.hero__tagline {
+  max-width: var(--measure);
+  margin-inline: auto;
+  color: var(--muted);
+  font-size: var(--fs-lg);
+}
+
+.hero__anniversary {
+  margin-top: var(--space-xs);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  letter-spacing: .08em;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-s);
+  margin-top: var(--space-l);
+}
+
+.featured { padding-block: var(--space-xl); }
+
+.featured__card {
+  display: grid;
+  gap: var(--space-m);
+  padding: var(--space-m);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-1);
+  box-shadow: var(--shadow-md);
+}
+
+@media (min-width: 768px) {
+  /* Spotlight split: cover beside body on wide screens. */
+  .featured__card {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    align-items: start;
+    padding: var(--space-l);
+  }
+}
+
+.featured__cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.featured__body > :first-child { margin-block-start: 0; }
+.featured__summary { color: var(--muted); }
+
+.featured__title { margin-block: var(--space-2xs) var(--space-3xs); }
+
+.featured__read { margin-block-start: var(--space-m); }
+
+.stats-band {
+  padding-block: var(--space-m);
+  border-block: 1px solid var(--line);
+  background: var(--bg-1);
+}
+
+.home-stats {
+  margin: 0;
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: .1em;
+  text-align: center;
+}
+
+.topics { padding-block: var(--space-xl); }
+
+.topic-cloud ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.topic-cloud__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.topic-cloud__link {
+  padding: .35em 1em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .08em;
+  text-decoration: none;
+  transition: color 160ms ease, box-shadow 160ms ease;
+}
+
+a.topic-cloud__link:hover,
+a.topic-cloud__link:focus-visible {
+  color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.topic-cloud__link--category {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.recent { padding-block: 0 var(--space-xl); }
+
 /* --- Reading progress bar --------------------------------------------------- */
 /* Fixed to viewport top; JS drives scaleX(0..1). Origin left so it fills
    left-to-right like a tape counter. Never intercepts input. */

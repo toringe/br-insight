@@ -334,9 +334,10 @@ class TestBuildPipeline:
         slugs = {a.slug for a in load_all(REPO_ROOT)}
         expected = {Path("library") / slug / "index.html" for slug in slugs}
         expected.add(Path("library") / "index.html")  # Task 9: library listing
+        expected.add(Path("index.html"))  # Task 10: home page
         actual = {p.relative_to(out) for p in written}
         assert actual == expected
-        assert len(written) == 30
+        assert len(written) == 31
 
     def test_build_is_idempotent(self, tmp_path):
         from br_insight.render import build

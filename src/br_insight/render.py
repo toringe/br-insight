@@ -5,18 +5,22 @@ Task 8 scope: ``build()`` fans the corpus out to
 ``library/<slug>/index.html`` pages with relative asset depth.
 Task 9 scope: ``decade``/``facets`` helpers and the
 ``library/index.html`` listing page (server-rendered cards + chips).
+Task 10 scope: ``archive_stats``/``topic_cloud``/``home_context``
+helpers and the root ``index.html`` home page.
 """
 
 from __future__ import annotations
 
 import datetime
+from collections import Counter
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from PIL import Image
 
 from br_insight.articles import extract_toc, load_all, related
-from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy
+from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy, resolve_featured
+from br_insight.textutils import slugify
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE_DIR = REPO_ROOT / "templates"
@@ -24,6 +28,10 @@ TEMPLATE_DIR = REPO_ROOT / "templates"
 # A Contents aside is only worth rendering when there is enough structure
 # to navigate; fewer h2/h3 headings than this means no aside.
 TOC_MIN_HEADINGS = 3
+
+# Home page: recent-additions row size and topic-cloud tag cap.
+RECENT_COUNT = 4
+TOPIC_TAG_LIMIT = 10
 
 
 def _toc_heading_count(toc: list[dict]) -> int:
@@ -48,6 +56,46 @@ def facets(articles) -> dict[str, list[str]]:
         "tags": sorted({tag for a in articles for tag in a.tags}),
         "authors": sorted({a.author for a in articles}),
         "decades": sorted(decades, key=lambda d: int(d[:-1])),
+    }
+
+
+def archive_stats(articles) -> dict[str, int]:
+    """Build-time totals for the home stats band."""
+    return {
+        "essays": len(articles),
+        "authors": len({article.author for article in articles}),
+        "words": sum(article.words for article in articles),
+    }
+
+
+def topic_cloud(articles) -> list[dict]:
+    """Home topic links: every category (A-Z), then the most-used tags.
+
+    Each entry is ``{"label", "href"}`` with canonical slugified URLs
+    (``/topics/<cat-slug>/`` and ``/topics/tag/<tag-slug>/``); the tag
+    cap keeps the cloud to the highest-count vocabulary.
+    """
+    topics = [
+        {"label": category, "href": f"/topics/{slugify(category)}/"}
+        for category in sorted({article.category for article in articles})
+    ]
+    counts = Counter(tag for article in articles for tag in article.tags)
+    top_tags = sorted(counts, key=lambda tag: (-counts[tag], tag))[:TOPIC_TAG_LIMIT]
+    topics.extend(
+        {"label": tag, "href": f"/topics/tag/{slugify(tag)}/"} for tag in top_tags
+    )
+    return topics
+
+
+def home_context(site: SiteConfig, articles, now: datetime.datetime) -> dict:
+    """Assemble everything templates/home.html needs from the corpus."""
+    return {
+        "featured": resolve_featured(site, articles, now.strftime("%Y%m")),
+        "featured_month": now.strftime("%B"),
+        "stats": archive_stats(articles),
+        "topics": topic_cloud(articles),
+        "recent": articles[:RECENT_COUNT],
+        "current_path": "/",
     }
 
 
@@ -99,11 +147,12 @@ def render_template(name: str, **ctx):
 
 
 def build(root: Path, out: Path) -> list[Path]:
-    """Render every article page into ``<out>/library/<slug>/index.html``.
+    """Render every article page plus the library listing and home page.
 
-    Returns the list of written paths. Only article pages are written;
-    sources, covers and legacy assets are read-only inputs. The wall
-    clock is sampled once so a single run stays self-consistent.
+    Returns the list of written paths: ``library/<slug>/index.html``,
+    ``library/index.html``, and the root ``index.html``. Sources,
+    covers and legacy assets are read-only inputs. The wall clock is
+    sampled once so a single run stays self-consistent.
     """
     now = datetime.datetime.now()
     site = SiteConfig.load(root)
@@ -149,6 +198,14 @@ def build(root: Path, out: Path) -> list[Path]:
         encoding="utf-8",
     )
     written.append(library_page)
+
+    home_page = out / "index.html"
+    home_page.parent.mkdir(parents=True, exist_ok=True)
+    home_page.write_text(
+        render_template("home.html", site=site, now=now, **home_context(site, articles, now)),
+        encoding="utf-8",
+    )
+    written.append(home_page)
     return written
 
 
