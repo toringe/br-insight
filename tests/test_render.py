@@ -511,7 +511,12 @@ class TestBuildPipeline:
         sample = next((out / "library").glob("*/index.html"))
         text = sample.read_text(encoding="utf-8")
         assert text.count("data-focus-hide") >= 3
-        assert '<div class="progress" aria-hidden="true"></div>' in text
+        # Task 12: progress a11y contract is server-rendered (JS only repaints)
+        assert (
+            '<div class="progress" role="progressbar" '
+            'aria-label="Reading progress" aria-valuemin="0" '
+            'aria-valuemax="100" aria-valuenow="0"></div>'
+        ) in text
 
 
 # ---------------------------------------------------------------------------

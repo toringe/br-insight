@@ -74,7 +74,9 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <div class="progress" aria-hidden="true"></div>
+  {#- Progress a11y contract is server-rendered; JS only repaints scaleX +
+      aria-valuenow on scroll (assets/js/modules/progress.js). -#}
+  <div class="progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
 
   {% include "partials/header.html" %}
 
@@ -84,6 +86,9 @@
 
   {% include "partials/footer.html" %}
 
+  <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button>
+
   {% block scripts %}{% endblock %}
+  <script type="module" src="{{ asset_prefix }}assets/js/main.js"></script>
 </body>
 </html>

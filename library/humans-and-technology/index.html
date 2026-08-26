@@ -35,14 +35,13 @@
   <link rel="preload" href="../../assets/fonts/source-serif-4-latin-400italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="../../assets/img/favicon.png" type="image/png">  <link rel="stylesheet" href="../../assets/css/main.min.css"></head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <div class="progress" aria-hidden="true"></div>
+  <a class="skip-link" href="#main">Skip to content</a><div class="progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
 
 <header class="site-header" data-header>
   <div class="container site-header__inner">
     <a class="site-header__brand neon neon--cyan" href="/">Blade Runner Insight</a>
 
-    <nav class="site-nav" id="primary-nav" aria-label="Primary">
+    <nav class="site-nav" id="primary-nav" aria-label="Primary" data-focus-hide>
       <ul class="site-nav__list" role="list">        <li>
           <a class="site-nav__link" href="/">Home</a>
         </li>        <li>
@@ -52,15 +51,16 @@
         </li>        <li>
           <a class="site-nav__link" href="/about.html">About</a>
         </li>      </ul>
-    </nav>
-
-    <div class="site-header__controls" data-focus-hide>
+    </nav><div class="site-header__controls">
       <button type="button" class="btn btn--ghost search-btn" data-search-open aria-haspopup="dialog" aria-controls="search-dialog">
         <span>Search</span>
         <kbd class="search-btn__hint" aria-hidden="true">⌘K</kbd>
-      </button>      <button type="button" class="btn btn--ghost fx-btn" data-fx-toggle aria-pressed="true">
+      </button>      <button type="button" class="btn btn--ghost fx-btn" data-fx-toggle data-focus-hide aria-pressed="true">
         Atmosphere
-      </button>      <button type="button" class="btn btn--ghost menu-btn" data-menu-toggle aria-expanded="false" aria-controls="primary-nav">
+      </button>      <button type="button" class="btn btn--ghost focus-btn" data-focus-toggle aria-pressed="false">
+        Focus
+      </button>
+      <button type="button" class="btn btn--ghost menu-btn" data-menu-toggle data-focus-hide aria-expanded="false" aria-controls="primary-nav">
         Menu
       </button>
     </div>
@@ -173,5 +173,8 @@ Where exactly does this boundary between the human and the artificial go? Has it
     <p><span class="est">EST. 1996 · 30 YEARS ONLINE</span></p>
   </div>
 </footer>
+  <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button>
+
+  <script type="module" src="../../assets/js/main.js"></script>
 </body>
 </html>

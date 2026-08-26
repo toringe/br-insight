@@ -1,166 +1,84 @@
-/*
-	Solid State by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
-*/
+/**
+ * Global orchestrator — one ES-module entry loaded by base.html on every page.
+ * Each reading-UX module is feature-detecting and self-guarding; init() calls
+ * are isolated so a failure in one never takes down the rest.
+ *
+ * Also hosts two small chrome behaviors that don't warrant their own module:
+ * the mobile menu toggle ([data-menu-toggle] → [data-menu-open] on the
+ * header, matching the CSS contract in main.css) and the random-essay action
+ * ([data-random-link] navigates to a slug from the home-only
+ * #essay-slugs JSON payload; modifier-click opens it in a new tab).
+ */
 
-(function($) {
+import { init as initProgress } from "./modules/progress.js";
+import { init as initToc } from "./modules/toc.js";
+import { init as initEndnav } from "./modules/endnav.js";
+import { init as initFocus } from "./modules/focus.js";
+import { init as initMemory } from "./modules/memory.js";
+import { init as initShortcuts } from "./modules/shortcuts.js";
 
-	"use strict";
+function safe(name, fn) {
+  try {
+    fn();
+  } catch (error) {
+    // Enhancement only: a broken module must not break the others or the page.
+    console.warn(`[bri] ${name} disabled`, error);
+  }
+}
 
-	skel.breakpoints({
-		xlarge:	'(max-width: 1680px)',
-		large:	'(max-width: 1280px)',
-		medium:	'(max-width: 980px)',
-		small:	'(max-width: 736px)',
-		xsmall:	'(max-width: 480px)'
-	});
+safe("progress", () => initProgress());
+safe("toc", () => initToc());
+safe("endnav", () => initEndnav());
+safe("focus", () => initFocus());
+safe("memory", () => initMemory());
+safe("shortcuts", () => initShortcuts());
 
-	$(function() {
+// --- Mobile menu -----------------------------------------------------------
 
-		var	$window = $(window),
-			$body = $('body'),
-			$header = $('#header'),
-			$banner = $('#banner');
+safe("menu", () => {
+  const toggle = document.querySelector("[data-menu-toggle]");
+  if (!toggle) return;
+  const header = toggle.closest(".site-header");
+  if (!header) return;
 
-		// Disable animations/transitions until the page has loaded.
-			$body.addClass('is-loading');
+  const isOpen = () => header.hasAttribute("data-menu-open");
+  const setOpen = (open) => {
+    if (open) header.setAttribute("data-menu-open", "");
+    else header.removeAttribute("data-menu-open");
+    toggle.setAttribute("aria-expanded", String(open));
+  };
 
-			$window.on('load', function() {
-				window.setTimeout(function() {
-					$body.removeClass('is-loading');
-				}, 100);
-			});
+  toggle.addEventListener("click", () => setOpen(!isOpen()));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) setOpen(false);
+  });
+  header.addEventListener("click", (event) => {
+    if (isOpen() && event.target.closest(".site-nav a")) setOpen(false);
+  });
+});
 
-		// Fix: Placeholder polyfill.
-			$('form').placeholder();
+// --- Random essay (home) ---------------------------------------------------
 
-		// Prioritize "important" elements on medium.
-			skel.on('+medium -medium', function() {
-				$.prioritize(
-					'.important\\28 medium\\29',
-					skel.breakpoint('medium').active
-				);
-			});
+safe("random", () => {
+  const link = document.querySelector("[data-random-link]");
+  const payload = document.getElementById("essay-slugs");
+  if (!link || !payload) return;
+  let slugs;
+  try {
+    slugs = JSON.parse(payload.textContent);
+  } catch {
+    return;
+  }
+  if (!Array.isArray(slugs) || !slugs.length) return;
 
-		// Header.
-			if (skel.vars.IEVersion < 9)
-				$header.removeClass('alt');
-
-			if ($banner.length > 0
-			&&	$header.hasClass('alt')) {
-
-				$window.on('resize', function() { $window.trigger('scroll'); });
-
-				$banner.scrollex({
-					bottom:		$header.outerHeight(),
-					terminate:	function() { $header.removeClass('alt'); },
-					enter:		function() { $header.addClass('alt'); },
-					leave:		function() { $header.removeClass('alt'); }
-				});
-
-			}
-
-		// Menu.
-			var $menu = $('#menu');
-
-			$menu._locked = false;
-
-			$menu._lock = function() {
-
-				if ($menu._locked)
-					return false;
-
-				$menu._locked = true;
-
-				window.setTimeout(function() {
-					$menu._locked = false;
-				}, 350);
-
-				return true;
-
-			};
-
-			$menu._show = function() {
-
-				if ($menu._lock())
-					$body.addClass('is-menu-visible');
-
-			};
-
-			$menu._hide = function() {
-
-				if ($menu._lock())
-					$body.removeClass('is-menu-visible');
-
-			};
-
-			$menu._toggle = function() {
-
-				if ($menu._lock())
-					$body.toggleClass('is-menu-visible');
-
-			};
-
-			$menu
-				.appendTo($body)
-				.on('click', function(event) {
-
-					event.stopPropagation();
-
-					// Hide.
-						$menu._hide();
-
-				})
-				.find('.inner')
-					.on('click', '.close', function(event) {
-
-						event.preventDefault();
-						event.stopPropagation();
-						event.stopImmediatePropagation();
-
-						// Hide.
-							$menu._hide();
-
-					})
-					.on('click', function(event) {
-						event.stopPropagation();
-					})
-					.on('click', 'a', function(event) {
-
-						var href = $(this).attr('href');
-
-						event.preventDefault();
-						event.stopPropagation();
-
-						// Hide.
-							$menu._hide();
-
-						// Redirect.
-							window.setTimeout(function() {
-								window.location.href = href;
-							}, 350);
-
-					});
-
-			$body
-				.on('click', 'a[href="#menu"]', function(event) {
-
-					event.stopPropagation();
-					event.preventDefault();
-
-					// Toggle.
-						$menu._toggle();
-
-				})
-				.on('keydown', function(event) {
-
-					// Hide on escape.
-						if (event.keyCode == 27)
-							$menu._hide();
-
-				});
-
-	});
-
-})(jQuery);
+  link.addEventListener("click", (event) => {
+    const slug = slugs[Math.floor(Math.random() * slugs.length)];
+    const href = `/library/${slug}/`;
+    if (event.metaKey || event.ctrlKey || event.shiftKey) {
+      event.preventDefault();
+      window.open(href, "_blank", "noopener");
+    } else {
+      window.location.href = href;
+    }
+  });
+});

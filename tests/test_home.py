@@ -2,6 +2,7 @@
 and build pipeline output at the root index.html."""
 
 import datetime
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -267,9 +268,17 @@ class TestHomeAnatomy:
         assert html.count('class="card"') == 4
         assert 'src="/library/recent-0/cover-crop.jpg"' in recent
 
-    def test_zero_js_no_script_tags(self, html):
-        # graceful degradation only: Random essay stays an inert <a>
-        assert "<script" not in html
+    def test_zero_js_no_executable_scripts(self, html):
+        # graceful degradation only: Random essay stays an inert <a>; the
+        # only scripts are the inert essay-slug JSON payload and deferred
+        # enhancement modules (Task 12 reading-UX orchestrator).
+        assert 'data-random-link href="/library/">Random essay</a>' in html
+        scripts = re.findall(r"<script\b([^>]*)>", html)
+        assert scripts, "base chrome now ships at least one module script"
+        for attrs in scripts:
+            assert (
+                'type="application/json"' in attrs or 'type="module"' in attrs
+            ), attrs
 
     def test_section_order_hero_stats_topics_recent(self, html):
         hero = html.index('class="hero"')

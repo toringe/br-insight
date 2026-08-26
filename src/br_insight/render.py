@@ -14,7 +14,6 @@ and ``feed.xml``.
 """
 
 from __future__ import annotations
-
 import datetime
 import email.utils
 import functools
@@ -105,6 +104,9 @@ def home_context(site: SiteConfig, articles, now: datetime.datetime) -> dict:
         "stats": archive_stats(articles),
         "topics": topic_cloud(articles),
         "recent": articles[:RECENT_COUNT],
+        # Slug list for main.js's random-essay action; rendered into the
+        # home-only <script type="application/json" id="essay-slugs"> hook.
+        "essay_slugs": [article.slug for article in articles],
         "current_path": "/",
     }
 

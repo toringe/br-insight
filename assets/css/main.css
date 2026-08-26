@@ -1411,7 +1411,8 @@ html[data-fx-welcome] .hero__title {
   .site-footer,
   .fx-layer,
   .progress,
-  .skip-link {
+  .skip-link,
+  .top-btn {
     display: none !important;
   }
 
@@ -1420,6 +1421,63 @@ html[data-fx-welcome] .hero__title {
     color: #111;
   }
 }
+
+/* --------------------------------------------------------------------------
+   10. READING UX — back-to-top + focus mode (Task 12).
+   JS owns visibility/state; CSS only presents it.
+   -------------------------------------------------------------------------- */
+
+/* Floating ↑ appears past 600px of scroll ([data-top], endnav.js). Ships
+   hidden in markup, so the hidden-attribute rule is load-bearing. */
+.top-btn {
+  position: fixed;
+  right: var(--space-m);
+  bottom: var(--space-m);
+  z-index: 85;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  opacity: .85;
+  transition:
+    opacity 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.top-btn[hidden] {
+  display: none;
+}
+
+.top-btn:hover,
+.top-btn:focus-visible {
+  opacity: 1;
+  border-color: var(--cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, .4);
+}
+
+/* Focus mode: <html data-focus> (focus.js) hides all [data-focus-hide]
+   chrome/decoration plus fx layers. Search + Focus header buttons carry no
+   data-focus-hide so the mode always has an exit. */
+html[data-focus] [data-focus-hide],
+html[data-focus] .fx-layer {
+  display: none !important;
+}
+
+.focus-btn[aria-pressed="true"] {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
 
 /* --------------------------------------------------------------------------
    10. REDUCED MOTION — blanket kill-switch.

@@ -80,3 +80,9 @@
   </div>
 </section>
 {% endblock %}
+
+{% block scripts %}
+{#- Slug payload consumed by main.js's random-essay action; home only so the
+    slug JSON never ships on pages without a random link. -#}
+<script type="application/json" id="essay-slugs">{{ essay_slugs | default([]) | tojson }}</script>
+{% endblock %}
