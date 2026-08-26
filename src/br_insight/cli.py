@@ -1,6 +1,9 @@
 """Command-line interface for the br-insight static-site pipeline."""
 
 import argparse
+from pathlib import Path
+
+from br_insight.render import build
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -38,7 +41,8 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
 
 
 def _run_build(args: argparse.Namespace) -> int:
-    print(f"build: rendering site into {args.out} (skeleton; not implemented yet)")
+    written = build(root=Path.cwd(), out=Path(args.out))
+    print(f"build: wrote {len(written)} article page(s) into {args.out}")
     return 0
 
 

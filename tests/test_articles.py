@@ -1,6 +1,7 @@
 """Tests for br_insight.articles: Article model, loaders, and helpers."""
 
 import datetime
+import re
 from pathlib import Path
 
 import pytest
@@ -211,6 +212,35 @@ def _root_with_newer_only(tmp_path):
 
 
 class TestRenderMarkdown:
+    def test_h2_h3_get_trailing_anchor_link(self):
+        html = articles.render_markdown("## One\n\n### Two\n")
+        assert '<h2 id="one">One <a class="anchor" href="#one">#</a></h2>' in html
+        assert '<h3 id="two">Two <a class="anchor" href="#two">#</a></h3>' in html
+
+    def test_non_h2_h3_get_id_but_no_anchor(self):
+        html = articles.render_markdown("# Top\n\n#### Deep\n")
+        assert '<h1 id="top">' in html
+        assert '<h4 id="deep">' in html
+        assert 'class="anchor"' not in html
+
+    def test_duplicate_headings_get_sequential_ids(self):
+        html = articles.render_markdown("## Same\n\n## Same\n")
+        assert '<h2 id="same">Same' in html
+        assert '<h2 id="same-2">Same' in html
+        assert 'href="#same-2"' in html
+
+    def test_literal_suffix_collision_stays_unique(self):
+        html = articles.render_markdown("## Same\n\n## Same\n\n## Same-2\n")
+        ids = re.findall(r'<h2 id="([^"]+)">', html)
+        assert len(ids) == len(set(ids))
+
+    def test_slugless_heading_never_gets_empty_id(self):
+        html = articles.render_markdown("## 日本語\n\n#### ★★★\n")
+        assert 'id=""' not in html
+        assert 'href="#"' not in html
+        assert '<h2 id="section">' in html
+        assert '<h4 id="section-2">' in html
+
     def test_heading_gets_slugified_id(self):
         html = articles.render_markdown("# Hello World\n\nBody.\n")
         assert '<h1 id="hello-world">Hello World</h1>' in html
@@ -227,6 +257,42 @@ class TestRenderMarkdown:
     def test_paragraphs_render_without_ids(self):
         html = articles.render_markdown("Just a paragraph.\n")
         assert "<p>Just a paragraph.</p>" in html
+
+
+TOC_BODY = (
+    "## Alpha\n\nalpha prose.\n\n"
+    "### Beta\n\nbeta prose.\n\n"
+    "### Gamma\n\ngamma prose.\n\n"
+    "## Delta\n\ndelta prose.\n\n"
+    "#### Skipped depth\n"
+)
+
+
+class TestExtractToc:
+    def test_collects_only_h2_h3_with_ids_and_text(self):
+        toc = articles.extract_toc(articles.render_markdown(TOC_BODY))
+        assert [(e["level"], e["id"]) for e in toc] == [
+            (2, "alpha"),
+            (2, "delta"),
+        ]
+        assert toc[0]["text"] == "Alpha"
+
+    def test_h3_nest_under_preceding_h2(self):
+        toc = articles.extract_toc(articles.render_markdown(TOC_BODY))
+        assert [(c["level"], c["id"]) for c in toc[0]["children"]] == [
+            (3, "beta"),
+            (3, "gamma"),
+        ]
+        assert toc[1]["children"] == []
+
+    def test_orphan_h3_becomes_top_level_entry(self):
+        toc = articles.extract_toc(
+            articles.render_markdown("### Lone\n")
+        )
+        assert [e["id"] for e in toc] == ["lone"]
+
+    def test_empty_document_yields_no_entries(self):
+        assert articles.extract_toc("<p>no headings</p>") == []
 
 
 def _make_article(slug, tags=(), date=datetime.datetime(2000, 1, 1)):

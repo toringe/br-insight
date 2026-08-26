@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% set asset_prefix = "../../" %}
+
+{% block og_type %}article{% endblock %}
+{% block title %}{{ article.title }}{% endblock %}
+{% block description %}{{ article.summary }}{% endblock %}
+{% block canonical_path %}library/{{ article.slug }}/{% endblock %}
+{% block og_image %}/library/{{ article.slug }}/{{ article.cover }}{% endblock %}
+
+{% block content %}
+<article class="article">
+  <div class="container">
+    <figure class="article-hero">
+      <picture>
+        <source
+          media="(max-width: 47.99em)"
+          srcset="{{ asset_prefix }}library/{{ article.slug }}/cover-crop.jpg">
+        <img
+          src="{{ asset_prefix }}library/{{ article.slug }}/cover.jpg"
+          alt="Cover art for {{ article.title }}"
+          width="{{ cover_width }}" height="{{ cover_height }}"
+          fetchpriority="high">
+      </picture>
+      {% include "partials/credit.html" %}
+    </figure>
+
+    {% include "partials/byline.html" %}
+
+    {% if toc %}
+    <aside class="toc" aria-labelledby="toc-title">
+      <p class="toc__title" id="toc-title">Contents</p>
+      <ul>
+        {%- for item in toc %}
+        <li>
+          <a href="#{{ item.id }}">{{ item.text }}</a>
+          {%- if item.children %}
+          <ul>
+            {%- for child in item.children %}
+            <li><a href="#{{ child.id }}">{{ child.text }}</a></li>
+            {%- endfor %}
+          </ul>
+          {%- endif %}
+        </li>
+        {%- endfor %}
+      </ul>
+    </aside>
+    {% endif %}
+
+    <div class="prose">
+      {{ article.html | safe }}
+    </div>
+
+    <nav class="end-block" aria-label="Continue reading">
+      <div class="end-block__pager">
+        <div class="end-block__slot">
+          {%- if newer %}
+          <span class="end-block__label">Newer</span>
+          <a class="end-block__link" href="/library/{{ newer.slug }}/">{{ newer.title }}</a>
+          {%- endif %}
+        </div>
+        <div class="end-block__slot end-block__slot--older">
+          {%- if older %}
+          <span class="end-block__label">Older</span>
+          <a class="end-block__link" href="/library/{{ older.slug }}/">{{ older.title }}</a>
+          {%- endif %}
+        </div>
+      </div>
+
+      <p class="end-block__back" data-focus-hide>
+        <a class="btn btn--ghost" href="/library/">&#8592; Back to Library</a>
+      </p>
+
+      {%- if related %}
+      <section class="end-block__related" data-focus-hide aria-labelledby="related-title">
+        <h2 class="end-block__heading" id="related-title">Related essays</h2>
+        <div class="grid grid--cards">
+          {%- for rel in related %}
+          <article class="card">
+            <a class="card__cover" href="/library/{{ rel.slug }}/" tabindex="-1" aria-hidden="true">
+              <img
+                src="{{ asset_prefix }}library/{{ rel.slug }}/cover-crop.jpg"
+                alt="" loading="lazy" width="505" height="295">
+            </a>
+            <div class="card__body">
+              <h3 class="card__title"><a href="/library/{{ rel.slug }}/">{{ rel.title }}</a></h3>
+              <p class="card__meta">
+                <span>{{ rel.author }}</span>
+                <span class="card__reading-time">{{ rel.minutes }} min read</span>
+              </p>
+            </div>
+          </article>
+          {%- endfor %}
+        </div>
+      </section>
+      {%- endif %}
+    </nav>
+  </div>
+</article>
+{% endblock %}

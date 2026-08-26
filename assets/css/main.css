@@ -892,6 +892,13 @@ main {
   opacity: 1;
 }
 
+/* Coarse pointers never hover: keep anchors permanently visible. */
+@media (hover: none) {
+  .prose .anchor {
+    opacity: 1;
+  }
+}
+
 .prose a {
   color: var(--cyan);
   text-decoration: underline;

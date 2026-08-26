@@ -1,0 +1,9 @@
+<p class="byline">
+  By <span class="byline__author">{{ article.author }}</span>
+  <span aria-hidden="true">·</span>
+  {%- set iso_date = article.date.strftime('%Y-%m-%d') -%}
+  {%- set human_date = article.date.strftime('%B %Y') -%}
+  <time datetime="{{ iso_date }}">{{ human_date }}</time>
+  <span aria-hidden="true">·</span>
+  <span>{{ article.minutes }} min read</span>
+</p>

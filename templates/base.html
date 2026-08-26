@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  {#- Asset path convention: every page assumes the site is served at the
-      domain root, so chrome assets use absolute "/assets/..." URLs (no
-      per-page depth prefixes). Canonical + OG URLs are built from
+  {#- Asset path convention: chrome assets resolve via ``asset_prefix`` so
+      pages at any depth can opt into relative URLs (article pages use
+      "../../"). Canonical + OG URLs stay absolute, built from
       site.base_url. -#}
+  {% set asset_prefix = asset_prefix | default('/') %}
 
   {%- set page_title -%}
     {%- block title %}{{ site.tagline }}{% endblock -%}
@@ -53,13 +54,13 @@
   </script>
   {% endif %}
 
-  <link rel="preload" href="/assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/chakra-petch-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="icon" href="/assets/img/favicon.png" type="image/png">
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" href="{{ asset_prefix }}assets/img/favicon.png" type="image/png">
 
   {#- Critical CSS placeholder: children may inline ≤ 8 KB of above-the-fold CSS. -#}
   {% block critical_css %}{% endblock %}
-  <link rel="stylesheet" href="/assets/css/main.min.css">
+  <link rel="stylesheet" href="{{ asset_prefix }}assets/css/main.min.css">
 
   {#- Speculation Rules include point: Task 14 injects a prefetch/prerender
       <script type="speculationrules"> block here. -#}

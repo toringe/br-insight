@@ -18,6 +18,8 @@ _LEGACY_DATE = re.compile(r"^\d{2}-\d{2}-\d{4}$")
 _BOLD = re.compile(r"(\*\*|__)(.+?)\1", re.DOTALL)
 _ITALIC = re.compile(r"(\*|_)(.+?)\1", re.DOTALL)
 _HEADING = re.compile(r"<h([1-6])>(.*?)</h\1>", re.DOTALL)
+_HEADING_WITH_ID = re.compile(r"<h([1-6]) id=\"([^\"]*)\">(.*?)</h\1>", re.DOTALL)
+_ANCHOR_TAG = re.compile(r'<a class="anchor"[^>]*>.*?</a>', re.DOTALL)
 _INLINE_TAGS = re.compile(r"<[^>]+>")
 
 _MARKDOWN = MarkdownIt()
@@ -77,15 +79,77 @@ def extract_summary(body: str, size: int = 100) -> str:
 
 
 def render_markdown(body: str) -> str:
-    """Render markdown to HTML; headings get slugified ``id`` attributes."""
+    """Render markdown to HTML with anchored headings.
+
+    Every heading gets a slugified ``id``; duplicates are suffixed
+    ``-2``, ``-3``, … and slugless headings fall back to ``section`` so
+    an empty id is never emitted. H2/H3 additionally carry a trailing
+    ``<a class="anchor">`` link targeting their own id.
+    """
     html = _MARKDOWN.render(body)
+    used: set[str] = set()
+    counts: dict[str, int] = {}
+
+    def unique_id(base: str) -> str:
+        if not base:
+            base = "section"
+        candidate = base
+        while candidate in used:
+            counts[base] = counts.get(base, 1) + 1
+            candidate = f"{base}-{counts[base]}"
+        used.add(candidate)
+        return candidate
 
     def add_id(match: re.Match[str]) -> str:
         level, inner = match.group(1), match.group(2)
         plain = _INLINE_TAGS.sub("", inner)
-        return f'<h{level} id="{slugify(plain)}">{inner}</h{level}>'
+        hid = unique_id(slugify(plain))
+        if level in ("2", "3"):
+            anchor = f' <a class="anchor" href="#{hid}">#</a>'
+        else:
+            anchor = ""
+        return f'<h{level} id="{hid}">{inner}{anchor}</h{level}>'
 
     return _HEADING.sub(add_id, html)
+
+
+def extract_toc(html: str) -> list[dict]:
+    """TOC tree from rendered article HTML: nested h2 → h3 entries.
+
+    Returns a list of ``{"level", "id", "text", "children"}`` dicts;
+    consecutive h3s nest under the preceding h2, orphan h3s surface at
+    the top level. Empty when the document has no h2/h3.
+    """
+    def plain_text(inner: str) -> str:
+        without_anchor = _ANCHOR_TAG.sub("", inner)
+        return re.sub(
+            r"\s+", " ", _INLINE_TAGS.sub("", without_anchor)
+        ).strip()
+
+    tree: list[dict] = []
+    current_h2: dict | None = None
+    for match in _HEADING_WITH_ID.finditer(html):
+        level, hid, inner = (
+            int(match.group(1)),
+            match.group(2),
+            match.group(3),
+        )
+        if level not in (2, 3):
+            continue
+        entry = {
+            "level": level,
+            "id": hid,
+            "text": plain_text(inner),
+            "children": [],
+        }
+        if level == 2:
+            tree.append(entry)
+            current_h2 = entry
+        elif current_h2 is not None:
+            current_h2["children"].append(entry)
+        else:
+            tree.append(entry)
+    return tree
 
 
 def load_all(root: Path) -> list[Article]:
