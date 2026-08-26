@@ -1,0 +1,104 @@
+# Curated one-line intros for topic pages (Task 11).
+# Keyed by exact category/tag name; topics missing here fall back to a
+# generic line rendered by br_insight.render.topic_pages().
+categories:
+  Film Analysis: >-
+    Scene-by-scene readings of the film itself — structure, cinematography,
+    editing, sound, and the craft behind the cuts.
+  Themes & Humanity: >-
+    What Blade Runner asks about being human: empathy, memory, mortality,
+    and the shifting line between person and product.
+  Characters: >-
+    Close readings of the humans and replicants who shoulder the film's
+    moral weight — Deckard, Roy, Rachael, Tyrell, Gaff, and J.F. Sebastian.
+  Religion & Symbolism: >-
+    Messiahs, makers, and watching eyes: the religious imagery and symbolic
+    systems woven through the film.
+  Technology & Society: >-
+    Replicants, corporate power, and engineered life — what the film warns
+    us about our own trajectory.
+  World & Setting: >-
+    The look and feel of Los Angeles 2019 — streets, weather, architecture,
+    and atmosphere.
+  Novel & Adaptation: >-
+    Philip K. Dick's Do Androids Dream of Electric Sheep?, and what survives
+    — or transforms — on the journey to screen.
+  Creative Works: >-
+    Original writing born from the film — fan fiction and creative responses
+    that carry its questions forward.
+tags:
+  adaptation: >-
+    Where the novel ends and the film begins — choices, losses, and
+    inventions along the way.
+  christ-figure: >-
+    Roy Batty and the messiah motif: nails, doves, and self-sacrifice.
+  cinematography: >-
+    Light and lens: smoke, shafts, and the film's painterly frame.
+  cloning-genetics: >-
+    Manufactured bodies and engineered lives — flesh made to order.
+  creator-creation: >-
+    Makers and made: Tyrell meets his monster, and the son returns to
+    confront the father.
+  deckard: >-
+    The blade runner himself — hunter, questioner, and possibly replicant.
+  director's-cut: >-
+    What changed between theatrical release, Director's Cut, and Final Cut
+    — and why it matters.
+  dreams: >-
+    Photographs, unicorns, and implanted pasts — dreams as contested
+    evidence of a soul.
+  dystopia: >-
+    Corporate towers over street-level decay: the social architecture of
+    2019 Los Angeles.
+  editorial: >-
+    Opinion and argument from the archive — essays that take a stance.
+  empathy: >-
+    The Voight-Kampff test makes feeling measurable; these essays ask
+    whether it truly is.
+  eyes: >-
+    The film's most persistent image — watching, glowing, reflecting,
+    judging.
+  fan-fiction: >-
+    Stories extended beyond the final cut by the community around the film.
+  genre: >-
+    Science fiction or film noir? What Blade Runner borrows from each
+    tradition.
+  los-angeles-2019: >-
+    November rain, noodle bars, and neon: the city as character.
+  noir: >-
+    Voice-over, venetian blinds, moral fog — hardboiled detective cinema
+    reborn in android skin.
+  personhood: >-
+    Who qualifies as a person, and who decides? Property, autonomy, and
+    android rights.
+  philip-k-dick: >-
+    The man behind the source novel — his paranoia, metaphysics, and doubts.
+  philosophy: >-
+    Descartes, Heidegger, and the ontology of manufactured minds.
+  postmodernism: >-
+    Simulation, pastiche, and the death of the original — theory applied
+    to the film.
+  race: >-
+    Engineered laborers as stand-in for colonial subjects: slavery's return
+    in science-fiction costume.
+  rachael: >-
+    Tyrell's assistant and creation — memory, uncertainty, and the
+    possibility of love.
+  replicant-or-human: >-
+    The central ambiguity: can you tell, and does it matter?
+  roy-batty: >-
+    Leader of the escaped Nexus-6 group — warrior, poet, and the film's
+    doomed heart.
+  special-effects: >-
+    Miniatures, matte paintings, and practical effects of pre-CGI
+    world-building.
+  tears-in-rain: >-
+    Roy Batty's final speech — loss, memory, and mortality compressed into
+    a single monologue.
+  tyrell: >-
+    Genius, godhead, and corporate ambition — the maker of makers.
+  unicorn: >-
+    Implanted dream or proof of a soul? A six-frame animal's outsized role.
+  visual-style: >-
+    Retrofitted future, neon on smog — production design that defined
+    cyberpunk.

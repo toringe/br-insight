@@ -42,7 +42,7 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
 
 def _run_build(args: argparse.Namespace) -> int:
     written = build(root=Path.cwd(), out=Path(args.out))
-    print(f"build: wrote {len(written)} article page(s) into {args.out}")
+    print(f"build: wrote {len(written)} page(s) into {args.out}")
     return 0
 
 

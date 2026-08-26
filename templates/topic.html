@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.name }}{% endblock %}
+{% block description %}{{ topic.intro }}{% endblock %}
+{% block canonical_path %}{{ topic.href.lstrip('/') }}{% endblock %}
+
+{% from "partials/card.html" import card %}
+
+{% block content %}
+<section class="library">
+  <div class="container">
+    <header class="page-head">
+      <p class="eyebrow">{{ "Category" if topic.kind == "category" else "Tag" }}</p>
+      <h1>{{ topic.name }}</h1>
+      <p class="page-head__lead">{{ topic.intro }}</p>
+      <p class="page-head__meta">{{ topic.count }} essay{{ "" if topic.count == 1 else "s" }}</p>
+    </header>
+
+    <div class="grid grid--cards">
+      {%- for a in topic.articles %}
+      {{ card(a, asset_prefix) }}
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

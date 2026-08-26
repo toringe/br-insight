@@ -406,17 +406,36 @@ def _tree_hash(out: Path) -> str:
 
 
 class TestBuildPipeline:
-    def test_writes_every_library_index_html(self, built):
+    def _expected_outputs(self):
+        """Full Task 11 output set: articles + listing + home + topic
+        routes (used categories & tags only) + about/404/error twins +
+        sitemap/feed."""
         from br_insight.articles import load_all
+        from br_insight.config import apply_taxonomy, load_taxonomy
+        from br_insight.render import topic_pages
 
-        out, written = built
         slugs = {a.slug for a in load_all(REPO_ROOT)}
         expected = {Path("library") / slug / "index.html" for slug in slugs}
         expected.add(Path("library") / "index.html")  # Task 9: library listing
         expected.add(Path("index.html"))  # Task 10: home page
+        enriched = apply_taxonomy(load_all(REPO_ROOT), load_taxonomy(REPO_ROOT))
+        for topic in topic_pages(enriched):
+            parts = ["topics"] + (
+                ["tag"] if topic["kind"] == "tag" else []
+            ) + [topic["slug"]]
+            expected.add(Path(*parts) / "index.html")
+        expected.add(Path("about.html"))   # Task 11
+        expected.add(Path("404.html"))     # Task 11
+        expected.add(Path("error.html"))   # Task 11: byte-twin of 404
+        expected.add(Path("sitemap.xml"))  # Task 11
+        expected.add(Path("feed.xml"))     # Task 11
+        return expected
+
+    def test_writes_every_library_index_html(self, built):
+        out, written = built
         actual = {p.relative_to(out) for p in written}
-        assert actual == expected
-        assert len(written) == 31
+        assert actual == self._expected_outputs()
+        assert len(written) == len(self._expected_outputs())
 
     def test_build_is_idempotent(self, tmp_path):
         from br_insight.render import build

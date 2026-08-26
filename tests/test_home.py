@@ -340,8 +340,13 @@ class TestBuildHomePage:
             Path("library") / slug / "index.html"
             for slug in {a.slug for a in load_all(REPO_ROOT)}
         } | {Path("library") / "index.html", Path("index.html")}
+        # Task 11: about, byte-twin 404/error, sitemap and feed ship too;
+        # their exact sets are asserted exhaustively in tests/test_render.py
+        assert {"about.html", "404.html", "error.html", "sitemap.xml", "feed.xml"} <= {
+            p.relative_to(out).as_posix() for p in written
+        }
         actual = {p.relative_to(out) for p in written}
-        assert actual == expected
+        assert actual >= expected
 
     def test_built_featured_matches_config_slug(self, built_home):
         title = next(

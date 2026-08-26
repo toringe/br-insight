@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}404{% endblock %}
+{% block description %}This deck no longer exists — return to the Blade Runner Insight archive.{% endblock %}
+{% block canonical_path %}404.html{% endblock %}
+
+{% block content %}
+<section class="hero not-found">
+  <div class="container">
+    {#- No eyebrow here: 404 sits outside the eyebrow signature system. -#}
+    <h1 class="hero__title">404</h1>
+    <p class="hero__tagline">This deck no longer exists.</p>
+    <p>The page you're hunting has gone dark in the acid rain, moved into the off-world colonies, or never spun up at all.</p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="/">Back home</a>
+      <a class="btn btn--ghost" href="/library/">Browse the library</a>
+    </div>
+    <p>Or press <kbd aria-hidden="true">⌘K</kbd> anywhere on the site to search the archive.</p>
+  </div>
+</section>
+{% endblock %}
