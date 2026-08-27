@@ -506,8 +506,8 @@ def _og_cover(root: Path, article, out: Path | None = None) -> str:
 def _og_variant(variant_dir: Path) -> str | None:
     """Largest bare ``cover-<W>.jpg`` hero variant present, if any.
 
-    Only bare hero names match (``cover-crop-*``/``cover-sq-*`` carry
-    extra stems and are not social-card candidates).
+    Only bare hero names match (``cover-crop-*`` names carry an extra stem
+    and are not social-card candidates).
     """
     hero_re = re.compile(r"^cover-(\d+)\.jpg$")
     widths = sorted(
