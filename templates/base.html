@@ -117,6 +117,25 @@
 
   <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button>
 
+  {#- Search overlay (Task 15): inert until opened by search.js (header button
+      [data-search-open] or ⌘K / "/"). Zero-JS: the dialog never opens without
+      it, and the noscript note routes visitors to the library filters. -#}
+  <dialog class="search-overlay" id="search-dialog" data-search-dialog aria-labelledby="search-title">
+    <div class="search-overlay__panel">
+      <h2 class="visually-hidden" id="search-title">Search essays</h2>
+      <div class="search-overlay__bar">
+        <input type="search" class="search-input" data-search-input
+               placeholder="Type to search…" autocomplete="off"
+               aria-label="Search essays">
+        <button type="button" class="btn btn--ghost search-overlay__close" data-search-close>Close</button>
+      </div>
+      <p class="search-hint" data-search-hint hidden></p>
+      <ul class="search-results" data-search-results aria-label="Search results"></ul>
+      <p class="search-empty" data-search-empty hidden>No essays match. Try fewer words, or browse the <a href="/library/">library</a> and its topics.</p>
+      <noscript><p class="search-noscript">Search needs JavaScript — browse every essay via the <a href="/library/">library</a> filters instead.</p></noscript>
+    </div>
+  </dialog>
+
   {% block scripts %}{% endblock %}
   {#- Cinematic FX payload (Task 13): plain config truth for the runtime
       module; fx.js decides what actually runs (atmosphere toggle, focus

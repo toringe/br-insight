@@ -16,6 +16,7 @@ import { init as initEndnav } from "./modules/endnav.js";
 import { init as initFocus } from "./modules/focus.js";
 import { init as initMemory } from "./modules/memory.js";
 import { init as initShortcuts } from "./modules/shortcuts.js";
+import { init as initSearch } from "./modules/search.js";
 import { init as initFx } from "./modules/fx.js";
 
 function safe(name, fn) {
@@ -33,6 +34,11 @@ safe("endnav", () => initEndnav());
 safe("focus", () => initFocus());
 safe("memory", () => initMemory());
 safe("shortcuts", () => initShortcuts());
+
+// Search (Task 15): feature gate is inside init — it no-ops when the
+// <dialog> skeleton or showModal() support is missing. The engine itself
+// loads lazily on first open (see modules/search.js).
+safe("search", () => initSearch());
 
 // Cinematic FX (Task 13): feature-detection gate — the build either embeds
 // window.__FX__ or omits it entirely; no payload means nothing to run.

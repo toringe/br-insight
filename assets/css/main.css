@@ -1503,6 +1503,142 @@ html[data-focus] .fx-layer {
   color: var(--cyan);
 }
 
+/* --------------------------------------------------------------------------
+   SEARCH OVERLAY — Task 15. The <dialog> in base.html stays inert until
+   modules/search.js showModal()s it (header button, ⌘K, or "/"); JS owns
+   open/close/results, CSS only presents it.
+   -------------------------------------------------------------------------- */
+
+.search-overlay {
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(-6px) scale(.985);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.search-overlay[open] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ::backdrop gets the same noir scrim the FX overlays use; blur is a bonus
+   where supported and degrades to plain dimming elsewhere. */
+.search-overlay::backdrop,
+dialog.search-overlay::backdrop {
+  background: rgba(4, 8, 14, .72);
+  backdrop-filter: blur(3px);
+}
+
+.search-overlay__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  width: min(38rem, calc(100vw - 2 * var(--space-s)));
+  max-height: min(70vh, 34rem);
+  padding: var(--space-s);
+}
+
+.search-overlay__bar {
+  display: flex;
+  gap: var(--space-2xs);
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  padding: .55rem .75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-size: var(--fs-base);
+}
+
+.search-input:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 1px;
+}
+
+.search-overlay__close {
+  flex-shrink: 0;
+}
+
+.search-hint {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+
+.search-results {
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.search-results a {
+  display: block;
+  padding: var(--space-2xs) var(--space-xs);
+  border-left: 2px solid transparent;
+  border-radius: var(--radius-xs);
+}
+
+.search-results a:focus-visible {
+  outline: none;
+  border-left-color: var(--cyan);
+  background: var(--cyan-tint);
+}
+
+.search-result__title {
+  display: block;
+  color: var(--text-bright);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.search-result__meta {
+  display: block;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+
+.search-result__summary {
+  margin: .25rem 0 0;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+
+.search-results mark {
+  padding: 0 .1em;
+  border-radius: var(--radius-xs);
+  background: var(--cyan-tint);
+  color: var(--text-bright);
+}
+
+.search-empty,
+.search-noscript {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.search-empty a,
+.search-noscript a {
+  color: var(--cyan);
+}
+
 
 /* --------------------------------------------------------------------------
    10. REDUCED MOTION — blanket kill-switch.

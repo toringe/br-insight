@@ -44,3 +44,15 @@ accessibility gating on top. Retuning never requires touching JS.
 - Zero-JS visitors simply get the page content without any atmosphere
   runtime (no canvas, overlays, or button behavior); broken modules never
   take the rest of the page down.
+
+## Search
+
+The build emits a compact search index to `assets/js/search-index.json`:
+one record per essay (slug, root-relative URL, title, author, ISO date,
+category, tags, summary, and the full stripped body text). The overlay
+(`assets/js/modules/search.js` + vendored MiniSearch v6) fetches it lazily
+on first open — header Search button, `⌘K`, or `/` — and never blocks page
+render. The index stays under a 200 KB gzipped budget, enforced by
+`uv run br-insight check`; a plain content edit refreshes it via
+`uv run br-insight build --out .`. Zero-JS visitors see a noscript pointer
+to the library filters instead of the modal.

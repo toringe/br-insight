@@ -252,7 +252,21 @@
     <p><span class="est">EST. 1996 · 30 YEARS ONLINE</span></p>
   </div>
 </footer>
-  <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button>
+  <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button><dialog class="search-overlay" id="search-dialog" data-search-dialog aria-labelledby="search-title">
+    <div class="search-overlay__panel">
+      <h2 class="visually-hidden" id="search-title">Search essays</h2>
+      <div class="search-overlay__bar">
+        <input type="search" class="search-input" data-search-input
+               placeholder="Type to search…" autocomplete="off"
+               aria-label="Search essays">
+        <button type="button" class="btn btn--ghost search-overlay__close" data-search-close>Close</button>
+      </div>
+      <p class="search-hint" data-search-hint hidden></p>
+      <ul class="search-results" data-search-results aria-label="Search results"></ul>
+      <p class="search-empty" data-search-empty hidden>No essays match. Try fewer words, or browse the <a href="/library/">library</a> and its topics.</p>
+      <noscript><p class="search-noscript">Search needs JavaScript — browse every essay via the <a href="/library/">library</a> filters instead.</p></noscript>
+    </div>
+  </dialog>
 
 <script type="application/json" id="essay-slugs">["love-letter", "how-science-became-god", "worn-down-hell", "picturing-the-human", "a-study-of-blade-runner", "analysis-of-an-itch", "measure-of-a-man", "genealogy-of-abdul-ben-hassan", "replicant-i-used-to-know", "how-and-why-movie-is-different", "br-demystified", "appreciation-assessment-of-dircut", "postmodernist-view", "city-eyes-and-christ", "do-androids-dream", "aboutfilm-analysis", "what-defines-human", "least-scary-option", "humans-and-technology", "br-a-sf-movie", "an-analysis-of-blade-runner", "significance-of-the-unicorn", "analysis-of-a-sf-movie", "sf-with-an-angle", "br-an-analysis", "christian-symbolism", "parting-of-the-mist", "deckards-identity-debate", "editors-article"]</script>
   <script>window.__FX__={"enabled": true, "flicker": {"enabled": true, "welcome": true}, "grain": {"enabled": true}, "rain": {"density": 120, "enabled": true, "speed": 1.0, "tier_auto": true}, "scanlines": {"enabled": true}};</script>  <script type="module" src="/assets/js/main.js"></script>

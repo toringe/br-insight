@@ -28,6 +28,7 @@ from PIL import Image
 from br_insight.articles import extract_toc, load_all, related
 from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy, resolve_featured
 from br_insight.images import CoverVariants, generate_cover_variants
+from br_insight.search import write_index
 from br_insight.textutils import slugify
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -322,6 +323,11 @@ def build(root: Path, out: Path) -> list[Path]:
     site = SiteConfig.load(root)
     taxonomy = load_taxonomy(root)
     articles = apply_taxonomy(load_all(root), taxonomy)
+
+    # Task 15: compact search index (records + stripped bodies) for the
+    # lazy client overlay; fetched on first search open, never render-blocking.
+    write_index(out, articles)
+
 
     # Task 14: generate responsive cover variants (WebP + JPEG fallbacks,
     # 16:9 card crops, 1:1 squares) next to each page's output so built

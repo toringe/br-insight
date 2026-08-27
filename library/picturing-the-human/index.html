@@ -274,7 +274,21 @@ Tyrell: &quot;Nothing the God of bio-mechanics would not let you in heaven for.&
     <p><span class="est">EST. 1996 · 30 YEARS ONLINE</span></p>
   </div>
 </footer>
-  <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button>
+  <button type="button" class="top-btn" data-top aria-label="Back to top" hidden>&#8593;</button><dialog class="search-overlay" id="search-dialog" data-search-dialog aria-labelledby="search-title">
+    <div class="search-overlay__panel">
+      <h2 class="visually-hidden" id="search-title">Search essays</h2>
+      <div class="search-overlay__bar">
+        <input type="search" class="search-input" data-search-input
+               placeholder="Type to search…" autocomplete="off"
+               aria-label="Search essays">
+        <button type="button" class="btn btn--ghost search-overlay__close" data-search-close>Close</button>
+      </div>
+      <p class="search-hint" data-search-hint hidden></p>
+      <ul class="search-results" data-search-results aria-label="Search results"></ul>
+      <p class="search-empty" data-search-empty hidden>No essays match. Try fewer words, or browse the <a href="/library/">library</a> and its topics.</p>
+      <noscript><p class="search-noscript">Search needs JavaScript — browse every essay via the <a href="/library/">library</a> filters instead.</p></noscript>
+    </div>
+  </dialog>
 
   <script>window.__FX__={"enabled": true, "flicker": {"enabled": true, "welcome": true}, "grain": {"enabled": true}, "rain": {"density": 120, "enabled": true, "speed": 1.0, "tier_auto": true}, "scanlines": {"enabled": true}};</script>  <script type="module" src="../../assets/js/main.js"></script>
 </body>
