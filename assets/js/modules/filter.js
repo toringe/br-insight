@@ -111,11 +111,22 @@ export function init(doc = document) {
   }
 
   // Card chip anchors: intercept same-page deep links for instant filtering.
+  // Anchor elements expose no searchParams (that's URL-only) — parse href.
   doc.addEventListener("click", (event) => {
     const link = event.target.closest("[data-link]");
-    if (!link || link.origin !== doc.defaultView.location.origin) return;
+    if (!link) return;
+    let url;
+    try {
+      url = new URL(link.href, doc.baseURI);
+    } catch {
+      return; // unparseable href — fall through to native navigation
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") return;
+    if (url.origin !== doc.defaultView.location.origin) return;
+    const value = url.searchParams.get(link.dataset.link);
+    if (value === null) return;
     event.preventDefault();
-    replace(link.dataset.link, link.searchParams.get(link.dataset.link));
+    replace(link.dataset.link, value);
   });
 
   if (select) {

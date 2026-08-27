@@ -246,6 +246,25 @@ class TestCssAnchorContract:
         minified = (REPO_ROOT / "assets/css/main.min.css").read_text(encoding="utf-8")
         assert minified == rcssmin.cssmin(source)
 
+    def test_hidden_attribute_beats_author_display_rules(self):
+        """Task 17 C-1 regression: filter.js toggles [hidden] on .card
+        (display:flex); a global reset-level override must keep hidden
+        elements out of the visual grid in both source and minified css."""
+        rule = re.compile(r"\[hidden\]\s*\{[^}]*display:\s*none\s*!important")
+        for name in ("main.css", "main.min.css"):
+            css = (REPO_ROOT / "assets/css" / name).read_text(encoding="utf-8")
+            assert rule.search(css), f"{name} is missing the [hidden] display:none!important override"
+
+    def test_mobile_header_collapses_instead_of_overflowing(self):
+        """Task 17 C-2 regression: below 640px the header row cannot fit
+        brand + controls on one line (measured ~590px needed); a sub-640
+        media query must switch site-header__inner to a wrapped layout."""
+        css = (REPO_ROOT / "assets/css/main.css").read_text(encoding="utf-8")
+        idx = css.index("@media (max-width: 639.98px)")
+        block = css[idx : idx + 400]
+        assert ".site-header__inner" in block
+        assert "flex-wrap: wrap" in block
+
 
 # ---------------------------------------------------------------------------
 # Task 8: article page anatomy (template-level)

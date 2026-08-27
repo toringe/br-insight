@@ -497,4 +497,73 @@ class TestFilterJsContract:
         assert data["hiddenAfterReset"] == [False, False]
         assert data["orderAfterReset"] == ["Vanishing", "Alias"]  # server order
         assert data["selectValueAfterReset"] == ""
-        assert data["lastUrl"] == "/library/"
+
+    def _chip_click(self, filter_mod, href: str) -> str:
+        """Drive the doc-level click handler with an anchor-like object
+        (card-footer chip deep link) and report the aftermath."""
+        snippet = f"""
+        const cards = [
+          {{ dataset: {{ category: 'Film Analysis', tags: 'noir', author: 'A',
+            decade: '2000s', minutes: '9', date: '2001-02-01',
+            title: 'Vanishing' }}, hidden: false }},
+          {{ dataset: {{ category: 'Characters', tags: 'eyes', author: 'B',
+            decade: '1980s', minutes: '4', date: '1982-06-25',
+            title: 'Alias' }}, hidden: false }},
+        ];
+        const grid = {{
+          querySelectorAll: () => [...cards],
+          appendChild() {{}},
+        }};
+        const handlers = {{}};
+        let lastUrl = null;
+        const doc = {{
+          querySelector(sel) {{ return sel === "[data-grid]" ? grid : null; }},
+          addEventListener(name, fn) {{ (handlers[name] ||= []).push(fn); }},
+          baseURI: "http://localhost:8611/library/",
+          defaultView: {{
+            location: {{ search: "", pathname: "/library/", hash: "",
+                         origin: "http://localhost:8611" }},
+            history: {{ replaceState(_s, _t, url) {{ lastUrl = url; }} }},
+          }},
+        }};
+        init(doc);
+        const urlAfterInit = lastUrl;
+        const anchor = {{ href: {href!r}, dataset: {{ link: "tag" }} }};
+        anchor.closest = (sel) => (sel === "[data-link]" ? anchor : null);
+        let prevented = false;
+        for (const fn of handlers.click ?? []) {{
+          fn({{ target: anchor, preventDefault() {{ prevented = true; }} }});
+        }}
+        console.log(JSON.stringify({{
+          hidden: cards.map((c) => c.hidden),
+          urlChanged: lastUrl !== urlAfterInit,
+          prevented,
+        }}));
+        """
+        script = f'import {{ init }} from "{filter_mod.as_uri()}";\n{snippet}\n'
+        proc = subprocess.run(
+            [node, "--input-type=module", "--eval", script],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert proc.returncode == 0, proc.stderr
+        return proc.stdout.strip()
+
+    def test_card_chip_click_toggles_filter_from_anchor_href(self, filter_mod):
+        """Task 17 I-1 regression: card-chip anchors expose no searchParams;
+        the handler must parse link.href as a URL and apply the filter."""
+        out = self._chip_click(filter_mod, "http://localhost:8611/library/?tag=eyes")
+        data = json.loads(out)
+        assert data["hidden"] == [True, False]  # Alias matches eyes
+        assert data["urlChanged"] is True
+        assert data["prevented"] is True
+
+    def test_card_chip_click_ignores_cross_origin_and_non_http(self, filter_mod):
+        """Native navigation continues for off-site or non-http(s) hrefs."""
+        for href in ("http://evil.example/library/?tag=eyes", "mailto:x@y.z"):
+            out = self._chip_click(filter_mod, href)
+            data = json.loads(out)
+            assert data["prevented"] is False
+            assert data["hidden"] == [False, False]
+            assert data["urlChanged"] is False

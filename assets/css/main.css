@@ -147,6 +147,13 @@
   margin: 0;
 }
 
+/* Hidden-state contract (Task 17): filter.js toggles [hidden] on .card and
+   other elements whose author display values (display:flex etc.) beat the
+   UA's [hidden]{display:none} — win back unconditionally. */
+[hidden] {
+  display: none !important;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   scrollbar-color: #2c3c52 transparent;
@@ -1103,8 +1110,43 @@ main {
     margin-inline-start: auto;
   }
 
+  /* Brand + four controls measure ~690px unwrapped — tighter buttons keep
+     the single row inside mid-size phones/tablets portrait (Task 17 C-2). */
+  .search-btn__hint { display: none; }
+
+  .site-header__controls .btn {
+    padding: .5em .75em;
+    font-size: .8125rem;
+  }
+
   .menu-btn {
     display: inline-flex;
+  }
+}
+
+/* Narrow phones/tablets portrait (Task 17 C-2): tightened, brand + controls
+   still cannot share one row here (~590px measured at 500-560 viewports,
+   ~640px at 375) — wrap the controls onto their own full-width line so the
+   header never scrolls horizontally down to 320. */
+@media (max-width: 639.98px) {
+  .site-header__inner {
+    flex-wrap: wrap;
+    row-gap: var(--space-3xs);
+  }
+
+  .site-header__brand {
+    font-size: 1rem;
+  }
+
+  .site-header__controls {
+    flex-basis: 100%;
+    gap: var(--space-3xs);
+    justify-content: space-between;
+  }
+
+  .site-header__controls .btn {
+    padding: .5em .6em;
+    font-size: .75rem;
   }
 }
 
