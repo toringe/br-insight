@@ -124,6 +124,23 @@ class TestExtractSummary:
             "First real words here."
         )
 
+    def test_heading_led_first_block_skips_to_first_prose_paragraph(self):
+        body = (
+            '## The "No" Arguments\n\n'
+            "Ever since the movie was released people watching it has been"
+            " divided in two.\n"
+        )
+        summary = articles.extract_summary(body, size=100)
+        assert summary.startswith("Ever since the movie")
+        assert "#" not in summary
+        assert '"' not in summary or "No" not in summary
+
+    def test_multiple_leading_headings_skipped_to_first_prose(self):
+        body = "## Opening Section\n\n### Subsection Here\n\nActual prose begins.\n"
+        assert articles.extract_summary(body, size=4) == (
+            "Actual prose begins."
+        )
+
 
 def _write_article(root, slug, front_matter, body):
     directory = root / "library" / slug
@@ -394,7 +411,7 @@ class TestRealLibrary:
         by_slug = {a.slug: a for a in corpus}
         assert by_slug["br-an-analysis"].author == "Unknown"
 
-    def test_summaries_match_first_paragraph_and_configured_size(
+    def test_summaries_match_first_prose_paragraph_and_configured_size(
         self, corpus
     ):
         truncated = 0
@@ -403,7 +420,17 @@ class TestRealLibrary:
                 REPO_ROOT / "library" / article.slug / "article.md"
             )
             paragraph = next(
-                (p.strip() for p in body.split("\n\n") if p.strip()), ""
+                (
+                    p.strip()
+                    for p in body.split("\n\n")
+                    if p.strip()
+                    and not all(
+                        re.match(r"^\s{0,3}#{1,6}(?:\s|$)", line)
+                        for line in p.splitlines()
+                        if line.strip()
+                    )
+                ),
+                "",
             )
             paragraph_words = len(paragraph.split())
             if paragraph_words > 100:

@@ -1,5 +1,6 @@
 """Tests for Task 11 about + 404/error pages."""
 
+import re
 from pathlib import Path
 
 import pytest
@@ -69,6 +70,38 @@ class TestAboutPage:
         legacy = ("jquery", "skel.min.js", "about.min.css", "id=\"menu\"")
         for marker in legacy:
             assert marker not in about, marker
+
+
+class TestNavCurrentPage:
+    """Exactly the page's own nav item carries aria-current="page"."""
+
+    NAV_HREFS = ("/", "/library/", "/topics/", "/about.html")
+
+    @staticmethod
+    def _nav_current(html: str) -> list[str]:
+        return re.findall(
+            r'href="([^"]+)"[^>]*aria-current="page"', html
+        )
+
+    def test_home_marks_only_home(self, built):
+        html = (built / "index.html").read_text(encoding="utf-8")
+        assert self._nav_current(html) == ["/"]
+
+    def test_library_marks_only_library(self, built):
+        html = (built / "library" / "index.html").read_text(encoding="utf-8")
+        assert self._nav_current(html) == ["/library/"]
+
+    def _topic_hub(self, built):
+        return (built / "topics" / "index.html").read_text(encoding="utf-8")
+
+    def test_topics_hub_marks_only_topics(self, built):
+        assert self._nav_current(self._topic_hub(built)) == ["/topics/"]
+
+    def test_article_page_carries_no_nav_aria_current(self, built):
+        html = (
+            built / "library" / "deckards-identity-debate" / "index.html"
+        ).read_text(encoding="utf-8")
+        assert self._nav_current(html) == []
 
 
 class Test404AndError:

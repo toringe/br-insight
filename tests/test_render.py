@@ -255,6 +255,14 @@ class TestCssAnchorContract:
             css = (REPO_ROOT / "assets/css" / name).read_text(encoding="utf-8")
             assert rule.search(css), f"{name} is missing the [hidden] display:none!important override"
 
+    def test_search_overlay_is_centered(self):
+        """Ride-along 3: the *{margin:0} reset pins the native dialog left;
+        .search-overlay must re-center with margin:auto."""
+        pattern = re.compile(r"\.search-overlay\s*\{[^}]*margin:\s*auto")
+        for name in ("main.css", "main.min.css"):
+            css = (REPO_ROOT / "assets/css" / name).read_text(encoding="utf-8")
+            assert pattern.search(css), f"{name} does not center .search-overlay"
+
     def test_mobile_header_collapses_instead_of_overflowing(self):
         """Task 17 C-2 regression: below 640px the header row cannot fit
         brand + controls on one line (measured ~590px needed); a sub-640

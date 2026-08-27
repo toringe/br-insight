@@ -4,9 +4,11 @@
 
     <nav class="site-nav" id="primary-nav" aria-label="Primary" data-focus-hide>
       <ul class="site-nav__list" role="list">
+        {%- set _current = current_path | default('') %}
+        {%- set _page_path = ('/' ~ (_current | trim('/'))) if _current else '' %}
         {%- for item in site.nav %}
         <li>
-          <a class="site-nav__link" href="{{ item.href }}"{% if item.href == current_path | default('') %} aria-current="page"{% endif %}>{{ item.label }}</a>
+          <a class="site-nav__link" href="{{ item.href }}"{% if _page_path and _page_path == '/' ~ (item.href | trim('/')) %} aria-current="page"{% endif %}>{{ item.label }}</a>
         </li>
         {%- endfor %}
       </ul>

@@ -411,6 +411,7 @@ def build(root: Path, out: Path) -> list[Path]:
             site=site,
             categories=[t for t in topics if t["kind"] == "category"],
             tags=[t for t in topics if t["kind"] == "tag"],
+            current_path="/topics/",
             now=now,
         ),
         encoding="utf-8",
