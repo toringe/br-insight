@@ -67,6 +67,27 @@ class TestBuildIndex:
         )
         assert "Postmodern" in record["body"]
 
+    def test_body_carries_decoded_entities_not_escapes(self, articles):
+        # Rendered HTML escapes quotes/& as &quot;/&amp;; the indexable
+        # body must hold the real characters, not the entity literals
+        # (MiniSearch would otherwise index stray "quot"/"amp" terms).
+        from br_insight.search import build_index
+
+        for record in build_index(articles):
+            body = record["body"]
+            for entity in ("&quot;", "&amp;", "&lt;", "&gt;", "&#39;"):
+                assert entity not in body, (record["slug"], entity)
+            assert "<" not in body and ">" not in body, record["slug"]
+
+    def test_deckards_identity_debate_quotes_are_decoded(self, articles):
+        from br_insight.search import build_index
+
+        record = next(
+            r for r in build_index(articles)
+            if r["slug"] == "deckards-identity-debate"
+        )
+        assert 'The "No" Arguments' in record["body"]
+
 
 class TestWriteIndex:
     def test_writes_loadable_compact_json(self, tmp_path, articles):
@@ -99,13 +120,15 @@ class TestWriteIndex:
             source=None,
             category="Characters",
             tags=["V-K"],
-            html="<h2 id=\"a\">Head</h2><p>Ce n'est qu'un adieu.</p>",
+            html="<h2 id=\"a\">Head</h2><p>Ce n&#39;est qu&#39;un adieu.</p>"
+                 "<p>&quot;Rain&quot; &amp; spires</p>",
         )
         target = write_index(tmp_path, [hostile])
         record = json.loads(target.read_text(encoding="utf-8"))[0]
         assert record["title"] == 'He said "rain" & <miles>'
         assert record["summary"] == "A “quoted” summary…"
-        assert record["body"] == "Head Ce n'est qu'un adieu."
+        assert record["body"] == ("Head Ce n'est qu'un adieu."
+                                  ' "Rain" & spires')
 
 
 class TestBudget:

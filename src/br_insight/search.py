@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from html import unescape as _unescape
 from pathlib import Path
 
 # Checks budget (mirrors checks.BUDGET_SEARCH_GZ; declared here so the
@@ -28,9 +29,11 @@ def strip_html(html: str) -> str:
 
     Anchor decoration is dropped first (the ``#`` glyphs would pollute the
     index), then every tag becomes one space so adjacent block text never
-    concatenates mid-word.
+    concatenates mid-word. Entities are decoded after tag stripping (a
+    single pass: a double-encoded ``&amp;lt;`` stays literal text and can
+    never reintroduce markup).
     """
-    plain = _TAGS.sub(" ", _ANCHOR_TAG.sub("", html))
+    plain = _unescape(_TAGS.sub(" ", _ANCHOR_TAG.sub("", html)))
     return _WHITESPACE.sub(" ", plain).strip()
 
 
