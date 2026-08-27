@@ -63,19 +63,43 @@
   </script>
   {% endif %}
 
+  {#- Font preload strategy (Task 14): regular Chakra 400/600 and regular
+      Source Serif only. The italic serif is prose-only and arrives under
+      font-display: swap; preloading it wasted bytes on nearly every page.
+      @font-face rules are untouched. -#}
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/source-serif-4-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="{{ asset_prefix }}assets/fonts/source-serif-4-latin-400italic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="{{ asset_prefix }}assets/img/favicon.png" type="image/png">
+
+  {#- LCP image preloads belong to pages with an above-the-fold cover
+      (article hero overrides this; media-scoped to mirror the <picture>
+      sources so the browser never double-fetches). -#}
+  {% block head_preload %}{% endblock %}
 
   {#- Critical CSS placeholder: children may inline ≤ 8 KB of above-the-fold CSS. -#}
   {% block critical_css %}{% endblock %}
   <link rel="stylesheet" href="{{ asset_prefix }}assets/css/main.min.css">
 
-  {#- Speculation Rules include point: Task 14 injects a prefetch/prerender
-      <script type="speculationrules"> block here. -#}
-  {% block speculation_rules %}{% endblock %}
+  {#- Speculation Rules (Task 14): moderate-eagerness prerender for
+      library routes — href_matches is scoped same-origin by the spec, so
+      no cross-site hits are possible. -#}
+  <script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "source": "document",
+        "where": {
+          "or": [
+            {"href_matches": "/library"},
+            {"href_matches": "/library/*"}
+          ]
+        },
+        "eagerness": "moderate"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>

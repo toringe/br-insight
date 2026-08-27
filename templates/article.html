@@ -1,27 +1,33 @@
 {% extends "base.html" %}
 
 {% set asset_prefix = "../../" %}
+{% from "partials/cover.html" import hero_picture, lazy_cover, cover_srcset, hero_sizes %}
 
 {% block og_type %}article{% endblock %}
 {% block title %}{{ article.title }}{% endblock %}
 {% block description %}{{ article.summary }}{% endblock %}
 {% block canonical_path %}library/{{ article.slug }}/{% endblock %}
+
+{#- Social images cite the largest generated JPEG variant — crawlers do
+    not decode WebP. Render passes the filename via og_cover (Task 14). -#}
 {% block og_image %}/library/{{ article.slug }}/{{ og_cover | default(article.cover) }}{% endblock %}
+
+{#- Task 14 LCP preload: mirrors the hero <picture> candidate list exactly
+    so the browser resolves the same URL once — no double fetch. -#}
+{% block head_preload %}
+{%- if cover_variants and cover_variants.hero %}
+<link rel="preload" as="image"
+      href="{{ asset_prefix }}library/{{ article.slug }}/cover-{{ cover_variants.hero[-1] }}.jpg"
+      imagesrcset="{{ cover_srcset(asset_prefix ~ 'library/' ~ article.slug ~ '/cover-', cover_variants.hero, 'webp') }}"
+      imagesizes="{{ hero_sizes }}">
+{%- endif %}
+{% endblock %}
 
 {% block content %}
 <article class="article">
   <div class="container">
     <figure class="article-hero">
-      <picture>
-        <source
-          media="(max-width: 47.99em)"
-          srcset="{{ asset_prefix }}library/{{ article.slug }}/cover-crop.jpg">
-        <img
-          src="{{ asset_prefix }}library/{{ article.slug }}/cover.jpg"
-          alt="Cover art for {{ article.title }}"
-          width="{{ cover_width }}" height="{{ cover_height }}"
-          fetchpriority="high">
-      </picture>
+      {{ hero_picture(article.slug, asset_prefix, "Cover art for " ~ article.title, cover_width, cover_height, cover_variants) }}
       {% include "partials/credit.html" %}
     </figure>
 
@@ -80,9 +86,7 @@
           {%- for rel in related %}
           <article class="card">
             <a class="card__cover" href="/library/{{ rel.slug }}/" tabindex="-1" aria-hidden="true">
-              <img
-                src="{{ asset_prefix }}library/{{ rel.slug }}/cover-crop.jpg"
-                alt="" loading="lazy" width="505" height="295">
+              {{ lazy_cover(rel.slug, asset_prefix, (variants | default({})).get(rel.slug)) }}
             </a>
             <div class="card__body">
               <h3 class="card__title"><a href="/library/{{ rel.slug }}/">{{ rel.title }}</a></h3>

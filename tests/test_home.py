@@ -277,7 +277,12 @@ class TestHomeAnatomy:
         scripts = re.findall(r"<script\b([^>]*)>(.*?)</script>", html, re.S)
         assert scripts, "base chrome now ships at least one module script"
         for attrs, body in scripts:
-            if 'type="application/json"' in attrs or 'type="module"' in attrs:
+            if (
+                'type="application/json"' in attrs
+                or 'type="module"' in attrs
+                # speculationrules are a declarative browser hint, never executed
+                or 'type="speculationrules"' in attrs
+            ):
                 continue
             # No-typed script allowed exactly once: the __FX__ config blob,
             # a single data assignment with zero executable logic.

@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 
+from br_insight.checks import main_check
 from br_insight.render import build
 
 
@@ -33,7 +34,12 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     serve.set_defaults(func=_run_serve)
 
     check = subparsers.add_parser(
-        "check", help="Verify links and integrity of the rendered site."
+        "check", help="Verify budgets and link integrity of the rendered site."
+    )
+    check.add_argument(
+        "--out",
+        default=".",
+        help="Rendered site tree to audit (default: repo root).",
     )
     check.set_defaults(func=_run_check)
 
@@ -52,5 +58,4 @@ def _run_serve(args: argparse.Namespace) -> int:
 
 
 def _run_check(args: argparse.Namespace) -> int:
-    print("check: running link and integrity checks (skeleton; not implemented yet)")
-    return 0
+    return main_check(Path(args.out))

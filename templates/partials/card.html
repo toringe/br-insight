@@ -1,10 +1,13 @@
 {#- Reusable article card (library grid; article-page related cards may reuse).
 
     Expects an ``a`` with: slug, title, author, minutes, category, tags, date.
-    ``prefix`` is the relative asset depth ("../", "../../"). Data attributes
-    drive the client-side filter module without any extra DOM queries.
+    ``prefix`` is the relative asset depth ("../", "../../"). ``plan`` is the
+    optional Task 14 ``CoverVariants`` entry for the article — when present
+    the cover renders as a responsive <picture>. Data attributes drive the
+    client-side filter module without any extra DOM queries.
 -#}
-{% macro card(a, prefix) %}
+{% from "partials/cover.html" import lazy_cover %}
+{% macro card(a, prefix, plan=None) %}
 <article class="card"
   data-category="{{ a.category }}"
   data-tags="{{ a.tags | join(' ') }}"
@@ -13,9 +16,7 @@
   data-minutes="{{ a.minutes }}"
   data-date="{{ a.date.strftime('%Y-%m-%d') }}">
   <a class="card__cover" href="/library/{{ a.slug }}/" tabindex="-1" aria-hidden="true">
-    <img
-      src="{{ prefix }}library/{{ a.slug }}/cover-crop.jpg"
-      alt="" loading="lazy" width="505" height="295">
+    {{ lazy_cover(a.slug, prefix, plan) }}
   </a>
   <div class="card__body">
     <h3 class="card__title"><a href="/library/{{ a.slug }}/">{{ a.title }}</a></h3>

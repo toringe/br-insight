@@ -165,6 +165,13 @@ canvas {
   max-width: 100%;
 }
 
+/* Responsive-images contract (Task 14): scaled-down images must keep their
+ * intrinsic aspect ratio instead of stretching to the height attribute.
+ * Component rules (e.g. .card__cover img) override where they need to. */
+img {
+  height: auto;
+}
+
 input,
 button,
 textarea,

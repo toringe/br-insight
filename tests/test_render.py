@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 from br_insight.config import SiteConfig
+from br_insight.images import CoverVariants
 from br_insight.render import REPO_ROOT, get_env, render_template
 
 
@@ -129,7 +130,8 @@ class TestDesignDirectionRetrofit:
         assert "font-display: swap" in css
         assert css.count("source-serif-4-latin-400") == 2  # face + italic face
         html = render_template("base.html", site=site)
-        assert html.count("source-serif-4-latin-400") == 2  # two preloads
+        assert html.count("source-serif-4-latin-400") == 1  # regular preload
+        assert "400italic.woff2" not in html  # Task 14: italic no longer preloaded
 
     def test_serif_fonts_shipped_within_budget(self, css):
         fonts = sorted((REPO_ROOT / "assets/fonts").glob("source-serif-*.woff2"))
@@ -279,6 +281,11 @@ ANATOMY_CTX = dict(
     toc=[],
     cover_width=1167,
     cover_height=700,
+    # Task 14: a plan as images.generate_cover_variants would produce for a
+    # 1167px-wide source (nothing wider than the source is ever cited).
+    cover_variants=CoverVariants(
+        source="cover.jpg", hero=(480, 800, 1167), crop=(480, 800), square=400
+    ),
 )
 
 
@@ -293,8 +300,12 @@ class TestArticleAnatomy:
         assert "<picture>" in html
         assert 'fetchpriority="high"' in html
         assert re.search(r'<img[^>]+width="1167"[^>]+height="700"', html)
-        assert "../../library/voight-kampff-test/cover.jpg" in html
-        assert "../../library/voight-kampff-test/cover-crop.jpg" in html
+        assert 'type="image/webp"' in html
+        assert "cover-1167.webp 1167w" in html
+        # Single-aspect hero ladder: mobile crop swap removed so intrinsic
+        # dimensions always match the picked candidate (LH aspect ratio).
+        assert "cover-crop-" not in html.split('article-hero')[1].split('</figure>')[0]
+        assert 'src="../../library/voight-kampff-test/cover-1167.jpg"' in html
 
     def test_credit_caption_known_artist(self, html):
         assert "Cover art © Syd Mead" in html
@@ -397,10 +408,24 @@ def built(tmp_path_factory):
 
 
 def _tree_hash(out: Path) -> str:
+    """SHA over the rendered tree, including generated cover variants.
+
+    Pillow's WebP/JPEG encoders emit timestamp-free deterministic bytes for
+    identical inputs and parameters (verified in tests/test_images.py), so
+    generated binaries are safe to include in the idempotency digest. The
+    ``cover-*.jpg`` filter keeps legacy originals (``cover-crop.jpg`` etc.)
+    out of scope — those are read-only sources, never build outputs.
+    """
     import hashlib
 
+    targets = sorted(out.rglob("index.html")) + sorted(
+        out.rglob("cover-*.webp")
+    ) + [p for p in out.rglob("cover-*.jpg") if "-" in p.stem]
+
     digest = hashlib.sha256()
-    for path in sorted(out.rglob("index.html")):
+    for path in targets:
+        if not path.is_file():
+            continue
         digest.update(path.relative_to(out).as_posix().encode())
         digest.update(path.read_bytes())
     return digest.hexdigest()
@@ -611,8 +636,13 @@ class TestTocThresholdCorpus:
 
 
 # ---------------------------------------------------------------------------
-# Finding 2: og:image/JSON-LD image falls back to cover.jpg when the declared
-# front-matter cover file is missing on disk (never edits article.md data)
+# og:image/JSON-LD image sourcing.
+#
+# Task 8 ruling: never point social cards at a 404. Task 14 supersedes the
+# "declared cover used as-is" clause — crawlers do not decode WebP, so the
+# largest generated JPEG hero variant (cover-<max>.jpg) is cited instead;
+# the Task 8 fallback chain remains the safety net when variants are absent
+# (e.g. a directory with no usable source cover).
 # ---------------------------------------------------------------------------
 
 MISSING_COVER_SLUGS = ("aboutfilm-analysis", "deckards-identity-debate")
@@ -626,7 +656,9 @@ class TestOgImageCoverFallback:
         ld = re.search(r'"image": "([^"]+)"', text).group(1)
         return og, ld
 
-    def test_missing_declared_cover_falls_back_to_cover_jpg(self, built):
+    def test_missing_declared_cover_never_404s(self, built):
+        """Article declares cover.png but ships only cover.jpg — the cited
+        variant must still exist on disk in the output tree."""
         out, _ = built
         from br_insight.articles import load_all
 
@@ -639,10 +671,11 @@ class TestOgImageCoverFallback:
             urls = self._emitted_image_urls(
                 (out / "library" / slug / "index.html").read_text(encoding="utf-8")
             )
-            expected = f"https://www.br-insight.com/library/{slug}/cover.jpg"
-            assert urls == (expected, expected), slug
+            for url in urls:
+                rel = url.replace("https://www.br-insight.com/", "")
+                assert (out / rel).is_file(), url
 
-    def test_existing_declared_cover_is_used_as_is(self, built):
+    def test_existing_declared_cover_pages_cite_jpg_variant(self, built):
         out, _ = built
         from br_insight.articles import load_all
 
@@ -654,8 +687,10 @@ class TestOgImageCoverFallback:
             urls = self._emitted_image_urls(
                 (out / "library" / slug / "index.html").read_text(encoding="utf-8")
             )
-            expected = f"https://www.br-insight.com/library/{slug}/cover.png"
-            assert urls == (expected, expected), slug
+            expected = re.compile(
+                rf"https://www\.br-insight\.com/library/{slug}/cover-\d+\.jpg"
+            )
+            assert expected.fullmatch(urls[0]) and expected.fullmatch(urls[1]), slug
 
     def test_jsonld_image_defaults_to_front_matter_cover_and_honors_override(
         self, site
@@ -732,3 +767,165 @@ class TestCliBuildWiring:
         assert rc == 0
         assert calls["out"] == tmp_path
         assert calls["root"] == REPO_ROOT
+
+
+# ---------------------------------------------------------------------------
+# Task 14: performance pass — picture markup, og:image variants, fonts,
+# speculation rules
+# ---------------------------------------------------------------------------
+
+
+class TestPictureMarkupContract:
+    """Every cover renders through <picture> with WebP srcset + JPG fallback."""
+
+    def _article_pages(self, out):
+        return sorted((out / "library").glob("*/index.html"))
+
+    def test_hero_picture_uses_webp_srcset_with_jpg_fallback(self, built):
+        out, _ = built
+        for page in self._article_pages(out):
+            text = page.read_text(encoding="utf-8")
+            assert '<source type="image/webp"' in text, page.parent.name
+            assert re.search(r'srcset="[^"]*cover-\d+\.webp \d+w', text), (
+                page.parent.name
+            )
+            # Non-webp <img> fallback points at a generated jpg variant.
+            assert re.search(r'<img[^>]+src="[^"]*cover-\d+\.jpg"', text), (
+                page.parent.name
+            )
+
+    def test_hero_lcp_priority_and_intrinsic_dimensions(self, built):
+        out, _ = built
+        for page in self._article_pages(out):
+            text = page.read_text(encoding="utf-8")
+            hero_img = re.search(
+                r'<img[^>]*fetchpriority="high"[^>]*>', text
+            )
+            assert hero_img, page.parent.name
+            assert 'width="' in hero_img.group(0)
+            assert 'height="' in hero_img.group(0)
+
+    def test_card_covers_lazy_with_webp_crop_srcset(self, built):
+        out, _ = built
+        text = (out / "library" / "index.html").read_text(encoding="utf-8")
+        assert 'cover-crop-480.webp 480w' in text
+        assert 'loading="lazy"' in text
+
+    def test_home_featured_cover_optimized(self, built):
+        out, _ = built
+        text = (out / "index.html").read_text(encoding="utf-8")
+        assert 'srcset="' in text and "cover-crop-" in text
+
+    def test_related_cards_use_lazy_web_pictures(self, built):
+        from br_insight.articles import load_all
+
+        out, _ = built
+        article = load_all(REPO_ROOT)[0]
+        text = (out / "library" / article.slug / "index.html").read_text(
+            encoding="utf-8"
+        )
+        if '<section class="end-block__related"' in text:
+            assert "cover-crop-" in text
+
+
+class TestOgImageOptimizedVariant:
+    @staticmethod
+    def _emitted_image_urls(text: str) -> tuple[str, str]:
+        og = re.search(r'property="og:image" content="([^"]+)"', text).group(1)
+        ld = re.search(r'"image": "([^"]+)"', text).group(1)
+        return og, ld
+
+    def test_all_article_social_images_use_jpg_variant(self, built):
+        out, _ = built
+        pattern = re.compile(
+            r'https://www\.br-insight\.com/library/([\w-]+)/cover-(\d+)\.jpg'
+        )
+        for page in sorted((out / "library").glob("*/index.html")):
+            urls = self._emitted_image_urls(page.read_text(encoding="utf-8"))
+            match_og = pattern.fullmatch(urls[0])
+            match_ld = pattern.fullmatch(urls[1])
+            assert match_og and match_ld, page.parent.name
+            assert match_og.groups() == match_ld.groups()
+
+    def test_referenced_variant_file_exists(self, built):
+        out, _ = built
+        for page in sorted((out / "library").glob("*/index.html")):
+            url = self._emitted_image_urls(page.read_text(encoding="utf-8"))[0]
+            rel = url.replace("https://www.br-insight.com/", "")
+            assert (out / rel).is_file(), url
+
+    def test_declared_png_cover_pages_also_get_variant(self, built):
+        # Task 14 supersedes the Task 8 ruling: crawlers never receive webp,
+        # so every article with generated variants cites cover-<max>.jpg.
+        out, _ = built
+        for slug in ("appreciation-assessment-of-dircut", "do-androids-dream"):
+            text = (out / "library" / slug / "index.html").read_text(
+                encoding="utf-8"
+            )
+            og = self._emitted_image_urls(text)[0]
+            assert re.fullmatch(r'https://www\.br-insight\.com/library/'
+                                + slug + r'/cover-\d+\.jpg', og)
+
+
+class TestFontPreloads:
+    def test_no_sitewide_italic_serif_preload(self, built):
+        out, _ = built
+        for path in sorted(out.rglob("*.html")):
+            text = path.read_text(encoding="utf-8")
+            assert "400italic" not in text, path.relative_to(out)
+
+    def test_regular_fonts_still_preloaded(self, built):
+        out, _ = built
+        text = (out / "index.html").read_text(encoding="utf-8")
+        assert "chakra-petch-latin-400.woff2" in text
+        assert "chakra-petch-latin-600.woff2" in text
+        assert "source-serif-4-latin-400.woff2" in text
+
+    def test_article_page_preloads_only_lcp_cover_candidates_as_image(self, built):
+        from br_insight.articles import load_all
+
+        out, _ = built
+        slug = load_all(REPO_ROOT)[0].slug
+        text = (out / "library" / slug / "index.html").read_text(encoding="utf-8")
+        preloads = re.findall(r'<link rel="preload"[^>]*as="image"[^>]*>', text)
+        assert preloads
+        for link in preloads:
+            assert 'imagesrcset="' in link  # responsive candidates only
+
+
+class TestSpeculationRules:
+    def test_every_built_page_ships_speculation_rules(self, built):
+        out, _ = built
+        pages = list(out.rglob("*.html"))
+        assert pages
+        for path in pages:
+            text = path.read_text(encoding="utf-8")
+            assert '<script type="speculationrules">' in text, path.name
+
+    def test_rules_prerender_library_routes_moderately(self, built):
+        import json as jsonlib
+
+        out, _ = built
+        text = (out / "index.html").read_text(encoding="utf-8")
+        block = re.search(
+            r'<script type="speculationrules">\s*(\{.*?\})\s*</script>',
+            text,
+            re.S,
+        ).group(1)
+        rules = jsonlib.loads(block)
+        prerender = rules["prerender"][0]
+        assert prerender["eagerness"] == "moderate"
+        where = jsonlib.dumps(prerender["where"])
+        assert "/library" in where
+
+
+class TestVariantIdempotencyHashing:
+    def test_tree_hash_covers_generated_variants(self, tmp_path_factory):
+        from br_insight.render import build
+
+        first, second = tmp_path_factory.mktemp("va"), tmp_path_factory.mktemp("vb")
+        build(REPO_ROOT, first)
+        build(REPO_ROOT, second)
+        digest_a = _tree_hash(first)
+        digest_b = _tree_hash(second)
+        assert digest_a == digest_b

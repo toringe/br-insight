@@ -17,6 +17,7 @@ from __future__ import annotations
 import datetime
 import email.utils
 import functools
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -26,6 +27,7 @@ from PIL import Image
 
 from br_insight.articles import extract_toc, load_all, related
 from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy, resolve_featured
+from br_insight.images import CoverVariants, generate_cover_variants, og_cover_filename
 from br_insight.textutils import slugify
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -321,6 +323,18 @@ def build(root: Path, out: Path) -> list[Path]:
     taxonomy = load_taxonomy(root)
     articles = apply_taxonomy(load_all(root), taxonomy)
 
+    # Task 14: generate responsive cover variants (WebP + JPEG fallbacks,
+    # 16:9 card crops, 1:1 squares) next to each page's output so built
+    # pages can cite them. Sources stay read-only; existing-current
+    # outputs are skipped, keeping in-tree rebuilds idempotent.
+    variants: dict[str, CoverVariants | None] = {
+        article.slug: generate_cover_variants(
+            root / "library" / article.slug,
+            dest=out / "library" / article.slug,
+        )
+        for article in articles
+    }
+
     cover_sizes: dict[str, tuple[int, int]] = {}
     written: list[Path] = []
     for index, article in enumerate(articles):
@@ -336,9 +350,11 @@ def build(root: Path, out: Path) -> list[Path]:
             older=older,
             related=related(article, articles),
             toc=toc if _toc_heading_count(toc) >= TOC_MIN_HEADINGS else [],
-            og_cover=_og_cover(root, article),
+            og_cover=_og_cover(root, article, out),
             cover_width=width,
             cover_height=height,
+            cover_variants=variants.get(article.slug),
+            variants=variants,
             now=now,
         )
         destination = out / "library" / article.slug / "index.html"
@@ -353,6 +369,7 @@ def build(root: Path, out: Path) -> list[Path]:
             "library.html",
             site=site,
             articles=articles,
+            variants=variants,
             **facets(articles),
             current_path="library/",
             now=now,
@@ -364,7 +381,13 @@ def build(root: Path, out: Path) -> list[Path]:
     home_page = out / "index.html"
     home_page.parent.mkdir(parents=True, exist_ok=True)
     home_page.write_text(
-        render_template("home.html", site=site, now=now, **home_context(site, articles, now)),
+        render_template(
+            "home.html",
+            site=site,
+            now=now,
+            variants=variants,
+            **home_context(site, articles, now),
+        ),
         encoding="utf-8",
     )
     written.append(home_page)
@@ -399,6 +422,7 @@ def build(root: Path, out: Path) -> list[Path]:
                 site=site,
                 topic=topic,
                 asset_prefix=asset_prefix,
+                variants=variants,
                 now=now,
             ),
             encoding="utf-8",
@@ -454,12 +478,37 @@ def _cover_size(
     return cache[slug]
 
 
-def _og_cover(root: Path, article) -> str:
-    """Social-image filename for ``article``.
+def _og_cover(root: Path, article, out: Path | None = None) -> str:
+    """Social-image filename for ``article`` (Task 14 upgrade path).
 
-    The front-matter ``cover`` when it exists on disk under
-    ``library/<slug>/``, else the physically guaranteed ``cover.jpg``
-    (social cards must never point at a 404).
+    Preference order:
+    1. the largest generated JPEG hero variant (``cover-<max>.jpg``) when
+       it exists in the output tree — crawlers do not decode WebP;
+    2. the front-matter ``cover`` when that file exists on disk under
+       ``library/<slug>/`` (Task 8 ruling preserved as fallback);
+    3. the physically guaranteed ``cover.jpg``.
     """
-    declared = root / "library" / article.slug / article.cover
-    return article.cover if declared.is_file() else "cover.jpg"
+    base = out if out is not None else root
+    declared_cover = base / "library" / article.slug / article.cover
+    if og_cover := _og_variant(base / "library" / article.slug):
+        return og_cover
+    if article.cover and declared_cover.is_file():
+        return article.cover
+    return "cover.jpg"
+
+
+def _og_variant(variant_dir: Path) -> str | None:
+    """Largest bare ``cover-<W>.jpg`` hero variant present, if any.
+
+    Only bare hero names match (``cover-crop-*``/``cover-sq-*`` carry
+    extra stems and are not social-card candidates).
+    """
+    hero_re = re.compile(r"^cover-(\d+)\.jpg$")
+    widths = sorted(
+        int(m.group(1))
+        for p in variant_dir.glob("cover-*.jpg")
+        if (m := hero_re.match(p.name))
+    )
+    if not widths:
+        return None
+    return f"cover-{widths[-1]}.jpg"

@@ -1,0 +1,67 @@
+{#- Task 14: responsive cover helpers — the single home of <picture> markup.
+
+    Every candidate references files generated at build time by
+    ``br_insight.images`` (see render.build): callers always receive a
+    ``CoverVariants`` plan whose width lists exactly match what exists on
+    disk, so srcsets never cite missing candidates.
+
+    Sizes values mirror layout reality:
+      hero:  container caps — 62rem (≥1024px), 42rem (≥768px), else full
+             viewport minus page padding;
+      cards: ~340px inside the 3-up grid, half viewport mid-width,
+             full width minus padding below.
+-#}
+
+{% set hero_sizes = "(min-width: 64em) 62rem, (min-width: 48em) 42rem, calc(100vw - 2rem)" %}
+{% set card_sizes = "(min-width: 64em) 340px, (min-width: 48em) 45vw, calc(100vw - 2rem)" %}
+
+{% macro cover_srcset(base, widths, ext) -%}
+{%- for w in widths -%}
+{{ base }}{{ w }}.{{ ext }} {{ w }}w{{ ", " if not loop.last }}
+{%- endfor -%}
+{%- endmacro %}
+
+{% macro hero_picture(slug, prefix, alt, width, height, plan) %}
+{#- One candidate ladder, one aspect: every hero variant derives from the
+    uncropped source, so the intrinsic width/height attributes match
+    whatever candidate the browser picks (Lighthouse image-aspect-ratio).
+    The 16:9 crops remain card/featured-only, where the fixed-ratio box
+    keeps them consistent. -#}
+<picture>
+  {%- if plan and plan.hero %}
+  <source type="image/webp"
+          srcset="{{ cover_srcset(prefix ~ 'library/' ~ slug ~ '/cover-', plan.hero, 'webp') }}"
+          sizes="{{ hero_sizes }}">
+  <img
+    src="{{ prefix }}library/{{ slug }}/cover-{{ plan.hero[-1] }}.jpg"
+    srcset="{{ cover_srcset(prefix ~ 'library/' ~ slug ~ '/cover-', plan.hero, 'jpg') }}"
+    sizes="{{ hero_sizes }}"
+    alt="{{ alt }}" width="{{ width }}" height="{{ height }}"
+    fetchpriority="high" decoding="async">
+  {%- else %}
+  <img
+    src="{{ prefix }}library/{{ slug }}/cover.jpg"
+    alt="{{ alt }}" width="{{ width }}" height="{{ height }}"
+    fetchpriority="high" decoding="async">
+  {%- endif %}
+</picture>
+{% endmacro %}
+
+{% macro lazy_cover(slug, prefix, plan=None) %}
+<picture>
+  {%- if plan and plan.crop %}
+  <source type="image/webp"
+          srcset="{{ cover_srcset(prefix ~ 'library/' ~ slug ~ '/cover-crop-', plan.crop, 'webp') }}"
+          sizes="{{ card_sizes }}">
+  <img
+    src="{{ prefix }}library/{{ slug }}/cover-crop-{{ plan.crop[-1] }}.jpg"
+    srcset="{{ cover_srcset(prefix ~ 'library/' ~ slug ~ '/cover-crop-', plan.crop, 'jpg') }}"
+    sizes="{{ card_sizes }}"
+    alt="" loading="lazy" decoding="async" width="505" height="295">
+  {%- else %}
+  <img
+    src="{{ prefix }}library/{{ slug }}/cover-crop.jpg"
+    alt="" loading="lazy" decoding="async" width="505" height="295">
+  {%- endif %}
+</picture>
+{% endmacro %}

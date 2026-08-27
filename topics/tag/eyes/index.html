@@ -16,12 +16,26 @@
   <meta name="twitter:description" content="The film&#39;s most persistent image — watching, glowing, reflecting, judging.">
   <meta name="twitter:image" content="https://www.br-insight.com/assets/img/bri-logo.png">
 
-
-  <link rel="preload" href="../../../assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../../assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../../../assets/fonts/chakra-petch-latin-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../../../assets/fonts/source-serif-4-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../../../assets/fonts/source-serif-4-latin-400italic.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="icon" href="../../../assets/img/favicon.png" type="image/png">  <link rel="stylesheet" href="../../../assets/css/main.min.css"></head>
+  <link rel="icon" href="../../../assets/img/favicon.png" type="image/png">  <link rel="stylesheet" href="../../../assets/css/main.min.css"><script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "source": "document",
+        "where": {
+          "or": [
+            {"href_matches": "/library"},
+            {"href_matches": "/library/*"}
+          ]
+        },
+        "eagerness": "moderate"
+      }
+    ]
+  }
+  </script>
+</head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a><div class="progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
 
@@ -72,9 +86,15 @@
   data-minutes="9"
   data-date="2001-03-12">
   <a class="card__cover" href="/library/city-eyes-and-christ/" tabindex="-1" aria-hidden="true">
-    <img
-      src="../../../library/city-eyes-and-christ/cover-crop.jpg"
-      alt="" loading="lazy" width="505" height="295">
+    <picture>  <source type="image/webp"
+          srcset="../../../library/city-eyes-and-christ/cover-crop-480.webp 480w, ../../../library/city-eyes-and-christ/cover-crop-800.webp 800w"
+          sizes="(min-width: 64em) 340px, (min-width: 48em) 45vw, calc(100vw - 2rem)">
+  <img
+    src="../../../library/city-eyes-and-christ/cover-crop-800.jpg"
+    srcset="../../../library/city-eyes-and-christ/cover-crop-480.jpg 480w, ../../../library/city-eyes-and-christ/cover-crop-800.jpg 800w"
+    sizes="(min-width: 64em) 340px, (min-width: 48em) 45vw, calc(100vw - 2rem)"
+    alt="" loading="lazy" decoding="async" width="505" height="295"></picture>
+
   </a>
   <div class="card__body">
     <h3 class="card__title"><a href="/library/city-eyes-and-christ/">The City, Eyes and Christ</a></h3>
@@ -94,9 +114,15 @@
   data-minutes="6"
   data-date="1995-11-03">
   <a class="card__cover" href="/library/editors-article/" tabindex="-1" aria-hidden="true">
-    <img
-      src="../../../library/editors-article/cover-crop.jpg"
-      alt="" loading="lazy" width="505" height="295">
+    <picture>  <source type="image/webp"
+          srcset="../../../library/editors-article/cover-crop-480.webp 480w, ../../../library/editors-article/cover-crop-800.webp 800w"
+          sizes="(min-width: 64em) 340px, (min-width: 48em) 45vw, calc(100vw - 2rem)">
+  <img
+    src="../../../library/editors-article/cover-crop-800.jpg"
+    srcset="../../../library/editors-article/cover-crop-480.jpg 480w, ../../../library/editors-article/cover-crop-800.jpg 800w"
+    sizes="(min-width: 64em) 340px, (min-width: 48em) 45vw, calc(100vw - 2rem)"
+    alt="" loading="lazy" decoding="async" width="505" height="295"></picture>
+
   </a>
   <div class="card__body">
     <h3 class="card__title"><a href="/library/editors-article/">Editor&#39;s Article</a></h3>
