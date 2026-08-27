@@ -284,7 +284,7 @@ ANATOMY_CTX = dict(
     # Task 14: a plan as images.generate_cover_variants would produce for a
     # 1167px-wide source (nothing wider than the source is ever cited).
     cover_variants=CoverVariants(
-        source="cover.jpg", hero=(480, 800, 1167), crop=(480, 800), square=400
+        source="cover.jpg", hero=(480, 800, 1167), crop=(480, 800)
     ),
 )
 

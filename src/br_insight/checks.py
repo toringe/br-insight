@@ -116,9 +116,9 @@ def _fragment_declared(target_html: Path, fragment: str) -> bool:
 def collect_pages(root: Path) -> list[Path]:
     """Built HTML pages only.
 
-    ``templates/`` (Jinja sources) and ``assets/templates/`` (page
-    skeletons) are authoring inputs that happen to live inside the tree;
-    their unrendered ``{{ }}`` hrefs would false-fail the link check.
+    ``templates/`` (Jinja sources) is an authoring input that happens to
+    live inside the tree; its unrendered ``{{ }}`` hrefs would false-fail
+    the link check.
     """
     return sorted(
         p

@@ -8,7 +8,6 @@ from PIL import Image
 from br_insight.images import (
     CROP_RATIOS,
     HERO_WIDTHS,
-    SQUARE_WIDTH,
     generate_cover_variants,
 )
 
@@ -39,15 +38,19 @@ class TestVariantGeneration:
             assert (paths["dir"] / f"cover-{width}.jpg").is_file()
         assert len(result.hero) == len(HERO_WIDTHS)
 
-    def test_crop_and_square_variants_are_correctly_sized(self, tmp_path):
+    def test_crop_variants_are_correctly_sized(self, tmp_path):
         paths = _make_site(tmp_path)
         generate_cover_variants(paths["dir"])
         for width in (480, 800):
             crop = Image.open(paths["dir"] / f"cover-crop-{width}.webp")
             assert crop.size[0] == width
             assert abs(crop.size[1] - round(width * 9 / 16)) <= 1
-        square = Image.open(paths["dir"] / f"cover-sq-{SQUARE_WIDTH}.webp")
-        assert square.size == (SQUARE_WIDTH, SQUARE_WIDTH)
+
+    def test_no_square_variants_are_generated(self, tmp_path):
+        paths = _make_site(tmp_path)
+        result = generate_cover_variants(paths["dir"])
+        assert not list(paths["dir"].glob("cover-sq-*"))
+        assert not hasattr(result, "square")
 
     def test_jpg_fallbacks_are_real_jpeg_bytes(self, tmp_path):
         paths = _make_site(tmp_path)
@@ -157,5 +160,4 @@ class TestRealCorpusSources:
 
     def test_reference_data_matches_module_constants(self):
         assert HERO_WIDTHS == (480, 800, 1280)
-        assert SQUARE_WIDTH == 400
-        assert set(CROP_RATIOS) == {"16/9", "1/1"}
+        assert set(CROP_RATIOS) == {"16/9"}

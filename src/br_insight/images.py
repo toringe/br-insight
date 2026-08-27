@@ -1,15 +1,13 @@
 """Build-time cover-variant generation (Task 14).
 
 Every article's source cover is transposed into responsive WebP variants
-plus JPEG fallbacks (crawlers and older browsers skip WebP), a 16:9 card
-crop set, and a 1:1 square. Sources are never modified; outputs already
-newer than the source are left alone so repeated in-tree builds stay
-idempotent.
+plus JPEG fallbacks (crawlers and older browsers skip WebP) and a 16:9 card
+crop set. Sources are never modified; outputs already newer than the source
+are left alone so repeated in-tree builds stay idempotent.
 
 Naming contract:
     cover-{W}.webp|.jpg          full-bleed hero candidates
     cover-crop-{W}.webp|.jpg     16:9 center crop for cards/featured
-    cover-sq-{W}.webp|.jpg       1:1 center crop
 
 ``W`` is always the *actual* pixel width written (never wider than the
 source), and every width reported by :class:`CoverVariants` is guaranteed
@@ -26,10 +24,9 @@ from PIL import Image
 # Width ladder per use site.
 HERO_WIDTHS: tuple[int, ...] = (480, 800, 1280)
 CROP_WIDTHS: tuple[int, ...] = (480, 800)
-SQUARE_WIDTH: int = 400
 
-# Center-crop aspect ratios, keyed by filename fragment.
-CROP_RATIOS: dict[str, float] = {"16/9": 16 / 9, "1/1": 1 / 1}
+# Center-crop aspect ratio (filename fragment → ratio).
+CROP_RATIOS: dict[str, float] = {"16/9": 16 / 9}
 
 JPEG_QUALITY = 80
 WEBP_QUALITY = 80
@@ -46,7 +43,6 @@ class CoverVariants:
     source: str
     hero: tuple[int, ...]
     crop: tuple[int, ...]
-    square: int
 
 
 def _flatten(im: Image.Image) -> Image.Image:
@@ -112,12 +108,10 @@ def generate_cover_variants(
         crop_widths = _effective_widths(
             CROP_WIDTHS, _center_crop(base_rgb, CROP_RATIOS["16/9"]).size[0]
         )
-        square_widths = _effective_widths((SQUARE_WIDTH,), base_rgb.size[0])
         plan = CoverVariants(
             source=source_name,
             hero=hero_widths,
             crop=crop_widths,
-            square=square_widths[-1] if square_widths else SQUARE_WIDTH,
         )
 
         images: list[tuple[str, Image.Image]] = []
@@ -133,16 +127,6 @@ def generate_cover_variants(
                 else cropped
             )
             images.append((f"cover-crop-{width}", scaled))
-        sq_cropped = _center_crop(base_rgb, CROP_RATIOS["1/1"])
-        if square_widths:
-            side = square_widths[-1]
-            sq_scaled = (
-                sq_cropped.resize((side, side), _RESAMPLE)
-                if side != sq_cropped.size[0]
-                else sq_cropped
-            )
-            images.append((f"cover-sq-{side}", sq_scaled))
-
         for stem, image in images:
             output_stem = dest_dir / stem
             if not _is_current(output_stem.with_suffix(".webp"), source_mtime):

@@ -330,7 +330,7 @@ def build(root: Path, out: Path) -> list[Path]:
 
 
     # Task 14: generate responsive cover variants (WebP + JPEG fallbacks,
-    # 16:9 card crops, 1:1 squares) next to each page's output so built
+    # 16:9 card crops) next to each page's output so built
     # pages can cite them. Sources stay read-only; existing-current
     # outputs are skipped, keeping in-tree rebuilds idempotent.
     variants: dict[str, CoverVariants | None] = {

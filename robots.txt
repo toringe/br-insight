@@ -1,3 +1,4 @@
 User-agent: *
-Disallow: /README.md
-Disallow: /assets/templates/
+Allow: /
+
+Sitemap: https://www.br-insight.com/sitemap.xml

@@ -53,7 +53,19 @@ def _run_build(args: argparse.Namespace) -> int:
 
 
 def _run_serve(args: argparse.Namespace) -> int:
-    print("serve: serving the built site over HTTP (skeleton; not implemented yet)")
+    import http.server
+    import functools
+
+    root = Path.cwd()
+    handler = functools.partial(
+        http.server.SimpleHTTPRequestHandler, directory=str(root)
+    )
+    with http.server.ThreadingHTTPServer(("", 8000), handler) as httpd:
+        print("serve: serving the built site at http://localhost:8000 (Ctrl-C stops)")
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
     return 0
 
 
