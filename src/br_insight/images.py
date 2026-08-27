@@ -150,8 +150,7 @@ def generate_cover_variants(
             if not _is_current(output_stem.with_suffix(".jpg"), source_mtime):
                 _write(dest_dir, f"{stem}.jpg", image, "JPEG", quality=JPEG_QUALITY)
     finally:
-        # Copies referencing resized variants share buffers lazily; drop refs.
-        del base_rgb
+        base_rgb.close()
     return plan
 
 
@@ -159,14 +158,3 @@ def _write(dest_dir: Path, filename: str, image: Image.Image, fmt: str, **params
     dest_dir.mkdir(parents=True, exist_ok=True)
     path = dest_dir / filename
     image.save(path, fmt, **params)
-
-
-def og_cover_filename(plan: CoverVariants) -> str | None:
-    """Largest generated JPEG variant — the social-card default.
-
-    Crawlers do not decode WebP, so og:image/twitter:image/JSON-LD cite
-    the biggest JPEG fallback instead of a WebP hero candidate.
-    """
-    if not plan.hero:
-        return None
-    return f"cover-{plan.hero[-1]}.jpg"

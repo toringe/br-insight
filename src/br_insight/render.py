@@ -27,7 +27,7 @@ from PIL import Image
 
 from br_insight.articles import extract_toc, load_all, related
 from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy, resolve_featured
-from br_insight.images import CoverVariants, generate_cover_variants, og_cover_filename
+from br_insight.images import CoverVariants, generate_cover_variants
 from br_insight.textutils import slugify
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
