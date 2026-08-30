@@ -1,6 +1,7 @@
 """Tests for Task 11 topic pages: pure ctx helpers + built /topics/ routes."""
 
 import datetime
+import re
 from types import SimpleNamespace
 
 import pytest
@@ -196,7 +197,7 @@ class TestTopicTemplateAnatomy:
 
     def test_relative_asset_depth_via_context(self):
         html = self._render("Film Analysis", kind="category")
-        assert 'href="../../assets/css/main.min.css"' in html
+        assert re.search(r'href="\.\./\.\./assets/css/main\.min\.css(\?v=[0-9a-f]{8})?"', html)
         assert 'src="../../library/' in html
 
     def test_html_escapes_names(self):

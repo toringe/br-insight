@@ -51,7 +51,7 @@ class TestAboutPage:
     def test_built_with_new_design_chrome(self, about):
         assert "<!DOCTYPE html>" in about
         assert '<nav' in about and 'aria-label="Primary"' in about
-        assert 'href="/assets/css/main.min.css"' in about
+        assert re.search(r'href="/assets/css/main\.min\.css(\?v=[0-9a-f]{8})?"', about)
 
     def test_title_and_canonical(self, about):
         assert "<title>About — Blade Runner Insight</title>" in about

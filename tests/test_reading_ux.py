@@ -44,7 +44,7 @@ class TestBaseAnatomy:
         assert "hidden" in html[btn_at:btn_at + 120]
 
     def test_orchestrator_script_tag(self, html):
-        assert '<script type="module" src="/assets/js/main.js">' in html
+        assert re.search(r'<script type="module" src="/assets/js/main\.js(\?v=[0-9a-f]{8})?">', html)
 
 
 class TestHeaderAnatomy:

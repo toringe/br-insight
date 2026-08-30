@@ -240,11 +240,19 @@ class TestCssAnchorContract:
         assert ".prose .anchor" in after[:200]
 
     def test_min_css_is_regenerated_from_source(self):
+        import sys
+
         import rcssmin
+
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import minify_css
 
         source = (REPO_ROOT / "assets/css/main.css").read_text(encoding="utf-8")
         minified = (REPO_ROOT / "assets/css/main.min.css").read_text(encoding="utf-8")
-        assert minified == rcssmin.cssmin(source)
+        expected = minify_css._version_fonts(
+            rcssmin.cssmin(source), REPO_ROOT / "assets/css"
+        )
+        assert minified == expected
 
     def test_hidden_attribute_beats_author_display_rules(self):
         """Task 17 C-1 regression: filter.js toggles [hidden] on .card
@@ -359,8 +367,10 @@ class TestArticleAnatomy:
         )
 
     def test_relative_asset_depth(self, html):
-        assert 'href="../../assets/css/main.min.css"' in html
-        assert 'href="../../assets/fonts/chakra-petch-latin-400.woff2"' in html
+        assert re.search(r'href="\.\./\.\./assets/css/main\.min\.css(\?v=[0-9a-f]{8})?"', html)
+        assert re.search(
+            r'href="\.\./\.\./assets/fonts/chakra-petch-latin-400\.woff2(\?v=[0-9a-f]{8})?"', html
+        )
 
     def test_jsonld_article_schema(self, html):
         assert '"@type": "Article"' in html
@@ -503,7 +513,7 @@ class TestBuildPipeline:
         out, _ = built
         sample = next((out / "library").glob("*/index.html"))
         text = sample.read_text(encoding="utf-8")
-        assert 'href="../../assets/css/main.min.css"' in text
+        assert re.search(r'href="\.\./\.\./assets/css/main\.min\.css(\?v=[0-9a-f]{8})?"', text)
 
     def test_built_pages_carry_jsonld(self, built):
         from br_insight.articles import load_all

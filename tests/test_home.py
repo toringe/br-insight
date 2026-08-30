@@ -200,7 +200,7 @@ def html():
 class TestHomeAnatomy:
     def test_title_and_chrome_defaults(self, html):
         assert "<!DOCTYPE html>" in html
-        assert 'href="/assets/css/main.min.css"' in html  # root asset depth
+        assert re.search(r'href="/assets/css/main\.min\.css(\?v=[0-9a-f]{8})?"', html)  # root asset depth
         assert 'href="/library/"' in html
 
     @pytest.mark.parametrize(

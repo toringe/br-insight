@@ -66,10 +66,11 @@
   {#- Font preload strategy (Task 14): regular Chakra 400/600 and regular
       Source Serif only. The italic serif is prose-only and arrives under
       font-display: swap; preloading it wasted bytes on nearly every page.
-      @font-face rules are untouched. -#}
-  <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="{{ asset_prefix }}assets/fonts/source-serif-4-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+      @font-face rules are untouched. ?v= hashes (Task 19b) keep preloads
+      in sync with the versioned urls the stylesheet cites. -#}
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-400.woff2{{ asset_ver('assets/fonts/chakra-petch-latin-400.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-600.woff2{{ asset_ver('assets/fonts/chakra-petch-latin-600.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/source-serif-4-latin-400.woff2{{ asset_ver('assets/fonts/source-serif-4-latin-400.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="{{ asset_prefix }}assets/img/favicon.png" type="image/png">
 
   {#- LCP image preloads belong to pages with an above-the-fold cover
@@ -79,7 +80,7 @@
 
   {#- Critical CSS placeholder: children may inline ≤ 8 KB of above-the-fold CSS. -#}
   {% block critical_css %}{% endblock %}
-  <link rel="stylesheet" href="{{ asset_prefix }}assets/css/main.min.css">
+  <link rel="stylesheet" href="{{ asset_prefix }}assets/css/main.min.css{{ asset_ver('assets/css/main.min.css') }}">
 
   {#- Speculation Rules (Task 14): moderate-eagerness prerender for
       library routes — href_matches is scoped same-origin by the spec, so
@@ -144,6 +145,6 @@
   {%- if fx_payload %}
   <script>window.__FX__={{ fx_payload | tojson }};</script>
   {%- endif %}
-  <script type="module" src="{{ asset_prefix }}assets/js/main.js"></script>
+  <script type="module" src="{{ asset_prefix }}assets/js/main.js{{ asset_ver('assets/js/main.js') }}"></script>
 </body>
 </html>

@@ -3,6 +3,7 @@ build integration, and the client-side filter.js contract."""
 
 import datetime
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -174,7 +175,7 @@ class TestLibraryAnatomy:
         assert 'href="https://www.br-insight.com/library/"' in html  # canonical
 
     def test_asset_depth_is_one_level(self, html):
-        assert 'href="../assets/css/main.min.css"' in html
+        assert re.search(r'href="\.\./assets/css/main\.min\.css(\?v=[0-9a-f]{8})?"', html)
         assert '../library/voight-kampff-test/cover-crop.jpg"' in html
 
     def test_filter_toolbar_contract(self, html):

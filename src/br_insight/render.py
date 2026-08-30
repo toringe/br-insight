@@ -17,6 +17,7 @@ from __future__ import annotations
 import datetime
 import email.utils
 import functools
+import hashlib
 import re
 from collections import Counter
 from pathlib import Path
@@ -295,6 +296,26 @@ def fx_config(site: SiteConfig) -> dict | None:
     }
 
 
+@functools.lru_cache(maxsize=64)
+def _asset_ver(root_str: str, relpath: str) -> str:
+    """``?v=<hash8>`` suffix for a repo asset, or ``""`` if it is missing.
+
+    Cached per process — a build reads each asset once, and the CLI runs
+    are fresh processes, so staleness across builds is not a concern.
+    """
+    path = Path(root_str) / relpath
+    try:
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()[:8]
+    except OSError:
+        return ""
+    return f"?v={digest}"
+
+
+def asset_ver(relpath: str) -> str:
+    """Jinja global: version-query suffix for a repo-root asset path."""
+    return _asset_ver(str(REPO_ROOT), relpath)
+
+
 def get_env() -> Environment:
     """Shared Jinja2 environment loading ``templates/`` from the repo root."""
     env = Environment(
@@ -305,6 +326,7 @@ def get_env() -> Environment:
     )
     env.globals["now"] = _Clock()
     env.globals["fx_config"] = fx_config
+    env.globals["asset_ver"] = asset_ver
     env.filters["decade"] = decade
     return env
 
