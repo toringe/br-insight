@@ -71,6 +71,28 @@ def facets(articles) -> dict[str, list[str]]:
     }
 
 
+def library_facets(articles) -> dict[str, dict[str, int]]:
+    """Per-value chip counts for the library filter toolbar.
+
+    Mirrors the :func:`facets` vocabularies keyed by the chips' ``data-group``
+    names (``category``/``tag``/``author``/``decade``) as ``value → count``;
+    multi-tag articles count once per tag.
+    """
+    counts: dict[str, Counter] = {
+        "category": Counter(),
+        "tag": Counter(),
+        "author": Counter(),
+        "decade": Counter(),
+    }
+    for article in articles:
+        counts["category"][article.category] += 1
+        counts["author"][article.author] += 1
+        counts["decade"][decade(article.date)] += 1
+        for tag in article.tags:
+            counts["tag"][tag] += 1
+    return {group: dict(values) for group, values in counts.items()}
+
+
 def archive_stats(articles) -> dict[str, int]:
     """Build-time totals for the home stats band."""
     return {
@@ -377,6 +399,7 @@ def build(root: Path, out: Path) -> list[Path]:
             articles=articles,
             variants=variants,
             **facets(articles),
+            chip_counts=library_facets(articles),
             current_path="library/",
             now=now,
         ),

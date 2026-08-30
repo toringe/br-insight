@@ -16,41 +16,58 @@
       <p class="page-head__lead">In-depth analysis of Blade Runner and its themes — every essay in the archive, filterable by category, tag, decade, and author.</p>
     </header>
 
-    <form class="filter-bar" data-filter-bar aria-label="Filter articles">
-      <div class="filter-bar__row">
-        <p class="filter-bar__label">Category</p>
-        {%- for category in categories %}
-        <button type="button" class="chip" data-group="category" data-value="{{ category }}" aria-pressed="false">{{ category }}</button>
-        {%- endfor %}
-      </div>
-      <div class="filter-bar__row">
-        <p class="filter-bar__label">Tag</p>
-        {%- for tag in tags %}
-        <button type="button" class="chip" data-group="tag" data-value="{{ tag }}" aria-pressed="false">{{ tag }}</button>
-        {%- endfor %}
-      </div>
-      <div class="filter-bar__row">
-        <p class="filter-bar__label">Decade</p>
-        {%- for d in decades %}
-        <button type="button" class="chip" data-group="decade" data-value="{{ d }}" aria-pressed="false">{{ d }}</button>
-        {%- endfor %}
-      </div>
-      <div class="filter-bar__row">
-        <p class="filter-bar__label">Author</p>
-        {%- for author in authors %}
-        <button type="button" class="chip" data-group="author" data-value="{{ author }}" aria-pressed="false">{{ author }}</button>
-        {%- endfor %}
-      </div>
-      <div class="filter-bar__row filter-bar__row--sort">
-        <p class="filter-bar__label" id="sort-label">Sort</p>
-        <select name="sort" data-sort aria-labelledby="sort-label">
+    <form class="filterbar" data-filter-bar aria-label="Filter articles">
+      <div class="filterbar__toolbar">
+        <details class="filterbar__details">
+          <summary class="filterbar__toggle">
+            Filter <span class="filterbar__badge" data-filter-badge hidden>0</span>
+          </summary>
+          <div class="filterbar__panel">
+            <div class="filterbar__group filterbar__group--wide">
+              <p class="filterbar__label">Category</p>
+              <div class="filterbar__chips">
+                {%- for category in categories %}
+                <button type="button" class="chip chip--sm" data-group="category" data-value="{{ category }}" aria-pressed="false" data-count="{{ chip_counts.category[category] }}">{{ category }}<span class="chip__count">{{ chip_counts.category[category] }}</span></button>
+                {%- endfor %}
+              </div>
+            </div>
+            <div class="filterbar__group filterbar__group--wide">
+              <p class="filterbar__label">Decade</p>
+              <div class="filterbar__chips">
+                {%- for d in decades %}
+                <button type="button" class="chip chip--sm" data-group="decade" data-value="{{ d }}" aria-pressed="false" data-count="{{ chip_counts.decade[d] }}">{{ d }}<span class="chip__count">{{ chip_counts.decade[d] }}</span></button>
+                {%- endfor %}
+              </div>
+            </div>
+            <div class="filterbar__group">
+              <p class="filterbar__label">Tag</p>
+              <div class="filterbar__chips filterbar__chips--scroll">
+                {%- for tag in tags %}
+                <button type="button" class="chip chip--sm" data-group="tag" data-value="{{ tag }}" aria-pressed="false" data-count="{{ chip_counts.tag[tag] }}">{{ tag }}<span class="chip__count">{{ chip_counts.tag[tag] }}</span></button>
+                {%- endfor %}
+              </div>
+            </div>
+            <div class="filterbar__group">
+              <p class="filterbar__label">Author</p>
+              <div class="filterbar__chips filterbar__chips--scroll">
+                {%- for author in authors %}
+                <button type="button" class="chip chip--sm" data-group="author" data-value="{{ author }}" aria-pressed="false" data-count="{{ chip_counts.author[author] }}">{{ author }}<span class="chip__count">{{ chip_counts.author[author] }}</span></button>
+                {%- endfor %}
+              </div>
+            </div>
+          </div>
+        </details>
+        <span class="filterbar__pills" data-pills aria-label="Active filters"></span>
+        <span class="filterbar__spacer"></span>
+        <label class="filterbar__sort-label" for="library-sort" hidden>Sort</label>
+        <select name="sort" id="library-sort" data-sort>
           <option value="" selected>Newest first</option>
-          <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
           <option value="longest">Longest read</option>
           <option value="shortest">Shortest read</option>
           <option value="az">Title A–Z</option>
         </select>
+        <button type="button" class="btn btn--ghost btn--sm" data-clear-filters hidden>Clear</button>
       </div>
     </form>
 

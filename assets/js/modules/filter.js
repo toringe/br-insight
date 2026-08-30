@@ -8,7 +8,9 @@
  * A Clear filters action resets chips, sort, and params to the full list.
  *
  * Exports pure helpers (parseParams, toSearch, matches, compareCards)
- * for testing; init() wires the prerendered DOM.
+ * for testing; init() wires the prerendered DOM. Active filters also
+ * render as removable pills with an active-count badge on the toolbar;
+ * incoming params auto-open the disclosure panel.
  */
 
 const GROUPS = ["category", "tag", "author", "decade"];
@@ -91,6 +93,8 @@ export function init(doc = document) {
   const emptyMessage = doc.querySelector("[data-empty]");
   const select = doc.querySelector("[data-sort]");
   const clearBtn = doc.querySelector("[data-clear-filters]");
+  const pills = doc.querySelector("[data-pills]");
+  const badge = doc.querySelector("[data-filter-badge]");
   const originalOrder = new Map(
     [...grid.querySelectorAll(".card")].map((card, i) => [card, i])
   );
@@ -99,6 +103,23 @@ export function init(doc = document) {
   const state = incoming.state;
   let sort = incoming.sort || "";
   if (select && SORTS.has(sort)) select.value = sort;
+
+  // Deep link: incoming filter params open the disclosure panel so the
+  // pressed chips are visible without a second click.
+  const details = bar && bar.querySelector("details");
+  if (details && GROUPS.some((g) => state[g].size)) details.open = true;
+
+  // Pill removal: the × button deletes exactly that group/value pair.
+  if (pills) {
+    pills.addEventListener("click", (event) => {
+      const btn = event.target.closest && event.target.closest("button");
+      if (!btn) return;
+      const pill = btn.closest("[data-group]");
+      if (!pill || !state[pill.dataset.group]) return;
+      state[pill.dataset.group].delete(pill.dataset.value);
+      render();
+    });
+  }
 
   render();
 
@@ -160,7 +181,47 @@ export function init(doc = document) {
     render();
   }
 
+  function activeTotal() {
+    let total = 0;
+    for (const g of GROUPS) total += state[g].size;
+    return total;
+  }
+
+  /** One .pill per active value (createElement/textContent only — no HTML
+   *  parsing), ordered like toSearch(); badge + Clear track the total. */
+  function renderPills() {
+    if (pills) {
+      pills.textContent = ""; // clears the container
+      for (const g of GROUPS) {
+        for (const value of [...state[g]].sort()) {
+          const pill = doc.createElement("span");
+          pill.className = "pill";
+          pill.dataset.group = g;
+          pill.dataset.value = value;
+          const label = doc.createElement("span");
+          label.className = "pill__label";
+          label.textContent = value;
+          pill.appendChild(label);
+          const remove = doc.createElement("button");
+          remove.type = "button";
+          remove.className = "pill__remove";
+          remove.setAttribute("aria-label", `Remove ${value} filter`);
+          remove.textContent = "×";
+          pill.appendChild(remove);
+          pills.appendChild(pill);
+        }
+      }
+    }
+    const total = activeTotal();
+    if (badge) {
+      badge.textContent = String(total);
+      badge.hidden = total === 0;
+    }
+    if (clearBtn) clearBtn.hidden = total === 0;
+  }
+
   function render() {
+    renderPills();
     if (bar) {
       for (const chip of bar.querySelectorAll("button[data-group]")) {
         chip.setAttribute(

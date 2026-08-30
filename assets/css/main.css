@@ -515,6 +515,23 @@ a.chip:hover {
   text-shadow: 0 0 8px rgba(0, 229, 255, .5);
 }
 
+/* Compact toolbar variant with per-chip corpus count. */
+.chip--sm {
+  gap: .35em;
+  padding: .18em .6em;
+  font-size: .6875rem;
+  letter-spacing: .08em;
+}
+
+.chip__count {
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: .85em;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: .65;
+}
+
 /* --- Eyebrow ("Esper scan" label) ------------------------------------------ */
 /* Signature section marker: mono uppercase letterspaced amber with literal
    [BRACKETS] drawn by pseudo-elements so screen readers hear the clean label.
@@ -705,34 +722,134 @@ h2.eyebrow {
   color: var(--muted);
 }
 
-.filter-bar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
+.filterbar {
+  position: relative; /* anchors the dropdown panel */
   margin-block: var(--space-l);
-  padding: var(--space-m);
+  padding: var(--space-2xs) var(--space-s);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
 }
 
-.filter-bar__row {
+.filterbar__toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2xs);
 }
 
-.filter-bar__label {
-  min-width: 5.5em;
-  color: var(--muted);
+/* details stays a real box: display:contents on <details> breaks the native
+   summary toggle and click delivery inside its subtree in Chromium. The open
+   panel drops below the toolbar as a full-width overlay anchored to the form. */
+.filterbar__details {
+  display: block;
+}
+
+.filterbar__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .5em;
+  padding: .3em .85em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
   font-family: var(--font-display);
   font-size: var(--fs-xs);
   letter-spacing: .12em;
   text-transform: uppercase;
 }
 
-.filter-bar select {
+.filterbar__toggle::-webkit-details-marker {
+  display: none;
+}
+
+.filterbar__toggle::before {
+  content: "▸";
+  color: var(--cyan);
+}
+
+.filterbar__details[open] .filterbar__toggle::before {
+  content: "▾";
+}
+
+.filterbar__toggle:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.filterbar__badge {
+  padding: .05em .45em;
+  border-radius: var(--radius-xs);
+  background: var(--amber);
+  color: var(--ink-on-neon);
+  font-family: var(--font-mono);
+  font-size: .6875rem;
+  letter-spacing: 0;
+}
+
+.filterbar__panel {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + var(--space-3xs));
+  z-index: 20;
+  display: grid;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 768px) {
+  .filterbar__panel {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--space-l);
+  }
+}
+
+.filterbar__group--wide {
+  grid-column: 1 / -1;
+}
+
+.filterbar__label {
+  margin-bottom: var(--space-2xs);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.filterbar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3xs);
+}
+
+.filterbar__chips--scroll {
+  max-height: 10rem;
+  overflow: auto;
+}
+
+.filterbar__pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3xs);
+}
+
+.filterbar__spacer {
+  flex: 1 1 auto;
+}
+
+.filterbar__sort-label {
+  display: inline;
+}
+
+.filterbar select {
   padding: .3em .85em;
   border: 1px solid var(--line);
   border-radius: var(--radius-xs);
@@ -743,7 +860,41 @@ h2.eyebrow {
   letter-spacing: .08em;
 }
 
-.filter-bar select:focus-visible {
+.filterbar select:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  padding: .15em .55em;
+  border: 1px solid var(--cyan);
+  border-radius: var(--radius-xs);
+  background: var(--cyan-tint);
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.pill__remove {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+
+.pill__remove:hover {
+  color: var(--pink);
+}
+
+.pill__remove:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 2px;
 }
