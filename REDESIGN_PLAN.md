@@ -1,5 +1,11 @@
 # Blade Runner Insight — 2026 Redesign Implementation Plan
 
+> **STATUS: COMPLETE** — all 17 tasks done on branch `9th`, tagged `v2.0.0-site-redesign`
+> (final review clean; QA fix waves `8fec05b..93b519a`, `7cb9c0c..370e405`). Execution was
+> tracked in `.superpowers/sdd/REDESIGN_PLAN/progress.md` (rulings, deferred minors, fix
+> rounds); the checkboxes below were ticked retroactively to match reality, not ticked
+> live during execution.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended)
 > or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax.
 
@@ -72,24 +78,24 @@ Legacy removals (final phase): `assets/js/jquery*.js`, `skel.min.js`, `util.js`,
 **Files:** Modify `pyproject.toml`; Create `src/br_insight/__init__.py`, `src/br_insight/cli.py`,
 `tests/conftest.py`.
 
-- [ ] Add deps: `jinja2`, `markdown-it-py`, `PyYAML`, `Pillow`; dev-deps: `pytest`.
-- [ ] `cli.py`: subcommands `build --out .` (default repo root), `serve` (http.server wrapper),
+- [x] Add deps: `jinja2`, `markdown-it-py`, `PyYAML`, `Pillow`; dev-deps: `pytest`.
+- [x] `cli.py`: subcommands `build --out .` (default repo root), `serve` (http.server wrapper),
   `check` (link/integrity checks used by Task 15). Exit codes non-zero on failure.
-- [ ] Step: `uv sync && uv run br-insight --help` prints usage.
-- [ ] Commit `chore: scaffold br_insight build package`.
+- [x] Step: `uv sync && uv run br-insight --help` prints usage.
+- [x] Commit `chore: scaffold br_insight build package`.
 
 ### Task 2: Front-matter normalization (one-time)
 
 **Files:** Create `scripts/normalize_frontmatter.py`, `tests/test_frontmatter.py`;
 Modify all 29 `library/*/article.md`.
 
-- [ ] Normalizer: tabs→2 spaces inside front matter; strip trailing whitespace; coerce `date`
+- [x] Normalizer: tabs→2 spaces inside front matter; strip trailing whitespace; coerce `date`
   to ISO `YYYY-MM-DD`; ensure `taxonomy.category: article`; ensure `summary.enabled/size`
   defaults (`true`/`100`) when absent; preserve `copyright:`/`source:` fields untouched.
   Idempotent (running twice = no diff).
-- [ ] Test: parse every `library/*/article.md` with strict PyYAML post-normalization — 29/29 pass;
+- [x] Test: parse every `library/*/article.md` with strict PyYAML post-normalization — 29/29 pass;
   second run produces empty git diff.
-- [ ] Run once; commit `chore: normalize article front matter`.
+- [x] Run once; commit `chore: normalize article front matter`.
 
 ### Task 3: Article model + loaders
 
@@ -110,10 +116,10 @@ def related(a: Article, all: list[Article]) -> list[Article]: ...  # shared tags
 def parse_date(raw: str) -> datetime: ...             # accepts DD-MM-YYYY and ISO
 ```
 
-- [ ] Tests first: reading_time edges (0 words→1, 220→1, 441→3); parse_date both formats;
+- [x] Tests first: reading_time edges (0 words→1, 220→1, 441→3); parse_date both formats;
   load_all returns 29 articles; unknown-author passthrough; missing cover_artist → None.
-- [ ] Implement; `uv run pytest -q` green.
-- [ ] Commit `feat: article model, lenient front matter, reading time`.
+- [x] Implement; `uv run pytest -q` green.
+- [x] Commit `feat: article model, lenient front matter, reading time`.
 
 ---
 
@@ -166,9 +172,9 @@ assignments:
 
 > **STOP: present this mapping to the owner; apply corrections before continuing.**
 
-- [ ] Loader in `config.py` validates: every slug exists on disk; every tag ∈ tag_vocab;
+- [x] Loader in `config.py` validates: every slug exists on disk; every tag ∈ tag_vocab;
   every article assigned exactly one category. Test each rule.
-- [ ] Commit `feat: curated taxonomy (owner-reviewed)`.
+- [x] Commit `feat: curated taxonomy (owner-reviewed)`.
 
 ### Task 5: Site config
 
@@ -254,9 +260,9 @@ byline `By {author} · {date} · {minutes} min read` · optional TOC aside (≥3
 prose (markdown-it-py, heading anchors) · end-block: prev/next + “← Back to Library” +
 related (shared tags) · focus-mode target hooks (`data-focus-hide` on chrome/decor).
 
-- [ ] Test: build idempotency — two consecutive `build`s produce identical tree hashes;
+- [x] Test: build idempotency — two consecutive `build`s produce identical tree hashes;
   every `/library/<slug>/` written; relative asset depth correct (`../../assets/…`).
-- [ ] Commit `feat: render engine + article template`.
+- [x] Commit `feat: render engine + article template`.
 
 ### Task 9: Library page + filters
 
@@ -334,14 +340,14 @@ fx:
 
 ### Task 14: Performance pass
 
-- [ ] `images.py` (Pillow): covers → WebP 480/800/1280w (q80) + JPG fallback; regenerate
+- [x] `images.py` (Pillow): covers → WebP 480/800/1280w (q80) + JPG fallback; regenerate
   `cover-crop` (16:9) and `cover-sq` (1:1) variants; explicit width/height everywhere (CLS 0).
   Verify: largest article-page payload (excluding lazily loaded) < 350 KB.
-- [ ] Speculation Rules `<script type=speculationrules>` prerender/prefetch same-site links;
+- [x] Speculation Rules `<script type=speculationrules>` prerender/prefetch same-site links;
   `<link rel=preload>` for font + LCP cover only.
-- [ ] Budget script in `cli.py check`: gzip sizes of css/js vs Global Constraints; fails build
+- [x] Budget script in `cli.py check`: gzip sizes of css/js vs Global Constraints; fails build
   when exceeded.
-- [ ] Lighthouse (local): ≥95 perf/a11y/bp/seo on Home, Library, one long article, mobile profile.
+- [x] Lighthouse (local): ≥95 perf/a11y/bp/seo on Home, Library, one long article, mobile profile.
 
 ### Task 15: Search
 
@@ -368,13 +374,15 @@ fx:
 
 ### Task 17: QA sweep
 
-- [ ] `uv run br-insight check`: zero broken internal links; idempotent rebuild (clean git tree).
-- [ ] `pytest -q` all green.
-- [ ] Browser smoke (OpenCode browser tools, `serve`): iPhone SE / iPad / 1440 desktop widths —
+- [x] `uv run br-insight check`: zero broken internal links; idempotent rebuild (clean git tree).
+- [x] `pytest -q` all green.
+- [x] Browser smoke (OpenCode browser tools, `serve`): iPhone SE / iPad / 1440 desktop widths —
   home, library + filters, search, one short + one long article, focus mode, atmosphere toggle,
   reduced-motion emulation, back-to-top, progress bar, 404.
-- [ ] Owner walkthrough checklist in PR description; screenshots at 3 breakpoints.
-- [ ] Final commit sequence tidy-up; tag `v2.0.0-site-redesign`.
+- [x] Owner walkthrough checklist in PR description; screenshots at 3 breakpoints.
+  *(Reality: no PR — owner kept the branch unmerged. The walkthrough record lives in the
+  final-review reports + ledger under `.superpowers/sdd/REDESIGN_PLAN/`.)*
+- [x] Final commit sequence tidy-up; tag `v2.0.0-site-redesign`.
 
 ---
 
