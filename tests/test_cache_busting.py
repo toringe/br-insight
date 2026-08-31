@@ -81,7 +81,7 @@ class TestCssFontVersioning:
             "chakra-petch-latin-600.woff2",
             "source-serif-4-latin-400.woff2",
             "source-serif-4-latin-400italic.woff2",
-            "sixtyfour-latin-400.woff2",
+            "sixtyfour-convergence-latin-400.woff2",
         ):
             assert font in found, f"{font} URL not versioned"
             assert re.fullmatch(r"[0-9a-f]{8}", found[font]), font

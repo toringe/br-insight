@@ -222,8 +222,8 @@ class TestHomeAnatomy:
         plain = unescape(render_template(
             "home.html", site=SiteConfig.load(REPO_ROOT), **_ctx()
         ))
-        assert '<h1 class="hero__title">Blade Runner Insight</h1>' in plain
-        assert "In-depth analytical perspectives on Ridley Scott's Blade Runner</p>" in plain
+        assert '<h1 class="hero__title"><span class="hero__title-plain">Blade Runner</span> Insight</h1>' in plain
+        assert "In-depth analytical perspectives on<br class=\"hero__tagline-br\" /> Ridley Scott's Blade Runner</p>" in plain
 
     def test_featured_section_contract(self, html):
         cover_at = html.index('src="/library/postmodernist-view/cover-crop.jpg"')
@@ -305,12 +305,11 @@ class TestHomeAnatomy:
 
 
 class TestEyebrowSignature:
-    """Task 10b: exactly five "Esper scan" eyebrows on the home page."""
+    """The hero kicker was dropped; four "Esper scan" eyebrows remain."""
 
-    def test_all_five_eyebrows_with_labels(self, html):
-        assert html.count('class="eyebrow') == 5
+    def test_remaining_eyebrows_with_labels(self, html):
+        assert html.count('class="eyebrow') == 4
         for label in (
-            ">The Archive<",
             ">Featured analysis · August<",
             ">Thirty years online<",
             ">Browse by topic<",
@@ -318,8 +317,8 @@ class TestEyebrowSignature:
         ):
             assert label in html
 
-    def test_hero_kicker_precedes_site_name(self, html):
-        assert html.index("hero__kicker") < html.index('class="hero__title"')
+    def test_no_hero_kicker(self, html):
+        assert "hero__kicker" not in html
 
     def test_stats_label_precedes_essay_counts(self, html):
         assert (
@@ -421,9 +420,9 @@ class TestBuildHomePage:
         current_month = datetime.date.today().strftime("%B")
         assert current_month in text
 
-    def test_built_home_carries_five_eyebrows_and_welcome_attr(self, built_home):
+    def test_built_home_carries_four_eyebrows_and_welcome_attr(self, built_home):
         text = (built_home / "index.html").read_text(encoding="utf-8")
-        assert text.count('class="eyebrow') == 5
+        assert text.count('class="eyebrow') == 4
         # real site config has the full fx chain on: root attrs emitted
         assert ('<html lang="en" data-fx-rain data-fx-scanlines data-fx-grain'
                 ' data-fx-flicker data-fx-welcome>') in text
