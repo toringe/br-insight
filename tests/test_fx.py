@@ -517,6 +517,54 @@ class TestRainHelpers:
         assert results[2] == [3, 5]
         assert results[3] == [1, 1]
 
+    def test_droplets_for_width_scales_and_clamps(self, rain_uri):
+        """Glass droplets: ~24 at the 1280 reference width, never above 28,
+        never below 6 so the glass never looks empty."""
+        out = _run(
+            f'import {{ dropletsForWidth }} from "{rain_uri}";\n'
+            "console.log(JSON.stringify([\n"
+            "  dropletsForWidth(1280),\n"
+            "  dropletsForWidth(1920),\n"   # capped at the ceiling
+            "  dropletsForWidth(640),\n"    # half viewport: half density
+            "  dropletsForWidth(320),\n"    # tiny viewport: scale floor 0.4
+            "]));\n"
+        )
+        assert json.loads(out) == [24, 28, 12, 10]
+
+    def test_droplet_step_advances_lifecycle(self, rain_uri):
+        """Stick-slip machine: a stuck droplet holds position while its
+        hold timer runs, then transitions to sliding; a sliding droplet
+        moves down (with wind lean) and resets to stuck after its burst.
+        stepDroplet(droplet, seconds, rand) is pure: mutates + returns it."""
+        out = _run(
+            f'import {{ stepDroplet, STUCK, SLIDING }} from "{rain_uri}";\n'
+            "const mk = (over) => ({ state: STUCK, x: 10, y: 20, r: 3,"
+            " vy: 0, hold: 0, slide: 0, ...over });\n"
+            "const rand = (() => { let i = 0; const seq ="
+            " [0.9, 0.1, 0.5, 0.99]; return () => seq[i++ % seq.length]; })();\n"
+            "const a = mk({ hold: 0.5 });\n"
+            "stepDroplet(a, 0.1, rand);\n"
+            "const stillStuck = a.state === STUCK && Math.abs(a.x - 10) < 0.2"
+            " && a.y === 20;\n"
+            "const fired = mk({ hold: 0.05 });\n"
+            "stepDroplet(fired, 0.1, rand);\n"
+            "const beganSlide = fired.state === SLIDING && fired.vy > 0;\n"
+            "const mover = mk({ state: SLIDING, vy: 40, slide: 0.05 });\n"
+            "const beforeY = mover.y;\n"
+            "stepDroplet(mover, 0.1, rand);\n"
+            "const slidDown = mover.y > beforeY && mover.x !== 10;\n"
+            "const reset = mk({ state: SLIDING, vy: 40, slide: 0.005 });\n"
+            "stepDroplet(reset, 0.1, rand);\n"
+            "const wentStuck = reset.state === STUCK && reset.vy === 0;\n"
+            "console.log(JSON.stringify({ stillStuck, beganSlide, slidDown, wentStuck }));\n"
+        )
+        assert json.loads(out) == {
+            "stillStuck": True,
+            "beganSlide": True,
+            "slidDown": True,
+            "wentStuck": True,
+        }
+
     def test_downgrade_tiers_halve_density_to_floor(self, rain_uri):
         out = _run(
             f'import {{ downgradeTier }} from "{rain_uri}";\n'
