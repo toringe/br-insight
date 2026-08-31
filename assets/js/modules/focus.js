@@ -1,8 +1,8 @@
 /**
  * Focus mode — hides every [data-focus-hide] element (primary nav, menu/
  * atmosphere buttons' extras, footer, article end-block extras) plus fx layers
- * by toggling data-focus on <html>. Search + Focus header buttons stay visible
- * so focus mode always has an exit; Esc also exits.
+ * by toggling data-focus on <html>. No header button; toggled by the `f`
+ * shortcut (which dispatches "bri:focus-toggle"), exited with Esc.
  *
  * Preference persists in localStorage key "bri:focus" ("1"/"0"); storage is
  * optional — private-mode failures degrade to session-only state.
@@ -61,6 +61,8 @@ export function init(doc = document) {
   const toggle = () => setOn(!isActive(htmlEl));
 
   if (btn) btn.addEventListener("click", toggle);
+  // Shortcut wiring: `f` dispatches this event; focus mode needs no button.
+  doc.addEventListener("bri:focus-toggle", toggle);
   doc.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && isActive(htmlEl)) setOn(false);
   });

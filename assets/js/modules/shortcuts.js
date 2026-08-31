@@ -46,8 +46,7 @@ export function init(doc = document) {
     if (action === "search") {
       openSearch(doc);
     } else if (action === "focus") {
-      const btn = doc.querySelector("[data-focus-toggle]");
-      if (btn) btn.click();
+      doc.dispatchEvent(new CustomEvent("bri:focus-toggle"));
     } else if (action === "top") {
       const win = doc.defaultView;
       if (!win) return;

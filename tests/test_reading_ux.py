@@ -55,15 +55,12 @@ class TestHeaderAnatomy:
 
         return render_template("base.html", site=SiteConfig.load(REPO_ROOT))
 
-    def test_focus_toggle_button(self, html):
-        matches = re.findall(r"<button[^>]*data-focus-toggle[^>]*>", html)
-        assert len(matches) == 1
-        tag = matches[0]
-        assert "Focus" in html[tag.index(">") + 1:]
-        assert 'aria-pressed="false"' in tag
+    def test_focus_toggle_button_removed(self, html):
+        """Focus mode has no header button; `f` shortcut + Esc own the toggle."""
+        assert not re.findall(r"<button[^>]*data-focus-toggle[^>]*>", html)
 
     def test_focus_mode_hides_nav_not_exit_buttons(self, html):
-        """data-focus-hide sits on nav/menu extras, never on search or focus."""
+        """data-focus-hide sits on nav/menu extras, never on search."""
         assert '<nav class="site-nav" id="primary-nav" aria-label="Primary" data-focus-hide>' in html
 
         def btn(selector):
@@ -71,8 +68,7 @@ class TestHeaderAnatomy:
 
         for hidden in ("data-menu-toggle", "data-fx-toggle"):
             assert "data-focus-hide" in btn(hidden)
-        for visible in ("data-search-open", "data-focus-toggle"):
-            assert "data-focus-hide" not in btn(visible)
+        assert "data-focus-hide" not in btn("data-search-open")
 
 
 @pytest.fixture(scope="module")
