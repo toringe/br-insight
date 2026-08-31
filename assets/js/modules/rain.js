@@ -1,9 +1,11 @@
 /**
- * Rain — cinematic canvas streaks (Task 13).
+ * Rain — cinematic canvas streaks (Task 13, depth pass).
  *
- * Fixed full-viewport <canvas> behind content (.fx-layer--rain shell,
- * z-index 80, pointer-events none). Config flows from window.__FX__
- * (density / speed / tier_auto); visual tuning lives in --fx-* CSS vars.
+ * Fixed full-viewport shell (.fx-layer--rain, z-index 80, pointer-events
+ * none) holding TWO canvases behind content: .fx-rain--far (slow, dim,
+ * CSS-blurred focus falloff) and .fx-rain--near (foreground). Both painted
+ * in one rAF loop. Config flows from window.__FX__ (density / speed /
+ * tier_auto); visual tuning lives in --fx-* CSS vars + PLANES in this file.
  *
  * Runtime discipline:
  *   - ~30fps cap via timestamp accumulation inside one rAF loop (no setInterval)
@@ -42,6 +44,16 @@ export function downgradeTier(density) {
   return Math.max(TIER_FLOOR, Math.round(density / TIER_DOWNGRADE_DIVISOR));
 }
 
+/** Depth split of the total drop budget into [far, near]. Near carries the
+ * majority (60%) since it reads as the foreground plane; both layers keep
+ * at least one drop so thin viewports never lose a depth plane. */
+export function splitDrops(density) {
+  const total = Math.max(2, Math.round(density));
+  const near = Math.max(1, Math.round(total * 0.6));
+  const far = Math.max(1, total - near);
+  return [far, near];
+}
+
 /** Ladder: hold -> downgrade (once) -> pause permanently. */
 export function watchdogVerdict(avgFrameMs, downgradesDone) {
   if (!(avgFrameMs > FRAME_BUDGET_MS)) return "hold";
@@ -69,49 +81,73 @@ function buildRain(doc, opts = {}) {
 
   const shell = doc.createElement("div");
   shell.className = "fx-layer fx-layer--rain";
-  const canvas = doc.createElement("canvas");
-  canvas.id = "fx-rain";
-  canvas.setAttribute("aria-hidden", "true");
-  shell.appendChild(canvas);
+
+  // Depth planes: far reads soft/slow (CSS blur sells the focus falloff),
+  // near keeps the original foreground look.
+  const canvases = [];
+  const ctxs = [];
+  for (const plane of ["far", "near"]) {
+    const canvas = doc.createElement("canvas");
+    canvas.id = `fx-rain--${plane}`;
+    canvas.className = `fx-rain fx-rain--${plane}`;
+    canvas.setAttribute("aria-hidden", "true");
+    shell.appendChild(canvas);
+    canvases.push(canvas);
+    ctxs.push(canvas.getContext("2d", { alpha: true }));
+  }
   doc.body.appendChild(shell);
 
-  const ctx = canvas.getContext("2d", { alpha: true });
-  if (!ctx) {
+  if (ctxs.some((c) => !c)) {
     shell.remove();
     return { stop() {} };
   }
 
   let cssWidth = 0;
   let cssHeight = 0;
-  let drops = [];
+  let layers = [[], []]; // [far, near] drop arrays
   let tierDowns = 0;
 
-  function newDrop(fromTop) {
+  // Per-plane look: far is slower, dimmer, thinner — parallax depth.
+  const PLANES = [
+    { speedScale: 0.55, alphaBase: 0.08, alphaRange: 0.3, thickBias: 0.95 },
+    { speedScale: 1.0, alphaBase: 0.14, alphaRange: 0.5, thickBias: 0.86 },
+  ];
+
+  function newDrop(planeIx, fromTop) {
+    const p = PLANES[planeIx];
     const len = 8 + Math.random() * 18;
     return {
       x: Math.random() * (cssWidth + 40) - 40,
       y: fromTop ? -len : Math.random() * cssHeight,
-      len,
-      vy: (280 + Math.random() * 240) * speed,
-      alpha: 0.14 + Math.random() * 0.5,
-      thick: Math.random() < 0.86 ? 1 : 2,
+      len: planeIx === 0 ? len * 0.75 : len,
+      vy: (280 + Math.random() * 240) * speed * p.speedScale,
+      alpha: p.alphaBase + Math.random() * p.alphaRange,
+      thick: Math.random() < p.thickBias ? 1 : 2,
     };
   }
 
-  function makeDrops(count) {
-    const next = drops.slice(0, count);
-    while (next.length < count) next.push(newDrop(false));
-    return next;
+  function makeLayers(counts) {
+    return layers.map((old, ix) => {
+      const next = old.slice(0, counts[ix]);
+      while (next.length < counts[ix]) next.push(newDrop(ix, false));
+      return next;
+    });
+  }
+
+  function reseed() {
+    layers = makeLayers(splitDrops(density));
   }
 
   function resize() {
     cssWidth = win.innerWidth;
     cssHeight = win.innerHeight;
     const dpr = Math.min(DPR_CAP, win.devicePixelRatio || 1);
-    canvas.width = Math.round(cssWidth * dpr);
-    canvas.height = Math.round(cssHeight * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drops = makeDrops(dropsForWidth(density, cssWidth));
+    for (const canvas of canvases) {
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+    }
+    for (const ctx of ctxs) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    reseed();
   }
 
   // --- Frame loop -----------------------------------------------------------
@@ -139,7 +175,7 @@ function buildRain(doc, opts = {}) {
     if (verdict === "downgrade") {
       tierDowns += 1;
       density = downgradeTier(density);
-      drops = makeDrops(dropsForWidth(density, cssWidth));
+      reseed();
       samples = [];
     } else if (verdict === "pause") {
       pausedForPerf = true;
@@ -151,25 +187,29 @@ function buildRain(doc, opts = {}) {
   }
 
   function paint(stepMs) {
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
     const seconds = Math.min(stepMs, 100) / 1000;
-    ctx.lineCap = "round";
-    for (const drop of drops) {
-      drop.y += drop.vy * seconds;
-      drop.x += UX * drop.vy * seconds;
-      if (drop.y - drop.len > cssHeight || drop.x < -drop.len * 2) {
-        Object.assign(drop, newDrop(true));
-        continue;
+    for (let ix = 0; ix < ctxs.length; ix += 1) {
+      const ctx = ctxs[ix];
+      const drops = layers[ix];
+      ctx.clearRect(0, 0, cssWidth, cssHeight);
+      ctx.lineCap = "round";
+      for (const drop of drops) {
+        drop.y += drop.vy * seconds;
+        drop.x += UX * drop.vy * seconds;
+        if (drop.y - drop.len > cssHeight || drop.x < -drop.len * 2) {
+          Object.assign(drop, newDrop(ix, true));
+          continue;
+        }
+        ctx.globalAlpha = drop.alpha;
+        ctx.strokeStyle = "#cfe9f5";
+        ctx.lineWidth = drop.thick;
+        ctx.beginPath();
+        ctx.moveTo(drop.x, drop.y);
+        ctx.lineTo(drop.x - UX * drop.len, drop.y - UY * drop.len);
+        ctx.stroke();
       }
-      ctx.globalAlpha = drop.alpha;
-      ctx.strokeStyle = "#cfe9f5";
-      ctx.lineWidth = drop.thick;
-      ctx.beginPath();
-      ctx.moveTo(drop.x, drop.y);
-      ctx.lineTo(drop.x - UX * drop.len, drop.y - UY * drop.len);
-      ctx.stroke();
+      ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
   }
 
   function frame(now) {

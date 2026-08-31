@@ -496,6 +496,27 @@ class TestRainHelpers:
         )
         assert json.loads(out) == [120, 120, 60, 48, 32]
 
+    def test_split_drops_partitions_density(self, rain_uri):
+        """Depth split: far+near sum to the total, near gets the majority,
+        and tiny totals still give both layers at least one drop."""
+        out = _run(
+            f'import {{ splitDrops }} from "{rain_uri}";\n'
+            "console.log(JSON.stringify([\n"
+            "  splitDrops(120),\n"
+            "  splitDrops(60),\n"
+            "  splitDrops(8),\n"
+            "  splitDrops(1),\n"
+            "]));\n"
+        )
+        results = json.loads(out)
+        for far, near in results:
+            assert far >= 1 and near >= 1
+        # Deterministic 60/40-ish split (near majority, rounding stable).
+        assert results[0] == [48, 72]
+        assert results[1] == [24, 36]
+        assert results[2] == [3, 5]
+        assert results[3] == [1, 1]
+
     def test_downgrade_tiers_halve_density_to_floor(self, rain_uri):
         out = _run(
             f'import {{ downgradeTier }} from "{rain_uri}";\n'

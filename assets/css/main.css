@@ -1706,9 +1706,25 @@ main {
   pointer-events: none;
 }
 
-/* Rain: <canvas> injected by rain.js renders into this shell */
+/* Rain: two depth planes injected by rain.js render into this shell.
+   The gaussian blur reads as focus falloff — far drops fall beyond a
+   window plane. Filter is GPU-composited, so frame cost stays ~flat. */
 .fx-layer--rain {
   opacity: var(--fx-rain-opacity);
+}
+
+.fx-layer--rain .fx-rain {
+  position: absolute;
+  inset: 0;
+}
+
+.fx-layer--rain .fx-rain--far {
+  filter: blur(1.5px);
+  opacity: .75;
+}
+
+.fx-layer--rain .fx-rain--near {
+  filter: blur(.5px);
 }
 
 /* Scanlines: static overlay, pure CSS; paints only while its presence flag
