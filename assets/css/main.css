@@ -81,6 +81,7 @@
   --font-logo-mono: "Sixtyfour", "Chakra Petch", system-ui, sans-serif;
   --font-tagline: "Lato Thin", system-ui, sans-serif;
   --font-brand: "Blade Runner Movie", "Chakra Petch", system-ui, sans-serif;
+  --font-header: "Rajdhani", "Chakra Petch", system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
     sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas,
@@ -312,6 +313,31 @@ ol[role="list"] {
   font-weight: 400;
   font-display: swap;
   src: url("../fonts/blade-runner-movie-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Site-header chrome face — Rajdhani (Google Fonts, OFL). Squarish
+   techno sans built for uppercase letterspaced labels. Latin subset,
+   woff2-only, swap. Used only inside .site-header. */
+@font-face {
+  font-family: "Rajdhani";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/rajdhani-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Rajdhani";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/rajdhani-latin-600.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
     U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
     U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
@@ -1017,8 +1043,23 @@ h2.eyebrow {
   letter-spacing: .04em;
 }
 
-.hero__title-plain {
-  font-family: var(--font-logo-mono);
+.hero__title-brand,
+.hero__title-logo {
+  display: block;
+  white-space: nowrap;
+}
+
+/* Width parity: measured in-browser at a fixed size, "blAdeBrunner" is
+   977.1px wide where "Insight" is 717.1px — the movie face scales to
+   .734em of the shared h1 size so both lines match in width. */
+.hero__title-brand {
+  font-family: var(--font-brand);
+  font-size: .734em;
+  letter-spacing: .04em;
+}
+
+.hero__title-logo {
+  font-family: var(--font-logo);
 }
 
 .hero__tagline {
@@ -1260,11 +1301,16 @@ main {
 
 .site-header__brand {
   color: var(--text-bright);
-  font-family: var(--font-brand);
-  font-size: var(--fs-base);
-  font-weight: 400;
+  font-family: var(--font-header);
+  font-size: var(--fs-lg);
+  font-weight: 600;
   letter-spacing: .04em;
   white-space: nowrap;
+}
+
+/* 'Insight' wears the eyebrow red for the two-tone wordmark. */
+.site-header__brand-accent {
+  color: var(--red);
 }
 
 .site-header__brand:hover {
@@ -1285,7 +1331,7 @@ main {
   display: inline-block;
   padding-block: .4em;
   color: var(--muted);
-  font-family: var(--font-display);
+  font-family: var(--font-header);
   font-size: var(--fs-sm);
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -1301,6 +1347,12 @@ main {
   color: var(--cyan);
 }
 
+/* Header chrome face: buttons in the header (menu, search, atmosphere,
+   in-menu actions) ride Rajdhani instead of the global Chakra face. */
+.site-header .btn {
+  font-family: var(--font-header);
+}
+
 .site-header__controls {
   display: flex;
   flex-shrink: 0;
@@ -1312,19 +1364,27 @@ main {
   display: none;
 }
 
-/* Mobile (<768px): nav collapses into a slide-down panel behind the menu
-   button. JS toggles data-menu-open on the header (hooks only here). */
+/* In-menu action rows (search + atmosphere): desktop shows the header
+   controls instead, so these only ever render on mobile. */
+.site-nav__actions {
+  display: none;
+}
+
+/* Mobile (<768px): nav collapses into a slide-down card behind the menu
+   button; search + atmosphere live here (header twins hide). JS toggles
+   data-menu-open on the header (hooks only here). */
 @media (max-width: 767.98px) {
   .site-nav {
     position: absolute;
-    inset-inline: 0;
-    top: 100%;
+    inset-inline: var(--space-2xs);
+    top: calc(100% + var(--space-3xs));
     display: none;
-    padding-block: var(--space-s) var(--space-m);
-    background: color-mix(in srgb, var(--bg-0) 96%, transparent);
+    padding: var(--space-s) var(--space-m) var(--space-m);
+    background: color-mix(in srgb, var(--bg-1) 96%, transparent);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--line);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
   }
 
@@ -1339,7 +1399,42 @@ main {
 
   .site-nav__list {
     flex-direction: column;
+    gap: 0;
+  }
+
+  .site-nav__link {
+    display: block;
+    padding: .8em .25em;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-nav__list li:last-child .site-nav__link {
+    border-bottom: 0;
+  }
+
+  .site-nav__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     gap: var(--space-3xs);
+    margin-top: var(--space-s);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--line);
+  }
+
+  .site-nav__action {
+    justify-content: flex-start;
+    gap: var(--space-2xs);
+    padding: .6em .5em;
+    font-size: .8125rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  /* Header twins of the in-menu actions: menu owns them below 768px. */
+  .site-header__controls .search-btn,
+  .site-header__controls .fx-btn {
+    display: none;
   }
 
   .site-header__inner {
@@ -1360,24 +1455,12 @@ main {
   }
 }
 
-/* Narrow phones/tablets portrait (Task 17 C-2): tightened, brand + controls
-   still cannot share one row here (~590px measured at 500-560 viewports,
-   ~640px at 375) — wrap the controls onto their own full-width line so the
-   header never scrolls horizontally down to 320. */
+/* Narrow phones/tablets portrait: with search + atmosphere inside the
+   menu, the header holds brand + lone Menu button on ONE row — no wrap,
+   no second controls line, straight down to 320px. */
 @media (max-width: 639.98px) {
-  .site-header__inner {
-    flex-wrap: wrap;
-    row-gap: var(--space-3xs);
-  }
-
   .site-header__brand {
     font-size: 1rem;
-  }
-
-  .site-header__controls {
-    flex-basis: 100%;
-    gap: var(--space-3xs);
-    justify-content: space-between;
   }
 
   .site-header__controls .btn {
@@ -1774,6 +1857,14 @@ body {
 html[data-focus] [data-focus-hide],
 html[data-focus] .fx-layer {
   display: none !important;
+}
+
+/* Mobile focus-mode exit: search/atmosphere live inside the (hidden) menu
+   below 768px, so the Menu button itself must stay visible as the exit. */
+@media (max-width: 767.98px) {
+  html[data-focus] .menu-btn {
+    display: inline-flex !important;
+  }
 }
 
 /* --------------------------------------------------------------------------

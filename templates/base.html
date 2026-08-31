@@ -63,13 +63,16 @@
   </script>
   {% endif %}
 
-  {#- Font preload strategy (Task 14): regular Chakra 400/600 and regular
-      Source Serif only. The italic serif is prose-only and arrives under
-      font-display: swap; preloading it wasted bytes on nearly every page.
-      @font-face rules are untouched. ?v= hashes (Task 19b) keep preloads
-      in sync with the versioned urls the stylesheet cites. -#}
+  {#- Font preload strategy (Task 14): regular Chakra 400/600, header chrome
+      Rajdhani 400/600, and regular Source Serif only. The italic serif is
+      prose-only and arrives under font-display: swap; preloading it wasted
+      bytes on nearly every page. @font-face rules are untouched. ?v= hashes
+      (Task 19b) keep preloads in sync with the versioned urls the
+      stylesheet cites. -#}
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-400.woff2{{ asset_ver('assets/fonts/chakra-petch-latin-400.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/chakra-petch-latin-600.woff2{{ asset_ver('assets/fonts/chakra-petch-latin-600.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/rajdhani-latin-400.woff2{{ asset_ver('assets/fonts/rajdhani-latin-400.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ asset_prefix }}assets/fonts/rajdhani-latin-600.woff2{{ asset_ver('assets/fonts/rajdhani-latin-600.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="{{ asset_prefix }}assets/fonts/source-serif-4-latin-400.woff2{{ asset_ver('assets/fonts/source-serif-4-latin-400.woff2') }}" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="{{ asset_prefix }}assets/img/favicon.png" type="image/png">
 

@@ -79,6 +79,8 @@ class TestCssFontVersioning:
         for font in (
             "chakra-petch-latin-400.woff2",
             "chakra-petch-latin-600.woff2",
+            "rajdhani-latin-400.woff2",
+            "rajdhani-latin-600.woff2",
             "source-serif-4-latin-400.woff2",
             "source-serif-4-latin-400italic.woff2",
             "sixtyfour-convergence-latin-400.woff2",

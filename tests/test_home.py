@@ -222,7 +222,13 @@ class TestHomeAnatomy:
         plain = unescape(render_template(
             "home.html", site=SiteConfig.load(REPO_ROOT), **_ctx()
         ))
-        assert '<h1 class="hero__title"><span class="hero__title-plain">Blade Runner</span> Insight</h1>' in plain
+        assert (
+            '<h1 class="hero__title">'
+            '<span class="visually-hidden">Blade Runner Insight</span>'
+            '<span class="hero__title-brand" aria-hidden="true">blAdeBrunner</span>'
+            '<span class="hero__title-logo" aria-hidden="true">Insight</span>'
+            '</h1>'
+        ) in plain
         assert "In-depth analytical perspectives on<br class=\"hero__tagline-br\" /> Ridley Scott's Blade Runner</p>" in plain
 
     def test_featured_section_contract(self, html):

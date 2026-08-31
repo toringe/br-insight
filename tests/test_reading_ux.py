@@ -63,12 +63,37 @@ class TestHeaderAnatomy:
         """data-focus-hide sits on nav/menu extras, never on search."""
         assert '<nav class="site-nav" id="primary-nav" aria-label="Primary" data-focus-hide>' in html
 
-        def btn(selector):
-            return re.search(f"<button[^>]*{selector}[^>]*>", html).group(0)
+        controls = html.split('<div class="site-header__controls">', 1)[1].split("</div>", 1)[0]
 
         for hidden in ("data-menu-toggle", "data-fx-toggle"):
-            assert "data-focus-hide" in btn(hidden)
-        assert "data-focus-hide" not in btn("data-search-open")
+            assert "data-focus-hide" in re.search(f"<button[^>]*{hidden}[^>]*>", controls).group(0)
+        assert "data-focus-hide" not in re.search(
+            r"<button[^>]*data-search-open[^>]*>", controls
+        ).group(0)
+
+    def test_mobile_nav_carries_search_and_atmosphere_actions(self, html):
+        """Mobile menu owns search + atmosphere: labeled duplicate actions
+        live inside the nav panel (hidden on desktop via CSS); they carry no
+        data-focus-hide because the nav container already hides them."""
+        nav = html.split('<nav class="site-nav"', 1)[1].split("</nav>", 1)[0]
+        for sel in ("data-search-open", "data-fx-toggle"):
+            btn = re.search(f"<button[^>]*{sel}[^>]*>", nav)
+            assert btn, f"nav panel is missing a {sel} action"
+            assert "site-nav__action" in btn.group(0)
+            assert "data-focus-hide" not in btn.group(0)
+        fx_nav_btn = re.search(r"<button[^>]*data-fx-toggle[^>]*>", nav).group(0)
+        assert "aria-pressed" in fx_nav_btn
+
+    def test_brand_is_real_text_with_red_insight(self, html):
+        """Header wordmark is plain Rajdhani text: real 'Blade Runner' words
+        (no blAdeBrunner glyph trick) and 'Insight' wrapped in the eyebrow-red
+        accent span. Accessible name unchanged."""
+        brand = re.search(r'<a class="site-header__brand[^>]*>.*?</a>', html).group(0)
+        assert "blAdeBrunner" not in brand
+        assert "neon" not in brand
+        assert '<span class="site-header__brand-accent">Insight</span>' in brand
+        assert 'aria-label="Blade Runner Insight"' in brand
+        assert re.search(r">Blade Runner\s+<span", brand)
 
 
 @pytest.fixture(scope="module")
@@ -338,3 +363,90 @@ class TestTocJs:
         assert lines[0][1:] == [None, None, False]
         assert lines[1] == ["one", "true", False]
         assert lines[2] == ["two", "true", False]
+
+
+@pytest.fixture(scope="module")
+def main_uri(tmp_path_factory):
+    # main.js resolves ./modules/* relative to its own location, so copy
+    # the real tree and mark it ESM for Node.
+    root = tmp_path_factory.mktemp("main-js")
+    shutil.copytree(REPO_ROOT / "assets/js", root / "assets" / "js")
+    (root / "package.json").write_text('{"type": "module"}', encoding="utf-8")
+    return (root / "assets" / "js" / "main.js").as_uri()
+
+
+class TestMenuJs:
+    """main.js mobile-menu contract: toggling, Esc, and close-on-activation
+    for anything inside the nav panel (links AND the search/atmosphere
+    action buttons), not just links."""
+
+    SHIM = """
+const mkEl = () => ({
+  attrs: {},
+  handlers: {},
+  addEventListener(type, fn) { (this.handlers[type] ??= []).push(fn); },
+  setAttribute(k, v) { this.attrs[k] = String(v); },
+  removeAttribute(k) { delete this.attrs[k]; },
+  hasAttribute(k) { return k in this.attrs; },
+});
+const header = mkEl();
+const toggle = Object.assign(mkEl(), {
+  closest: (sel) => (sel === '.site-header' ? header : null),
+});
+const navTarget = { closest: (sel) => (sel === '.site-nav a, .site-nav button' ? navTarget : null) };
+globalThis.document = {
+  documentElement: mkEl(),
+  querySelector: (sel) => (sel === '[data-menu-toggle]' ? toggle : null),
+  addEventListener(type, fn) { (this.handlers ??= {})[type] ??= []; this.handlers[type].push(fn); },
+};
+"""
+
+    def _run_menu(self, main_uri, body):
+        # The shim must exist BEFORE the import: main.js runs module inits at
+        # import time; only the menu block needs a working document. The body
+        # runs after the awaited import so the menu handlers are bound.
+        return _run(
+            self.SHIM + "\n"
+            f'await import("{main_uri}");\n'
+            + body + "\n"
+            "console.log(JSON.stringify(globalThis.result));\n"
+        )
+
+    def test_toggle_opens_and_menu_closes_on_nav_button(self, main_uri):
+        out = self._run_menu(
+            main_uri,
+            """
+toggle.handlers.click[0]();
+const opened = header.hasAttribute('data-menu-open');
+// Activating the in-menu search/atmosphere button must close the menu.
+header.handlers.click[0]({ target: navTarget });
+const closed = !header.hasAttribute('data-menu-open');
+globalThis.result = { opened, closed };
+""",
+        )
+        assert json.loads(out) == {"opened": True, "closed": True}
+
+    def test_menu_still_closes_on_nav_link(self, main_uri):
+        out = self._run_menu(
+            main_uri,
+            """
+toggle.handlers.click[0]();
+header.handlers.click[0]({ target: navTarget });
+globalThis.result = header.hasAttribute('data-menu-open');
+""",
+        )
+        assert json.loads(out) is False
+
+    def test_escape_closes_menu(self, main_uri):
+        out = self._run_menu(
+            main_uri,
+            """
+toggle.handlers.click[0]();
+const opened = header.hasAttribute('data-menu-open');
+const keydowns = document.handlers.keydown ?? [];
+for (const fn of keydowns) fn({ key: 'Escape' });
+const closedAfterEscape = !header.hasAttribute('data-menu-open');
+globalThis.result = { opened, closedAfterEscape };
+""",
+        )
+        assert json.loads(out) == {"opened": True, "closedAfterEscape": True}

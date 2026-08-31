@@ -391,6 +391,7 @@ class TestFxInitGuards:
 globalThis.document = {
   documentElement: mkEl(),
   querySelector: () => null,
+  querySelectorAll: () => [],
   addEventListener() {},
   defaultView: {},
 };
@@ -400,6 +401,47 @@ console.log(JSON.stringify(Object.keys(document.documentElement.attrs)));
         )
         # No config -> data-fx-off must NOT appear; nothing gets written.
         assert json.loads(out) == []
+
+    def test_init_binds_and_syncs_every_fx_toggle(self, fx_uri):
+        """Header + in-menu duplicate atmosphere buttons must ALL receive the
+        click binding and stay aria-pressed in lockstep."""
+        out = _run(
+            f'import {{ init }} from "{fx_uri}";\n'
+            + _el_shim()
+            + """
+const mkBtn = () => Object.assign(mkEl(), {
+  handlers: [],
+  addEventListener(type, fn) { this.handlers.push([type, fn]); },
+});
+const btns = [mkBtn(), mkBtn()];
+const store = new Map();
+globalThis.document = {
+  documentElement: mkEl(),
+  querySelector: () => null,
+  querySelectorAll: (sel) => (sel === '[data-fx-toggle]' ? btns : []),
+  addEventListener() {},
+  defaultView: {
+    __FX__: """ + RAIN_ONLY_CONFIG + """,
+    matchMedia: () => ({ matches: false, addEventListener() {} }),
+    localStorage: {
+      getItem: (k) => (store.has(k) ? store.get(k) : null),
+      setItem: (k, v) => store.set(k, String(v)),
+    },
+  },
+};
+init(document);
+const bound = btns.map((b) => b.handlers.filter(([t]) => t === 'click').length);
+const initial = btns.map((b) => b.attrs['aria-pressed']);
+// Toggle through the FIRST button only; both must flip in lockstep.
+for (const [, fn] of btns[0].handlers.filter(([t]) => t === 'click')) fn();
+const afterToggle = btns.map((b) => b.attrs['aria-pressed']);
+console.log(JSON.stringify({ bound, initial, afterToggle }));
+"""
+        )
+        data = json.loads(out)
+        assert data["bound"] == [1, 1]
+        assert data["initial"] == ["true", "true"]
+        assert data["afterToggle"] == ["false", "false"]
 
     def test_focus_attr_change_reapplies_gating(self, fx_uri):
         out = _run(
@@ -416,6 +458,7 @@ const html = mkEl();
 globalThis.document = {
   documentElement: html,
   querySelector: () => null,
+  querySelectorAll: () => [],
   addEventListener() {},
   defaultView: {
     __FX__: """ + FULL_CONFIG + """,

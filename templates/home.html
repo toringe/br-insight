@@ -8,7 +8,10 @@
 {% block content %}
 <section class="hero">
   <div class="container">
-    <h1 class="hero__title"><span class="hero__title-plain">Blade Runner</span> Insight</h1>
+    {#- Brand face is the Blade Runner Movie Font; its uppercase B is the
+        origami-unicorn logo glyph, so the literal string below renders
+        "BLADE <unicorn> RUNNER". Screen readers get the real name. -#}
+    <h1 class="hero__title"><span class="visually-hidden">Blade Runner Insight</span><span class="hero__title-brand" aria-hidden="true">blAdeBrunner</span><span class="hero__title-logo" aria-hidden="true">Insight</span></h1>
     <p class="hero__tagline">In-depth analytical perspectives on<br class="hero__tagline-br" /> Ridley Scott's Blade Runner</p>
     <p class="hero__anniversary">Thirty years of Blade Runner analysis — online since 1996.</p>
     <div class="hero__actions">

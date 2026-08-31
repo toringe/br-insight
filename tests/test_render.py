@@ -133,6 +133,23 @@ class TestDesignDirectionRetrofit:
         assert html.count("source-serif-4-latin-400") == 1  # regular preload
         assert "400italic.woff2" not in html  # Task 14: italic no longer preloaded
 
+    def test_header_uses_rajdhani_with_red_insight(self, site, css):
+        """Header chrome (brand, nav links, header buttons) rides the
+        self-hosted Rajdhani face; 'Insight' in the wordmark wears the
+        eyebrow red. Both header weights are preloaded."""
+        assert '--font-header: "Rajdhani"' in css
+        assert css.count('font-family: "Rajdhani"') == 2  # 400 + 600 faces
+        assert "font-display: swap" in css
+        # Header-scoped rules ride the new token.
+        assert re.search(r"\.site-header__brand\s*\{[^}]*font-family:\s*var\(--font-header\)", css)
+        assert re.search(r"\.site-nav__link\s*\{[^}]*font-family:\s*var\(--font-header\)", css)
+        assert re.search(r"\.site-header \.btn\s*\{[^}]*font-family:\s*var\(--font-header\)", css)
+        assert re.search(
+            r"\.site-header__brand-accent\s*\{[^}]*color:\s*var\(--red\)", css
+        )
+        html = render_template("base.html", site=site)
+        assert html.count("rajdhani-latin-") == 2  # both weights preloaded
+
     def test_serif_fonts_shipped_within_budget(self, css):
         fonts = sorted((REPO_ROOT / "assets/fonts").glob("source-serif-*.woff2"))
         sizes = {p.name: p.stat().st_size for p in fonts}
@@ -271,15 +288,61 @@ class TestCssAnchorContract:
             css = (REPO_ROOT / "assets/css" / name).read_text(encoding="utf-8")
             assert pattern.search(css), f"{name} does not center .search-overlay"
 
-    def test_mobile_header_collapses_instead_of_overflowing(self):
-        """Task 17 C-2 regression: below 640px the header row cannot fit
-        brand + controls on one line (measured ~590px needed); a sub-640
-        media query must switch site-header__inner to a wrapped layout."""
+    def test_mobile_header_stays_on_one_row(self):
+        """Contract update (was: wrapped two-line header): with search and
+        atmosphere living inside the menu, the sub-640 header must fit the
+        brand + lone Menu button on a single row — no wrap, no forced
+        second controls line."""
         css = (REPO_ROOT / "assets/css/main.css").read_text(encoding="utf-8")
         idx = css.index("@media (max-width: 639.98px)")
-        block = css[idx : idx + 400]
-        assert ".site-header__inner" in block
-        assert "flex-wrap: wrap" in block
+        depth, start = 0, css.index("{", idx)
+        for j in range(start, len(css)):
+            if css[j] == "{":
+                depth += 1
+            elif css[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    block = css[start : j + 1]
+                    break
+        assert "flex-wrap" not in block
+        assert "flex-basis" not in block
+        assert ".site-header__brand" in block  # size trim keeps 320px on one row
+
+    def test_mobile_menu_owns_actions_and_dropdown_is_a_card(self):
+        """Mobile menu contract: header search/atmosphere buttons hide below
+        768px, the dropdown renders as a padded bordered card (no edge-hugging
+        text), and focus mode keeps the menu button visible as the exit."""
+        for name in ("main.css", "main.min.css"):
+            css = (REPO_ROOT / "assets/css" / name).read_text(encoding="utf-8")
+            # Desktop hides the in-menu actions; mobile hides the header ones.
+            assert re.search(r"\.site-nav__actions\s*\{[^}]*display:\s*none", css), name
+            # Brace-match every 767.98px media block and use the nav one.
+            blocks = []
+            for m in re.finditer(r"@media \(max-width:\s*767\.98px\)", css):
+                depth, i = 0, css.index("{", m.start())
+                for j in range(i, len(css)):
+                    if css[j] == "{":
+                        depth += 1
+                    elif css[j] == "}":
+                        depth -= 1
+                        if depth == 0:
+                            blocks.append(css[i : j + 1])
+                            break
+            nav_block = next(b for b in blocks if ".site-nav" in b)
+            assert re.search(
+                r"\.site-header__controls \.search-btn\s*[,{][^}]*display:\s*none", nav_block
+            ), name
+            assert re.search(
+                r"\.site-header__controls \.fx-btn\s*[,{][^}]*display:\s*none", nav_block
+            ), name
+            # Dropdown is a card: padded on both axes + a full border + radius.
+            nav_rule = re.search(r"\.site-nav\s*\{[^}]*", nav_block)
+            assert nav_rule and "border-radius" in nav_rule.group(0), name
+            assert re.search(r"\.site-nav\s*\{[^}]*(padding-inline|padding\s*:)", nav_block), name
+            # Focus mode keeps the Menu button as the visible mobile exit.
+            assert re.search(
+                r"html\[data-focus\] \.menu-btn\s*\{[^}]*display:\s*inline-flex\s*!important", css
+            ), name
 
 
 # ---------------------------------------------------------------------------

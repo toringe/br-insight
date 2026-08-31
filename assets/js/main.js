@@ -67,7 +67,9 @@ safe("menu", () => {
     if (event.key === "Escape" && isOpen()) setOpen(false);
   });
   header.addEventListener("click", (event) => {
-    if (isOpen() && event.target.closest(".site-nav a")) setOpen(false);
+    if (isOpen() && event.target.closest(".site-nav a, .site-nav button")) {
+      setOpen(false);
+    }
   });
 });
 

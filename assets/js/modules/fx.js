@@ -104,7 +104,7 @@ export function init(doc = document) {
   if (!config || config.enabled !== true) return; // fx disabled at build
 
   const htmlEl = doc.documentElement;
-  const btn = doc.querySelector("[data-fx-toggle]");
+  const btns = doc.querySelectorAll("[data-fx-toggle]");
   const store = storage(doc);
   const media =
     typeof win.matchMedia === "function"
@@ -151,7 +151,7 @@ export function init(doc = document) {
       syncStaticLayer(doc, "fx-layer--scanlines", resolved.active.scanlines);
       syncStaticLayer(doc, "fx-layer--grain", resolved.active.grain);
     } catch {} // enhancement only
-    if (btn) btn.setAttribute("aria-pressed", String(atmosphereOn));
+    for (const btn of btns) btn.setAttribute("aria-pressed", String(atmosphereOn));
     if (config.rain?.enabled === true && !htmlEl.hasAttribute("data-fx-rain")) {
       stopRain();
     } else if (
@@ -170,7 +170,7 @@ export function init(doc = document) {
     sync();
   };
 
-  if (btn) btn.addEventListener("click", toggleAtmosphere);
+  for (const btn of btns) btn.addEventListener("click", toggleAtmosphere);
 
   // Focus mode toggles data-focus on <html> from focus.js — react to it.
   if (typeof MutationObserver === "function") {
