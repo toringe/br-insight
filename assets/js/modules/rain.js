@@ -34,9 +34,9 @@ const WIND_ANGLE = -0.06; // radians (~-3.4°): slight diagonal lean
 const RESIZE_DEBOUNCE_MS = 150;
 
 // Glass droplets: count scaling + stick-slip lifecycle bounds.
-const DROPLET_REF = 24;
-const DROPLET_MAX = 28;
-const DROPLET_MIN = 6;
+const DROPLET_REF = 30;
+const DROPLET_MAX = 36;
+const DROPLET_MIN = 8;
 const WOBBLE_AMP = 0.35; // px of idle jitter while stuck
 export const STUCK = "stuck";
 export const SLIDING = "sliding";
@@ -155,9 +155,10 @@ function buildRain(doc, opts = {}) {
   let tierDowns = 0;
   let glassPaused = false; // watchdog freezes the priciest garnish first
 
-  // Per-plane look: far is slower, dimmer, thinner — parallax depth.
+  // Per-plane look: far is slower and blurred by CSS (focus falloff), so
+  // its drops run brighter + longer to survive the blur; near is foreground.
   const PLANES = [
-    { speedScale: 0.55, alphaBase: 0.08, alphaRange: 0.3, thickBias: 0.95 },
+    { speedScale: 0.5, alphaBase: 0.25, alphaRange: 0.45, thickBias: 0.7 },
     { speedScale: 1.0, alphaBase: 0.14, alphaRange: 0.5, thickBias: 0.86 },
   ];
 
@@ -202,7 +203,7 @@ function buildRain(doc, opts = {}) {
       state: STUCK,
       x: Math.random() * cssWidth,
       y: Math.random() * cssHeight * 0.9,
-      r: 2 + Math.random() * 3.5,
+      r: 3 + Math.random() * 4,
       vy: 0,
       hold: Math.random() * 8,
       slide: 0,
@@ -322,16 +323,16 @@ function buildRain(doc, opts = {}) {
       }
       const size = d.r * 2;
       if (d.state === SLIDING) {
-        ctx.globalAlpha = 0.16;
+        ctx.globalAlpha = 0.3;
         ctx.strokeStyle = "#cfe9f5";
-        ctx.lineWidth = Math.max(1, d.r * 0.7);
+        ctx.lineWidth = Math.max(1.2, d.r * 0.8);
         ctx.lineCap = "round";
         ctx.beginPath();
-        ctx.moveTo(d.x, d.y - d.vy * 0.12);
+        ctx.moveTo(d.x, d.y - d.vy * 0.14);
         ctx.lineTo(d.x, d.y);
         ctx.stroke();
       }
-      ctx.globalAlpha = 0.9;
+      ctx.globalAlpha = 1;
       ctx.drawImage(sprite, d.x - d.r, d.y - d.r, size, size);
     }
     ctx.globalAlpha = 1;

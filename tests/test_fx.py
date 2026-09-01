@@ -518,8 +518,8 @@ class TestRainHelpers:
         assert results[3] == [1, 1]
 
     def test_droplets_for_width_scales_and_clamps(self, rain_uri):
-        """Glass droplets: ~24 at the 1280 reference width, never above 28,
-        never below 6 so the glass never looks empty."""
+        """Glass droplets: ~30 at the 1280 reference width, never above 36,
+        never below 8 so the glass never looks empty."""
         out = _run(
             f'import {{ dropletsForWidth }} from "{rain_uri}";\n'
             "console.log(JSON.stringify([\n"
@@ -529,7 +529,7 @@ class TestRainHelpers:
             "  dropletsForWidth(320),\n"    # tiny viewport: scale floor 0.4
             "]));\n"
         )
-        assert json.loads(out) == [24, 28, 12, 10]
+        assert json.loads(out) == [30, 36, 15, 12]
 
     def test_droplet_step_advances_lifecycle(self, rain_uri):
         """Stick-slip machine: a stuck droplet holds position while its
