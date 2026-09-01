@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from markdown_it import MarkdownIt
+from mdit_py_plugins.footnote import footnote_plugin
 
 from br_insight import frontmatter
 from br_insight.textutils import slugify
@@ -23,7 +24,17 @@ _ANCHOR_TAG = re.compile(r'<a class="anchor"[^>]*>.*?</a>', re.DOTALL)
 _INLINE_TAGS = re.compile(r"<[^>]+>")
 _ATX_HEADING = re.compile(r"^\s{0,3}#{1,6}(?:\s|$)")
 
-_MARKDOWN = MarkdownIt()
+_MARKDOWN = MarkdownIt().use(footnote_plugin)
+
+# Inline footnote refs render as "[1]"; the brackets are noise — keep the
+# number only.
+_FOOTNOTE_REF_BRACKETS = re.compile(
+    r'(<sup class="footnote-ref"><a[^>]*>)\[(\d+)\](</a></sup>)'
+)
+# The plugin emits <section class="footnotes"> bare; a heading is injected
+# inside it so the notes get their own TOC-visible section header.
+_FOOTNOTE_SECTION = '<section class="footnotes">'
+_FOOTNOTES_HEADER = '<section class="footnotes">\n<h2>Notes</h2>'
 
 
 @dataclass(frozen=True)
@@ -100,8 +111,15 @@ def render_markdown(body: str) -> str:
     ``-2``, ``-3``, … and slugless headings fall back to ``section`` so
     an empty id is never emitted. H2/H3 additionally carry a trailing
     ``<a class="anchor">`` link targeting their own id.
+
+    Footnotes (``[^1]`` refs / ``[^1]: text`` defs) render via the
+    markdown-it footnote plugin; the notes section gains an injected
+    ``<h2>Notes`` header so extract_toc lists it.
     """
     html = _MARKDOWN.render(body)
+    if _FOOTNOTE_SECTION in html:
+        html = _FOOTNOTES_HEADER.join(html.split(_FOOTNOTE_SECTION, 1))
+        html = _FOOTNOTE_REF_BRACKETS.sub(r"\1\2\3", html)
     used: set[str] = set()
     counts: dict[str, int] = {}
 

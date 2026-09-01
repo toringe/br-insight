@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% set asset_prefix = "../../" %}
-{% from "partials/cover.html" import hero_picture, lazy_cover, cover_srcset, hero_sizes %}
+{% from "partials/cover.html" import banner_picture, lazy_cover, cover_srcset, hero_sizes %}
 
 {% block og_type %}article{% endblock %}
 {% block title %}{{ article.title }}{% endblock %}
@@ -12,29 +12,33 @@
     not decode WebP. Render passes the filename via og_cover (Task 14). -#}
 {% block og_image %}/library/{{ article.slug }}/{{ og_cover | default(article.cover) }}{% endblock %}
 
-{#- Task 14 LCP preload: mirrors the hero <picture> candidate list exactly
-    so the browser resolves the same URL once — no double fetch. -#}
+{#- Task 14 LCP preload: mirrors the banner <picture> candidate list exactly
+    so the browser resolves the same URL once — no double fetch. The prose
+    face is article-only, so its preload lives here too. -#}
 {% block head_preload %}
-{%- if cover_variants and cover_variants.hero %}
+{%- if cover_variants and cover_variants.crop %}
 <link rel="preload" as="image"
-      href="{{ asset_prefix }}library/{{ article.slug }}/cover-{{ cover_variants.hero[-1] }}.jpg"
-      imagesrcset="{{ cover_srcset(asset_prefix ~ 'library/' ~ article.slug ~ '/cover-', cover_variants.hero, 'webp') }}"
+      href="{{ asset_prefix }}library/{{ article.slug }}/cover-crop-{{ cover_variants.crop[-1] }}.jpg"
+      imagesrcset="{{ cover_srcset(asset_prefix ~ 'library/' ~ article.slug ~ '/cover-crop-', cover_variants.crop, 'webp') }}"
       imagesizes="{{ hero_sizes }}">
 {%- endif %}
+<link rel="preload" href="{{ asset_prefix }}assets/fonts/lato-light-latin-300.woff2{{ asset_ver('assets/fonts/lato-light-latin-300.woff2') }}" as="font" type="font/woff2" crossorigin>
 {% endblock %}
 
 {% block content %}
 <article class="article">
+  <figure class="article-hero">
+    {{ banner_picture(article.slug, asset_prefix, "Cover art for " ~ article.title, cover_variants) }}
+    <div class="article-hero__scrim" aria-hidden="true"></div>
+    <div class="article-hero__content">
+      <p class="eyebrow article__category">{{ article.category }}</p>
+      <h1 class="article-hero__title">{{ article.title }}</h1>
+      {% include "partials/byline.html" %}
+    </div>
+    {% include "partials/credit.html" %}
+  </figure>
+
   <div class="container">
-    <figure class="article-hero">
-      {{ hero_picture(article.slug, asset_prefix, "Cover art for " ~ article.title, cover_width, cover_height, cover_variants) }}
-      {% include "partials/credit.html" %}
-    </figure>
-
-    <p class="eyebrow article__category">{{ article.category }}</p>
-
-    {% include "partials/byline.html" %}
-
     {% if toc %}
     <aside class="toc" aria-labelledby="toc-title">
       <p class="eyebrow" id="toc-title">Contents</p>
@@ -60,21 +64,6 @@
     </div>
 
     <nav class="end-block" aria-label="Continue reading">
-      <div class="end-block__pager">
-        <div class="end-block__slot">
-          {%- if newer %}
-          <span class="end-block__label">Newer</span>
-          <a class="end-block__link" href="/library/{{ newer.slug }}/">{{ newer.title }}</a>
-          {%- endif %}
-        </div>
-        <div class="end-block__slot end-block__slot--older">
-          {%- if older %}
-          <span class="end-block__label">Older</span>
-          <a class="end-block__link" href="/library/{{ older.slug }}/">{{ older.title }}</a>
-          {%- endif %}
-        </div>
-      </div>
-
       <p class="end-block__back" data-focus-hide>
         <a class="btn btn--ghost" href="/library/">&#8592; Back to Library</a>
       </p>

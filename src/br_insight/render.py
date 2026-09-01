@@ -24,7 +24,6 @@ from pathlib import Path
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from PIL import Image
 
 from br_insight.articles import extract_toc, load_all, related
 from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy, resolve_featured
@@ -48,8 +47,16 @@ FEED_ITEM_LIMIT = 20
 
 
 def _toc_heading_count(toc: list[dict]) -> int:
-    """Total h2/h3 entries across the TOC tree, children included."""
-    return sum(1 + len(entry["children"]) for entry in toc)
+    """Total h2/h3 entries across the TOC tree, children included.
+
+    The build-generated footnotes header ("notes") doesn't count toward
+    the aside threshold — it's machinery, not authored structure.
+    """
+    return sum(
+        (entry["id"] != "notes")
+        + sum(child["id"] != "notes" for child in entry["children"])
+        for entry in toc
+    )
 
 
 def decade(date: datetime.date) -> str:
@@ -385,24 +392,16 @@ def build(root: Path, out: Path) -> list[Path]:
         for article in articles
     }
 
-    cover_sizes: dict[str, tuple[int, int]] = {}
     written: list[Path] = []
-    for index, article in enumerate(articles):
-        newer = articles[index - 1] if index > 0 else None
-        older = articles[index + 1] if index + 1 < len(articles) else None
-        width, height = _cover_size(root, article.slug, cover_sizes)
+    for article in articles:
         toc = extract_toc(article.html)
         html = render_template(
             "article.html",
             site=site,
             article=article,
-            newer=newer,
-            older=older,
             related=related(article, articles),
             toc=toc if _toc_heading_count(toc) >= TOC_MIN_HEADINGS else [],
             og_cover=_og_cover(root, article, out),
-            cover_width=width,
-            cover_height=height,
             cover_variants=variants.get(article.slug),
             variants=variants,
             now=now,
@@ -519,15 +518,6 @@ def build(root: Path, out: Path) -> list[Path]:
     )
     written.append(feed)
     return written
-
-
-def _cover_size(
-    root: Path, slug: str, cache: dict[str, tuple[int, int]]
-) -> tuple[int, int]:
-    if slug not in cache:
-        with Image.open(root / "library" / slug / "cover.jpg") as image:
-            cache[slug] = image.size
-    return cache[slug]
 
 
 def _og_cover(root: Path, article, out: Path | None = None) -> str:

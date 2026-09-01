@@ -162,7 +162,10 @@ class TestDesignDirectionRetrofit:
 
     def test_serif_applied_to_prose_and_summaries(self, css):
         prose = css[css.index(".prose {"):]
-        assert "font-family: var(--font-serif)" in prose[:200]
+        # Article prose reads in Lato Light 300; serif stays for card and
+        # featured summaries.
+        assert "font-family: var(--font-prose)" in prose[:200]
+        assert "font-weight: 300" in prose[:200]
         card = css[css.index(".card__summary {"):]
         assert "var(--font-serif)" in card[:300]
         featured = css[css.index(".featured__summary {"):]
@@ -377,12 +380,8 @@ ANATOMY_CTX = dict(
     older=None,
     related=[],
     toc=[],
-    cover_width=1167,
-    cover_height=700,
-    # Task 14: a plan as images.generate_cover_variants would produce for a
-    # 1167px-wide source (nothing wider than the source is ever cited).
     cover_variants=CoverVariants(
-        source="cover.jpg", hero=(480, 800, 1167), crop=(480, 800)
+        source="cover.jpg", hero=(480, 800, 1167), crop=(480, 800, 1167)
     ),
 )
 
@@ -397,13 +396,11 @@ class TestArticleAnatomy:
     def test_hero_picture_with_high_fetchpriority_and_dimensions(self, html):
         assert "<picture>" in html
         assert 'fetchpriority="high"' in html
-        assert re.search(r'<img[^>]+width="1167"[^>]+height="700"', html)
+        # Cinematic banner: fixed 16:9 box, crop ladder cited.
+        assert re.search(r'<img[^>]+width="1280"[^>]+height="720"', html)
         assert 'type="image/webp"' in html
-        assert "cover-1167.webp 1167w" in html
-        # Single-aspect hero ladder: mobile crop swap removed so intrinsic
-        # dimensions always match the picked candidate (LH aspect ratio).
-        assert "cover-crop-" not in html.split('article-hero')[1].split('</figure>')[0]
-        assert 'src="../../library/voight-kampff-test/cover-1167.jpg"' in html
+        assert "cover-crop-1167.webp 1167w" in html
+        assert 'src="../../library/voight-kampff-test/cover-crop-1167.jpg"' in html
 
     def test_credit_caption_known_artist(self, html):
         assert "Cover art © Syd Mead" in html
@@ -461,24 +458,22 @@ class TestArticleAnatomy:
     def test_back_to_library_link(self, html):
         assert 'href="/library/">' in html
 
-    def test_pager_slots_newer_then_older(self, site):
+    def test_pager_removed(self, site):
         newer = _ns_article(slug="newer-one", title="Newer One")
         older = _ns_article(slug="older-one", title="Older One")
         html = render_template(
             "article.html", site=site, article=_ns_article(),
-            newer=newer, older=older, related=[], toc=[], cover_width=1, cover_height=1,
+            newer=newer, older=older, related=[], toc=[],
         )
-        n = html.index(">Newer</span>")
-        o = html.index(">Older</span>")
-        assert n < o
-        assert html.index('href="/library/newer-one/"', n, o)
-        assert html.index('href="/library/older-one/"', o)
+        assert "end-block__pager" not in html
+        assert ">Newer</span>" not in html
+        assert ">Older</span>" not in html
 
     def test_related_cards_with_title_byline_reading_time(self, site):
         rels = [_ns_article(slug=f"rel-{i}", title=f"Rel {i}") for i in range(3)]
         html = render_template(
             "article.html", site=site, article=_ns_article(),
-            newer=None, older=None, related=rels, toc=[], cover_width=1, cover_height=1,
+            related=rels, toc=[],
         )
         assert html.count('class="card"') == 3
         assert 'href="/library/rel-0/"' in html
@@ -596,7 +591,12 @@ class TestBuildPipeline:
         out, _ = built
 
         def total(nodes) -> int:
-            return sum(1 + total(n["children"]) for n in nodes)
+            # Mirrors render._toc_heading_count: the generated "Notes"
+            # header doesn't count toward the threshold.
+            return sum(
+                (n["id"] != "notes") + sum(c["id"] != "notes" for c in n["children"])
+                for n in nodes
+            )
 
         for article in load_all(REPO_ROOT):
             expected = total(extract_toc(article.html)) >= 3
@@ -605,19 +605,15 @@ class TestBuildPipeline:
             )
             assert ('<aside class="toc"' in text) is expected, article.slug
 
-    def test_pager_orders_newer_before_older(self, built):
-        from br_insight.articles import load_all
-
+    def test_pager_removed_from_built_pages(self, built):
         out, _ = built
-        articles = load_all(REPO_ROOT)
-        mid = articles[len(articles) // 2]
-        newer, older = articles[len(articles) // 2 - 1], articles[len(articles) // 2 + 1]
-        text = (out / "library" / mid.slug / "index.html").read_text(encoding="utf-8")
-        n = text.index(">Newer</span>")
-        o = text.index(">Older</span>")
-        assert n < o
-        assert text.index(f'href="/library/{newer.slug}/"', n, o)
-        assert text.index(f'href="/library/{older.slug}/"', o)
+        text = next(
+            p.read_text(encoding="utf-8")
+            for p in sorted((out / "library").glob("*/index.html"))
+        )
+        assert "end-block__pager" not in text
+        assert ">Newer</span>" not in text
+        assert ">Older</span>" not in text
 
     def test_both_credit_branches_occur_across_corpus(self, built):
         from br_insight.articles import load_all
@@ -664,7 +660,12 @@ def _toc_entry_count(article) -> int:
     from br_insight.articles import extract_toc
 
     def total(nodes) -> int:
-        return sum(1 + total(n["children"]) for n in nodes)
+        # Mirrors render._toc_heading_count: the generated "Notes"
+        # header doesn't count toward the threshold.
+        return sum(
+            (n["id"] != "notes") + sum(c["id"] != "notes" for c in n["children"])
+            for n in nodes
+        )
 
     return total(extract_toc(article.html))
 
@@ -886,11 +887,11 @@ class TestPictureMarkupContract:
         for page in self._article_pages(out):
             text = page.read_text(encoding="utf-8")
             assert '<source type="image/webp"' in text, page.parent.name
-            assert re.search(r'srcset="[^"]*cover-\d+\.webp \d+w', text), (
+            assert re.search(r'srcset="[^"]*cover-(?:crop-)?\d+\.webp \d+w', text), (
                 page.parent.name
             )
             # Non-webp <img> fallback points at a generated jpg variant.
-            assert re.search(r'<img[^>]+src="[^"]*cover-\d+\.jpg"', text), (
+            assert re.search(r'<img[^>]+src="[^"]*cover-(?:crop-)?\d+\.jpg"', text), (
                 page.parent.name
             )
 

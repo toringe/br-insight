@@ -23,7 +23,7 @@ from PIL import Image
 
 # Width ladder per use site.
 HERO_WIDTHS: tuple[int, ...] = (480, 800, 1280)
-CROP_WIDTHS: tuple[int, ...] = (480, 800)
+CROP_WIDTHS: tuple[int, ...] = (480, 800, 1280)
 
 # Center-crop aspect ratio (filename fragment → ratio).
 CROP_RATIOS: dict[str, float] = {"16/9": 16 / 9}

@@ -21,6 +21,30 @@
 {%- endfor -%}
 {%- endmacro %}
 
+{#- Cinematic article banner: 16:9 crop variants, full-bleed overlay hero.
+    Fixed-ratio box keeps every article's cover consistent regardless of the
+    source's natural aspect. width/height mirror the 16:9 ratio for CLS. -#}
+{% macro banner_picture(slug, prefix, alt, plan) %}
+<picture>
+  {%- if plan and plan.crop %}
+  <source type="image/webp"
+          srcset="{{ cover_srcset(prefix ~ 'library/' ~ slug ~ '/cover-crop-', plan.crop, 'webp') }}"
+          sizes="{{ hero_sizes }}">
+  <img
+    src="{{ prefix }}library/{{ slug }}/cover-crop-{{ plan.crop[-1] }}.jpg"
+    srcset="{{ cover_srcset(prefix ~ 'library/' ~ slug ~ '/cover-crop-', plan.crop, 'jpg') }}"
+    sizes="{{ hero_sizes }}"
+    alt="{{ alt }}" width="1280" height="720"
+    fetchpriority="high" decoding="async">
+  {%- else %}
+  <img
+    src="{{ prefix }}library/{{ slug }}/cover-crop.jpg"
+    alt="{{ alt }}" width="1280" height="720"
+    fetchpriority="high" decoding="async">
+  {%- endif %}
+</picture>
+{% endmacro %}
+
 {% macro hero_picture(slug, prefix, alt, width, height, plan) %}
 {#- One candidate ladder, one aspect: every hero variant derives from the
     uncropped source, so the intrinsic width/height attributes match
