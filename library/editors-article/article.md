@@ -1,7 +1,8 @@
 ---
 title: Editor's Article
 author: Tor Inge Skaar
-cover: cover.jpg
+cover: cover.png
+cauthor: Matthew Ceo
 date: 1995-11-03
 taxonomy:
     category: article

@@ -7,8 +7,8 @@ import pytest
 
 from br_insight.render import REPO_ROOT
 
-# The legacy about.html carries SEVEN revision screenshots (rev1–rev7);
-# the brief's "six" is stale — all seven are preserved faithfully.
+# The legacy about.html carried SEVEN revision screenshots (rev1–rev7);
+# rev8 (2017 redesign) is new — all eight now live in the carousel.
 SCREENSHOTS = (
     ("/assets/img/site_rev1.jpg", "Screenshot of 1st revision"),
     ("/assets/img/site_rev2.jpg", "Screenshot of 2nd revision"),
@@ -17,6 +17,19 @@ SCREENSHOTS = (
     ("/assets/img/site_rev5.jpg", "Screenshot of 5th revision"),
     ("/assets/img/site_rev6.png", "Screenshot of 6th revision"),
     ("/assets/img/site_rev7.png", "Screenshot of 7th revision"),
+    ("/assets/img/site_rev8.png", "Screenshot of 8th revision"),
+)
+
+# Legacy caption typos preserved intentionally (owner's narrative).
+REVISION_CAPTIONS = (
+    "First Revision - 1996",
+    "Second Revision - 1998",
+    "Third Revision - 1999",
+    "Fourth Revision - 2002",
+    "Fifth Revision - 1999",
+    "Sixth Revision - 2007",
+    "Seventh Revision - 2015",
+    "Eighth Revision - 2017",
 )
 
 HISTORY_FACTS = (
@@ -70,6 +83,25 @@ class TestAboutPage:
         legacy = ("jquery", "skel.min.js", "about.min.css", "id=\"menu\"")
         for marker in legacy:
             assert marker not in about, marker
+
+    def test_revision_accordion_markup(self, about):
+        assert 'aria-roledescription="carousel"' in about
+        assert 'data-rev-accordion' in about
+        assert 'data-rev-prev' in about
+        assert 'data-rev-next' in about
+        assert 'data-rev-counter' in about
+
+    def test_revision_accordion_radios_and_labels(self, about):
+        # Strips are radio + label driven: click-to-expand works without JS;
+        # revisions.js only adds arrows, counter and keyboard support.
+        for n in range(1, 9):
+            assert f'id="rev-radio-{n}"' in about
+            assert f'for="rev-radio-{n}"' in about
+        assert 'checked' in about  # first revision expanded on load
+
+    def test_all_revision_captions_in_carousel(self, about):
+        for caption in REVISION_CAPTIONS:
+            assert caption in about, caption
 
 
 class TestNavCurrentPage:

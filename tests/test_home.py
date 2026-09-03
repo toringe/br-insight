@@ -98,7 +98,7 @@ class TestTopicCloud:
 
 
 class TestHomeContext:
-    def test_featured_recent_and_month_resolved_from_injected_now(self):
+    def test_featured_picks_and_month_resolved_from_injected_now(self):
         from br_insight.render import home_context
 
         articles = corpus()
@@ -109,8 +109,56 @@ class TestHomeContext:
         # config slug wins over monthly rotation
         assert ctx["featured"].slug == "postmodernist-view"
         assert ctx["featured_month"] == "August"
-        assert ctx["recent"] == articles[:4]
+        picks = ctx["archive_picks"]
+        assert len(picks) == 3
+        assert "postmodernist-view" not in {a.slug for a in picks}
+        assert picks == sorted(picks, key=lambda a: a.date, reverse=True)
+        assert ctx["iso_year_week"] == "2026-W35"
         assert ctx["stats"]["essays"] == len(articles)
+
+    def test_archive_picks_stable_within_week_shift_next_week(self):
+        from br_insight.render import home_context
+
+        articles = corpus()
+        friday = home_context(
+            SiteConfig.load(REPO_ROOT), articles,
+            datetime.datetime(2026, 8, 28, 23, 0),
+        )
+        sunday = home_context(
+            SiteConfig.load(REPO_ROOT), articles,
+            datetime.datetime(2026, 8, 30, 12, 0),
+        )
+        assert friday["iso_year_week"] == sunday["iso_year_week"]
+        assert [a.slug for a in friday["archive_picks"]] == [
+            a.slug for a in sunday["archive_picks"]
+        ]
+        # a week later: same corpus, fresh (deterministic) shuffle
+        next_week = home_context(
+            SiteConfig.load(REPO_ROOT), articles,
+            datetime.datetime(2026, 8, 31, 12, 0),
+        )
+        assert next_week["iso_year_week"] == "2026-W36"
+        assert [a.slug for a in next_week["archive_picks"]] != [
+            a.slug for a in friday["archive_picks"]
+        ]
+
+    def test_archive_payload_carries_client_fields_and_crop_ladder(self):
+        from br_insight.render import home_context
+
+        articles = corpus()
+        ctx = home_context(
+            SiteConfig.load(REPO_ROOT), articles,
+            datetime.datetime(2026, 8, 26, 14, 30),
+        )
+        by_slug = {item["slug"]: item for item in ctx["archive_payload"]}
+        assert len(by_slug) == len(articles)
+        item = next(iter(by_slug.values()))
+        assert {"slug", "title", "author", "minutes", "date",
+                "category", "tags", "crop"} <= set(item)
+        assert all(
+            isinstance(v, list) and all(isinstance(w, int) for w in v)
+            for v in (i["crop"] for i in by_slug.values())
+        )
 
     def test_rotation_fallback_is_deterministic_per_month(self):
         from dataclasses import replace
@@ -165,7 +213,7 @@ RECENT_ARTICLES = [
         title=f"Recent {i}",
         date=datetime.datetime(2024, 5, i + 1),
     )
-    for i in range(4)
+    for i in range(3)
 ]
 
 HOME_TOPICS = [
@@ -183,7 +231,21 @@ def _ctx(**overrides):
         featured_month="August",
         stats={"essays": 29, "authors": 12, "words": 79321},
         topics=HOME_TOPICS,
-        recent=RECENT_ARTICLES,
+        archive_picks=RECENT_ARTICLES,
+        iso_year_week="2026-W35",
+        archive_payload=[
+            {
+                "slug": a.slug,
+                "title": a.title,
+                "author": a.author,
+                "minutes": a.minutes,
+                "date": a.date.strftime("%Y-%m-%d"),
+                "category": a.category,
+                "tags": a.tags,
+                "crop": [],
+            }
+            for a in RECENT_ARTICLES
+        ],
         current_path="/",
     )
     ctx.update(overrides)
@@ -267,12 +329,18 @@ class TestHomeAnatomy:
     def test_topic_cloud_escapes_ampersands(self, html):
         assert "Themes &amp; Humanity" in html
 
-    def test_recent_row_four_cards_newest_first(self, html):
-        recent = html[html.index('aria-labelledby="recent-title"'):]
-        positions = [recent.index(f'/library/recent-{i}/">') for i in range(4)]
+    def test_archive_row_four_cards_in_given_order(self, html):
+        archive = html[html.index('aria-labelledby="archive-title"'):]
+        positions = [archive.index(f'/library/recent-{i}/">') for i in range(3)]
         assert positions == sorted(positions)
-        assert html.count('class="card"') == 4
-        assert 'src="/library/recent-0/cover-crop.jpg"' in recent
+        assert html.count('class="card"') == 3
+        assert 'src="/library/recent-0/cover-crop.jpg"' in archive
+
+    def test_archive_grid_carries_week_and_featured_hooks(self, html):
+        assert 'data-archive-grid' in html
+        assert 'data-build-week="2026-W35"' in html
+        assert 'data-featured-slug="postmodernist-view"' in html
+        assert 'id="archive-payload"' in html
 
     def test_zero_js_no_executable_scripts(self, html):
         # graceful degradation only: Random essay stays an inert <a>; the
@@ -301,8 +369,8 @@ class TestHomeAnatomy:
         featured = html.index('class="featured"')
         stats = html.index('class="home-stats"')
         topics = html.index('aria-label="Topics"')
-        recent = html.index('aria-labelledby="recent-title"')
-        assert hero < featured < stats < topics < recent
+        archive = html.index('aria-labelledby="archive-title"')
+        assert hero < featured < stats < topics < archive
 
     def test_home_nav_marks_current_page(self, html):
         nav = html[html.index("<nav"):html.index("</nav>")]
@@ -319,7 +387,7 @@ class TestEyebrowSignature:
             ">Featured analysis · August<",
             ">Thirty years online<",
             ">Browse by topic<",
-            ">Recent additions<",
+            ">From the archive<",
         ):
             assert label in html
 
@@ -396,7 +464,7 @@ class TestBuildHomePage:
         from br_insight.textutils import slugify
 
         text = (built_home / "index.html").read_text(encoding="utf-8")
-        cloud = text[text.index('aria-label="Topics"'):text.index("Recent additions")]
+        cloud = text[text.index('aria-label="Topics"'):text.index("From the archive")]
         hrefs = {h.removeprefix('href="').removesuffix('"') for h in _cloud_hrefs(cloud)}
         expected_cats = {
             f"/topics/{slugify(c)}/" for c in taxonomy_categories()
@@ -406,20 +474,22 @@ class TestBuildHomePage:
         assert "/topics/themes-humanity/" in hrefs
         assert "/topics/tag/noir/" in hrefs
 
-    def test_built_recent_row_is_four_newest(self, built_home):
+    def test_built_archive_row_is_weekly_pick(self, built_home):
+        from br_insight.config import resolve_archive_picks
+
         articles = corpus()
         text = (built_home / "index.html").read_text(encoding="utf-8")
-        recent = text[text.index('aria-labelledby="recent-title"'):]
-        positions = [recent.index(f'/library/{a.slug}/">') for a in articles[:4]]
-        assert positions == sorted(positions)  # newest-first card order
-        assert recent.count('class="card"') == 4
-        # nothing else from the corpus leaks past the four-card grid
-        fifth_newest_onwards = {a.slug for a in articles[4:]}
+        archive = text[text.index('aria-labelledby="archive-title"'):]
+        assert archive.count('class="card"') == 3
+        # build week, injected via the grid hook, drives the fallback pick
+        week = re.search(r'data-build-week="([^"]+)"', text).group(1)
+        featured = "postmodernist-view"
+        expected = {a.slug for a in resolve_archive_picks(articles, week, featured)}
         row_slugs = {
-            slug for slug in fifth_newest_onwards
-            if f"/library/{slug}/" in recent
+            a.slug for a in articles if f'/library/{a.slug}/">' in archive
         }
-        assert not row_slugs
+        assert row_slugs == expected
+        assert featured not in row_slugs
 
     def test_built_month_name_present(self, built_home):
         text = (built_home / "index.html").read_text(encoding="utf-8")

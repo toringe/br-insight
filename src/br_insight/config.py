@@ -308,3 +308,61 @@ def resolve_featured(
     if not slugs:
         raise SiteConfigError("no articles available for featured rotation")
     return by_slug[slugs[int(year_month) % len(slugs)]]
+
+
+ARCHIVE_PICK_COUNT = 3
+
+
+def cyrb53(text: str) -> int:
+    """cyrb53 string hash (32-bit ops, 53-bit output).
+
+    The client carousel (assets/js/modules/archive.js) implements the
+    identical function, so build-time picks and view-time picks agree
+    exactly. Slugs are slugify() output, i.e. ASCII, where the JS
+    charCodeAt loop and this code-point loop see the same input.
+    """
+    h1 = 0xDEADBEEF
+    h2 = 0x41C6CE57
+    for ch in text:
+        c = ord(ch)
+        h1 = ((h1 ^ c) * 2654435761) & 0xFFFFFFFF
+        h2 = ((h2 ^ c) * 1597334677) & 0xFFFFFFFF
+    h1 = (((h1 ^ (h1 >> 16)) * 2246822507) & 0xFFFFFFFF) ^ (
+        ((h2 ^ (h2 >> 13)) * 3266489909) & 0xFFFFFFFF
+    )
+    h1 &= 0xFFFFFFFF
+    h2 = ((h2 ^ (h2 >> 16)) * 2246822507) & 0xFFFFFFFF
+    h2 ^= ((h1 ^ (h1 >> 13)) * 3266489909) & 0xFFFFFFFF
+    h2 &= 0xFFFFFFFF
+    return (2097151 & h2) * 4294967296 + h1
+
+
+def cyrb53_hex(text: str) -> str:
+    """cyrb53 as 13 hex chars so lexicographic sort == numeric sort."""
+    return f"{cyrb53(text):013x}"
+
+
+def resolve_archive_picks(
+    articles: Iterable[Article],
+    iso_year_week: str,
+    exclude_slug: str | None = None,
+) -> list[Article]:
+    """Deterministic weekly picks for the home "From the archive" row.
+
+    Orders article slugs by ``cyrb53_hex(slug + ":" + iso_year_week)``
+    (slug as tie-break) and takes the first ``ARCHIVE_PICK_COUNT``,
+    returned newest-first, so the same week always yields the same picks
+    and a new week reshuffles them. The featured essay (``exclude_slug``)
+    is excluded to avoid duplicating the hero card.
+    """
+    pool = sorted(
+        (a for a in articles if a.slug != exclude_slug),
+        key=lambda a: a.slug,
+    )
+    if not pool:
+        return []
+    picks = sorted(
+        pool,
+        key=lambda a: (cyrb53_hex(f"{a.slug}:{iso_year_week}"), a.slug),
+    )[:ARCHIVE_PICK_COUNT]
+    return sorted(picks, key=lambda a: a.date, reverse=True)

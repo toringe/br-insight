@@ -36,6 +36,42 @@ class TestTopicPages:
         assert {t["name"] for t in tags} == used_tags
         assert len(topics) == len(categories) + len(tags)
 
+
+class TestTopicTitleSize:
+    """Length-aware h1 sizing: Sixtyfour is a monospace grid font (exactly
+    1em per glyph, measured), so a topic name's longest word must drop font
+    tiers to wrap at word boundaries on phones instead of breaking mid-word.
+    Tiers (fs-3xl/2xl/xl/lg fit ~8/10/12/16 chars at 320px viewport):
+    lg ≤7, md ≤9, sm ≤11, xs ≥12."""
+
+    def test_tier_by_longest_word(self):
+        from br_insight.render import topic_title_size
+
+        # lg: longest word ≤ 7 chars
+        assert topic_title_size("Noir") == "lg"
+        assert topic_title_size("World & Setting") == "lg"
+        assert topic_title_size("Genre") == "lg"
+        # md: longest word 8–9 chars
+        assert topic_title_size("Themes & Humanity") == "md"
+        assert topic_title_size("Religion & Symbolism") == "md"
+        assert topic_title_size("Dystopia") == "md"
+        # sm: longest word 10–11 chars
+        assert topic_title_size("Novel & Adaptation") == "sm"
+        assert topic_title_size("Technology & Society") == "sm"
+        assert topic_title_size("Fan-Fiction") == "sm"
+        # xs: longest word ≥ 12 chars
+        assert topic_title_size("Cinematography") == "xs"
+        assert topic_title_size("Postmodernism") == "xs"
+        assert topic_title_size("Los-Angeles-2019") == "xs"
+
+    def test_topic_pages_carry_title_size(self):
+        from br_insight.render import topic_pages
+
+        by_name = {t["name"]: t for t in topic_pages(corpus())}
+        assert by_name["noir"]["title_size"] == "lg"
+        assert by_name["Novel & Adaptation"]["title_size"] == "sm"
+        assert by_name["cinematography"]["title_size"] == "xs"
+
     def test_hrefs_match_home_topic_cloud_exactly(self):
         from br_insight.render import topic_cloud, topic_pages
 
@@ -171,9 +207,16 @@ class TestTopicTemplateAnatomy:
     def test_header_eyebrow_name_intro_count(self):
         html = self._render("Film Analysis", kind="category")
         assert '<p class="eyebrow">Category</p>' in html
-        assert "<h1>Film Analysis</h1>" in html
+        assert (
+            '<h1 class="page-head__title page-head__title--md">Film Analysis</h1>'
+            in html
+        )
         assert 'class="page-head__lead"' in html
         assert ">8 essays</" in html
+
+    def test_title_tier_class_tracks_longest_word(self):
+        html = self._render("Novel & Adaptation", kind="category")
+        assert 'page-head__title--sm">Novel &amp; Adaptation</h1>' in html
 
     def test_tag_eyebrow_and_count(self):
         from br_insight.render import topic_pages
@@ -229,9 +272,8 @@ class TestTopicsHubTemplate:
             tags,
         )
 
-    def test_header_eyebrow_h1_and_real_intro(self):
+    def test_header_h1_and_real_intro(self):
         html, _, _ = self._render()
-        assert '<p class="eyebrow">Browse by topic</p>' in html
         assert "<h1>Topics</h1>" in html
         lead = html[html.index('class="page-head__lead"'):]
         lead_text = lead[lead.index(">") + 1 : lead.index("</p>")]

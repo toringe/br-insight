@@ -1,8 +1,3 @@
-<figcaption class="credit">
-  {%- if article.cover_artist -%}
-  Cover art © {{ article.cover_artist }}
-  {%- else -%}
-  Cover art by an unknown artist — know the creator?
-  <a href="{{ asset_prefix | default('/') }}about.html">Get in touch</a>.
-  {%- endif -%}
-</figcaption>
+{%- if article.cover_artist -%}
+<figcaption class="credit">Cover art © {{ article.cover_artist }}</figcaption>
+{%- endif -%}

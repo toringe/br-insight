@@ -1,6 +1,11 @@
 {#- Site history prose, carried over verbatim from the legacy about.html
     (Task 11). Typos and dating quirks ("Fifth Revision - 1999", "permantently")
-    are preserved intentionally — this is the owner's narrative. -#}
+    are preserved intentionally — this is the owner's narrative. Revision
+    screenshots render as a fluid flexbox accordion (after Simey's
+    "Stripe Sessions" carousel): collapsed strips show a center slice of each
+    screenshot, the active strip flex-expands to reveal the full image. Strips
+    are radio + label driven, so click-to-expand works without JS; arrows +
+    counter + keyboard come from assets/js/modules/revisions.js. -#}
 <div class="prose about-history">
   <p>Blade Runner Insight started as a project in November 1995 and it went online in July 1996. It was at first named <strong>The Unofficial In-Depth Analysis of Blade Runner</strong>, and it was based on the idea to provide a deeper and more profound understanding of the science fiction movie “Blade Runner”.</p>
   <p>The idea was to create a collection of essays and analytical papers written by people all over the world and easily share it online. The first versions of the site was hosted on <a href="https://en.wikipedia.org/wiki/Yahoo!_GeoCities">GeoCities</a>.</p>
@@ -11,39 +16,79 @@
   <h2 id="site-history">Site history</h2>
 
   <p>The site itself has gone through several make-overs since it was launched. The following screenshots show the different versions.</p>
-
-  <h3 id="first-revision-1996">First Revision - 1996</h3>
-  <figure>
-    <img src="/assets/img/site_rev1.jpg" alt="Screenshot of 1st revision" loading="lazy">
-  </figure>
-
-  <h3 id="second-revision-1998">Second Revision - 1998</h3>
-  <figure>
-    <img src="/assets/img/site_rev2.jpg" alt="Screenshot of 2nd revision" loading="lazy">
-  </figure>
-
-  <h3 id="third-revision-1999">Third Revision - 1999</h3>
-  <figure>
-    <img src="/assets/img/site_rev3.jpg" alt="Screenshot of 3rd revision" loading="lazy">
-  </figure>
-
-  <h3 id="fourth-revision-2002">Fourth Revision - 2002</h3>
-  <figure>
-    <img src="/assets/img/site_rev4.jpg" alt="Screenshot of 4th revision" loading="lazy">
-  </figure>
-
-  <h3 id="fifth-revision-2005">Fifth Revision - 1999</h3>
-  <figure>
-    <img src="/assets/img/site_rev5.jpg" alt="Screenshot of 5th revision" loading="lazy">
-  </figure>
-
-  <h3 id="sixth-revision-2007">Sixth Revision - 2007</h3>
-  <figure>
-    <img src="/assets/img/site_rev6.png" alt="Screenshot of 6th revision" loading="lazy">
-  </figure>
-
-  <h3 id="seventh-revision-2015">Seventh Revision - 2015</h3>
-  <figure>
-    <img src="/assets/img/site_rev7.png" alt="Screenshot of 7th revision" loading="lazy">
-  </figure>
 </div>
+
+<section class="rev-accordion" aria-roledescription="carousel" aria-label="Previous versions of the site" data-rev-accordion>
+  <ul class="rev-accordion__list" role="list">
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-1" checked>
+      <figure>
+        <img src="/assets/img/site_rev1.jpg" alt="Screenshot of 1st revision" loading="lazy" width="640" height="440">
+        <figcaption class="rev-accordion__caption">First Revision - 1996</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-1" aria-label="Show 1st revision"></label>
+    </li>
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-2">
+      <figure>
+        <img src="/assets/img/site_rev2.jpg" alt="Screenshot of 2nd revision" loading="lazy" width="640" height="441">
+        <figcaption class="rev-accordion__caption">Second Revision - 1998</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-2" aria-label="Show 2nd revision"></label>
+    </li>
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-3">
+      <figure>
+        <img src="/assets/img/site_rev3.jpg" alt="Screenshot of 3rd revision" loading="lazy" width="640" height="347">
+        <figcaption class="rev-accordion__caption">Third Revision - 1999</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-3" aria-label="Show 3rd revision"></label>
+    </li>
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-4">
+      <figure>
+        <img src="/assets/img/site_rev4.jpg" alt="Screenshot of 4th revision" loading="lazy" width="640" height="417">
+        <figcaption class="rev-accordion__caption">Fourth Revision - 2002</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-4" aria-label="Show 4th revision"></label>
+    </li>
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-5">
+      <figure>
+        <img src="/assets/img/site_rev5.jpg" alt="Screenshot of 5th revision" loading="lazy" width="923" height="719">
+        <figcaption class="rev-accordion__caption">Fifth Revision - 1999</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-5" aria-label="Show 5th revision"></label>
+    </li>
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-6">
+      <figure>
+        <img src="/assets/img/site_rev6.png" alt="Screenshot of 6th revision" loading="lazy" width="1019" height="737">
+        <figcaption class="rev-accordion__caption">Sixth Revision - 2007</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-6" aria-label="Show 6th revision"></label>
+    </li>
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-7">
+      <figure>
+        <img src="/assets/img/site_rev7.png" alt="Screenshot of 7th revision" loading="lazy" width="1176" height="717">
+        <figcaption class="rev-accordion__caption">Seventh Revision - 2015</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-7" aria-label="Show 7th revision"></label>
+    </li>
+    <li class="rev-accordion__item">
+      <input class="visually-hidden rev-accordion__radio" type="radio" name="rev-history" id="rev-radio-8">
+      <figure>
+        <img src="/assets/img/site_rev8.png" alt="Screenshot of 8th revision" loading="lazy" width="1100" height="616">
+        <figcaption class="rev-accordion__caption">Eighth Revision - 2017</figcaption>
+      </figure>
+      <label class="rev-accordion__hit" for="rev-radio-8" aria-label="Show 8th revision"></label>
+    </li>
+  </ul>
+
+  <div class="rev-accordion__controls">
+    <button type="button" class="btn btn--ghost rev-accordion__btn" data-rev-prev aria-label="Previous revision" hidden>&#8592;</button>
+    <p class="rev-accordion__counter" data-rev-counter aria-live="polite" hidden>1 / 8</p>
+    <button type="button" class="btn btn--ghost rev-accordion__btn" data-rev-next aria-label="Next revision" hidden>&#8594;</button>
+  </div>
+</section>

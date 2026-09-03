@@ -21,13 +21,13 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/{{ a.slug }}/">{{ a.title }}</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author={{ a.author | urlencode }}">{{ a.author }}</a>
+      <a class="card__author" data-link="author" href="/library/?author={{ a.author | urlencode }}">by {{ a.author }}</a>
       <span class="card__reading-time">{{ a.minutes }} min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">{{ a.category }}</span>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category={{ a.category | urlencode }}">{{ a.category }}</a>
       {%- for tag in a.tags %}
-      <a class="chip chip--tag" data-link="tag" href="/library/?tag={{ tag | urlencode }}">{{ tag }}</a>
+      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag={{ tag | urlencode }}">{{ tag }}</a>
       {%- endfor %}
     </p>
   </div>

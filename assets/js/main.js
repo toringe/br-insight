@@ -17,6 +17,8 @@ import { init as initFocus } from "./modules/focus.js";
 import { init as initMemory } from "./modules/memory.js";
 import { init as initShortcuts } from "./modules/shortcuts.js";
 import { init as initSearch } from "./modules/search.js";
+import { init as initArchive } from "./modules/archive.js";
+import { init as initRevisions } from "./modules/revisions.js";
 import { init as initFx } from "./modules/fx.js";
 
 function safe(name, fn) {
@@ -39,6 +41,15 @@ safe("shortcuts", () => initShortcuts());
 // <dialog> skeleton or showModal() support is missing. The engine itself
 // loads lazily on first open (see modules/search.js).
 safe("search", () => initSearch());
+
+// Weekly archive carousel (home): re-picks the "From the archive" row with
+// the visitor's current ISO week; skips itself on the build week (server
+// DOM already matches) and no-ops entirely without the payload hook.
+safe("archive", () => initArchive());
+
+// Revision-screenshot carousel (about): reveals arrows + counter over the
+// no-JS scroll-snap baseline; no-ops without the carousel markup.
+safe("revisions", () => initRevisions());
 
 // Cinematic FX (Task 13): feature-detection gate — the build either embeds
 // window.__FX__ or omits it entirely; no payload means nothing to run.
@@ -88,10 +99,13 @@ safe("random", () => {
   if (!Array.isArray(slugs) || !slugs.length) return;
 
   link.addEventListener("click", (event) => {
+    // Always cancel the default navigation first: the anchor's href is
+    // /library/, and its default action would otherwise race (and win
+    // against) the JS navigation below.
+    event.preventDefault();
     const slug = slugs[Math.floor(Math.random() * slugs.length)];
     const href = `/library/${slug}/`;
     if (event.metaKey || event.ctrlKey || event.shiftKey) {
-      event.preventDefault();
       window.open(href, "_blank", "noopener");
     } else {
       window.location.href = href;

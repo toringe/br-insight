@@ -26,7 +26,13 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from br_insight.articles import extract_toc, load_all, related
-from br_insight.config import SiteConfig, apply_taxonomy, load_taxonomy, resolve_featured
+from br_insight.config import (
+    SiteConfig,
+    apply_taxonomy,
+    load_taxonomy,
+    resolve_archive_picks,
+    resolve_featured,
+)
 from br_insight.images import CoverVariants, generate_cover_variants
 from br_insight.search import write_index
 from br_insight.textutils import slugify
@@ -38,8 +44,8 @@ TEMPLATE_DIR = REPO_ROOT / "templates"
 # to navigate; fewer h2/h3 headings than this means no aside.
 TOC_MIN_HEADINGS = 3
 
-# Home page: recent-additions row size and topic-cloud tag cap.
-RECENT_COUNT = 4
+# Home page: topic-cloud tag cap (archive-row size lives in
+# config.ARCHIVE_PICK_COUNT).
 TOPIC_TAG_LIMIT = 10
 
 # RSS full-summary feed: newest-N window.
@@ -129,14 +135,39 @@ def topic_cloud(articles) -> list[dict]:
     return topics
 
 
-def home_context(site: SiteConfig, articles, now: datetime.datetime) -> dict:
+def home_context(site: SiteConfig, articles, now: datetime.datetime, variants=None) -> dict:
     """Assemble everything templates/home.html needs from the corpus."""
+    featured = resolve_featured(site, articles, now.strftime("%Y%m"))
+    iso_cal = now.isocalendar()
+    iso_year_week = f"{iso_cal.year}-W{iso_cal.week:02d}"
+    picks = resolve_archive_picks(articles, iso_year_week, featured.slug)
+    # Minimal per-article payload for the client-side weekly carousel:
+    # JS re-applies the same digest pick with the *visitor's* current ISO
+    # week so the row rotates by time, independent of rebuild cadence.
+    # ``crop`` carries each article's actual 16:9 crop-width ladder (from
+    # its CoverVariants plan) so client-built srcsets never cite a
+    # missing candidate.
+    payload = [
+        {
+            "slug": a.slug,
+            "title": a.title,
+            "author": a.author,
+            "minutes": a.minutes,
+            "date": a.date.strftime("%Y-%m-%d"),
+            "category": a.category,
+            "tags": a.tags,
+            "crop": list(plan.crop) if (plan := (variants or {}).get(a.slug)) and plan.crop else [],
+        }
+        for a in sorted(articles, key=lambda x: x.slug)
+    ]
     return {
-        "featured": resolve_featured(site, articles, now.strftime("%Y%m")),
+        "featured": featured,
         "featured_month": now.strftime("%B"),
         "stats": archive_stats(articles),
         "topics": topic_cloud(articles),
-        "recent": articles[:RECENT_COUNT],
+        "archive_picks": picks,
+        "iso_year_week": iso_year_week,
+        "archive_payload": payload,
         # Slug list for main.js's random-essay action; rendered into the
         # home-only <script type="application/json" id="essay-slugs"> hook.
         "essay_slugs": [article.slug for article in articles],
@@ -173,6 +204,26 @@ def _generic_intro(kind: str, name: str) -> str:
     return f"A running thread through the archive: essays {filed_by} “{name}”."
 
 
+def topic_title_size(name: str) -> str:
+    """Font tier for a topic page h1 rendered in Sixtyfour.
+
+    Sixtyfour advances exactly 1em per glyph (monospace pixel grid), so on a
+    320px phone fs-3xl fits only ~8 characters per line. The global
+    ``overflow-wrap: break-word`` would split a too-long word mid-word
+    ("Adaptatio / n"), so each name drops to a tier whose size fits its
+    longest whitespace-separated word: lg ≤7 chars, md ≤9, sm ≤11, xs ≥12
+    (fs-3xl/2xl/xl/lg fit ~8/10/12/16 chars at 320px).
+    """
+    longest = max(len(word) for word in name.split())
+    if longest <= 7:
+        return "lg"
+    if longest <= 9:
+        return "md"
+    if longest <= 11:
+        return "sm"
+    return "xs"
+
+
 def topic_pages(
     articles, intros: dict[str, dict[str, str]] | None = None
 ) -> list[dict]:
@@ -205,6 +256,7 @@ def topic_pages(
                     "href": f"/topics/{prefix}{slug}/",
                     "count": len(members),
                     "articles": members,
+                    "title_size": topic_title_size(name),
                     "intro": intros.get(kind, {}).get(name)
                     or _generic_intro(kind, name),
                 }
@@ -436,7 +488,7 @@ def build(root: Path, out: Path) -> list[Path]:
             site=site,
             now=now,
             variants=variants,
-            **home_context(site, articles, now),
+            **home_context(site, articles, now, variants),
         ),
         encoding="utf-8",
     )

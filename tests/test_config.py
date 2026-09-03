@@ -348,6 +348,61 @@ class TestResolveFeatured:
             config.resolve_featured(self._config(tmp_path), [], "202608")
 
 
+class TestResolveArchivePicks:
+    def test_picks_are_capped_newest_first_and_deterministic(self):
+        corpus = [_make_article(f"article-{i}") for i in range(8)]
+        picks = config.resolve_archive_picks(corpus, "2026-W35")
+        assert len(picks) == config.ARCHIVE_PICK_COUNT == 3
+        assert picks == sorted(picks, key=lambda a: a.date, reverse=True)
+        again = config.resolve_archive_picks(corpus, "2026-W35")
+        assert [a.slug for a in again] == [a.slug for a in picks]
+
+    def test_picks_change_with_the_week_but_stay_deterministic(self):
+        corpus = [_make_article(f"slug-{i}") for i in range(12)]
+
+        def picks_for(week):
+            return [
+                a.slug for a in config.resolve_archive_picks(corpus, week)
+            ]
+
+        assert picks_for("2026-W35") == picks_for("2026-W35")
+        # across a year of weeks the pick set actually rotates
+        distinct = {
+            tuple(picks_for(f"2026-W{n:02d}")) for n in range(1, 53)
+        }
+        assert len(distinct) > 1
+
+    def test_featured_slug_is_excluded(self):
+        corpus = [_make_article(f"slug-{i}") for i in range(8)]
+        plain = [a.slug for a in config.resolve_archive_picks(corpus, "2026-W35")]
+        excluded = [
+            a.slug
+            for a in config.resolve_archive_picks(
+                corpus, "2026-W35", exclude_slug=plain[0]
+            )
+        ]
+        assert plain[0] not in excluded
+        assert len(excluded) == 3
+        assert set(excluded) <= {a.slug for a in corpus}
+        assert set(excluded) != set(plain)
+
+    def test_empty_corpus_yields_no_picks(self):
+        assert config.resolve_archive_picks([], "2026-W35") == []
+
+    def test_corpus_smaller_than_pick_count_returns_all(self):
+        corpus = [_make_article("only"), _make_article("another")]
+        picks = config.resolve_archive_picks(corpus, "2026-W35")
+        assert {a.slug for a in picks} == {"only", "another"}
+
+    def test_cyrb53_parity_with_client_hash(self):
+        # vector locked by the JS implementation in archive.js (run under
+        # Node in tests/test_archive_js.py) — both sides must stay in sync
+        assert config.cyrb53("foobar") == 3480908510889717
+        assert config.cyrb53("") == 3338908027751811
+        # hex form sorts lexicographically like the number
+        assert config.cyrb53_hex("foobar") == f"{config.cyrb53('foobar'):013x}"
+
+
 class TestRealSiteYaml:
     def test_owner_values_load_from_repo(self):
         site = config.SiteConfig.load(REPO_ROOT)

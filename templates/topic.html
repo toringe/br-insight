@@ -11,7 +11,7 @@
   <div class="container">
     <header class="page-head">
       <p class="eyebrow">{{ "Category" if topic.kind == "category" else "Tag" }}</p>
-      <h1>{{ topic.name }}</h1>
+      <h1 class="page-head__title page-head__title--{{ topic.title_size }}">{{ topic.name }}</h1>
       <p class="page-head__lead">{{ topic.intro }}</p>
       <p class="page-head__meta">{{ topic.count }} essay{{ "" if topic.count == 1 else "s" }}</p>
     </header>

@@ -207,6 +207,19 @@ class TestLibraryAnatomy:
         assert 'value="newest"' not in html  # duplicate "Newest first" dropped
         assert html.count("Newest first") == 1
 
+    def test_live_search_input_between_pills_and_sort(self, html):
+        assert re.search(
+            r'<input class="filterbar__search" type="search" data-library-search\s+'
+            r'placeholder="Search title, author, tag…"\s+'
+            r'aria-label="Search articles">',
+            html,
+        )
+        # toolbar order: filter toggle … search … sort select
+        assert (
+            html.index("data-filter-bar")
+            < html.index("data-library-search")
+            < html.index("data-sort")
+        )
     def test_toolbar_clear_hidden_initially(self, html):
         assert ('<button type="button" class="btn btn--ghost btn--sm" '
                 'data-clear-filters hidden>Clear</button>') in html
@@ -225,9 +238,16 @@ class TestLibraryAnatomy:
         assert 'width="505"' in html and 'height="295"' in html
         assert 'href="/library/voight-kampff-test/">Voight-Kampff Test</a>' in html
         assert "min read" in html
-        # deep-linkable chip anchors on the card itself
+        # deep-linkable anchors on the card itself; author is plain byline
+        # text ("by Name") — only category/tags keep the boxed chip look
         assert '/library/?author=' in html
+        assert '/library/?category=' in html
         assert '/library/?tag=' in html
+        assert 'class="card__author"' in html
+        assert ">by " in html
+        assert 'chip chip--sm chip--category' in html
+        assert 'chip chip--sm chip--tag' in html
+        assert 'chip chip--sm chip--author' not in html
 
     def test_zero_js_fallback_full_list(self, html):
         """Every article is present regardless of JS; empty-state starts hidden."""
@@ -235,7 +255,7 @@ class TestLibraryAnatomy:
         assert "hidden" in html
 
     def test_empty_state_copy_and_clear_action(self, html):
-        assert "No essays match those filters." in html
+        assert "No essays match those filters or that search." in html
         assert 'class="btn btn--ghost" data-clear-filters>Clear filters</button>' in html
 
     def test_filter_module_script_tag(self, html):
@@ -309,7 +329,7 @@ def filter_mod(tmp_path_factory):
 
 def run_filter(filter_mod, snippet: str) -> str:
     script = (
-        f'import {{ parseParams, toSearch, matches, compareCards }} '
+        f'import {{ parseParams, toSearch, matches, matchesQuery, compareCards }} '
         f'from "{filter_mod.as_uri()}";\n'
         f"{snippet}\n"
     )
@@ -345,7 +365,7 @@ EMPTY_STATE = "{ category: new Set(), tag: new Set(), author: new Set(), decade:
 def run_with_card(filter_mod, snippet: str) -> str:
     """Snippet has access to a `makeCard` factory mirroring fake_card()."""
     script = (
-        f'import {{ parseParams, toSearch, matches, compareCards }} '
+        f'import {{ parseParams, toSearch, matches, matchesQuery, compareCards }} '
         f'from "{filter_mod.as_uri()}";\n'
         "const makeCard = (o = {}) => ({ dataset: { category: 'Film Analysis',"
         " tags: 'noir visual-style', author: 'K. Deckard', decade: '1990s',"
@@ -376,7 +396,7 @@ def run_init(filter_mod, search: str) -> str:
     ];
     const placed = [];
     const grid = {{
-      querySelectorAll: () => [...cards],
+      querySelectorAll: (sel) => (sel === "[data-link]" ? [] : [...cards]),
       appendChild(card) {{ placed.push(card.dataset.title); }},
     }};
     const select = {{
@@ -424,7 +444,8 @@ def run_dom(filter_mod, search: str, fire: str = "") -> str:
     ];
     const placed = [];
     const grid = {{
-      querySelectorAll: () => [...cards],
+      querySelectorAll: (sel) =>
+        sel === "[data-link]" ? [...cardLinks] : [...cards],
       appendChild(card) {{ placed.push(card.dataset.title); }},
     }};
 
@@ -432,6 +453,7 @@ def run_dom(filter_mod, search: str, fire: str = "") -> str:
       attrs: {{}}, dataset: {{}}, children: [], textContent: "",
       setAttribute(k, v) {{ this.attrs[k] = String(v); }},
       getAttribute(k) {{ return this.attrs[k] ?? null; }},
+      removeAttribute(k) {{ delete this.attrs[k]; }},
       appendChild(c) {{ this.children.push(c); return c; }},
       closest() {{ return null; }},
       addEventListener() {{}},
@@ -452,6 +474,18 @@ def run_dom(filter_mod, search: str, fire: str = "") -> str:
       chip.dataset.value = value;
       return chip;
     }});
+
+    // Card chip anchors (one category, one tag) for the aria-current mirror.
+    const cardLinks = [
+      {{ dataset: {{ link: "category" }}, href: "/library/?category=Characters" }},
+      {{ dataset: {{ link: "tag" }}, href: "/library/?tag=eyes" }},
+    ].map((spec) => {{
+      const el = makeEl();
+      el.dataset.link = spec.dataset.link;
+      el.attrs.href = spec.href;
+      el.getAttribute = (k) => (k === "href" ? spec.href : el.attrs[k] ?? null);
+      return el;
+    }});
     const barHandlers = {{}};
     const details = {{ open: false }};
     const bar = {{
@@ -466,12 +500,18 @@ def run_dom(filter_mod, search: str, fire: str = "") -> str:
     const pills = makeContainer();
     pills.addEventListener = (name, fn) => {{ (pillHandlers[name] ||= []).push(fn); }};
     const select = {{ value: "", addEventListener() {{}} }};
+    const searchHandlers = {{}};
+    const searchEl = {{
+      value: "",
+      addEventListener(name, fn) {{ (searchHandlers[name] ||= []).push(fn); }},
+    }};
     const clearHandlers = [];
     const clearBtn = {{
       hidden: true,
       addEventListener(name, fn) {{ clearHandlers.push(fn); }},
     }};
     let lastUrl = null;
+    const docHandlers = {{}};
     const doc = {{
       querySelector(sel) {{
         if (sel === "[data-grid]") return grid;
@@ -479,10 +519,12 @@ def run_dom(filter_mod, search: str, fire: str = "") -> str:
         if (sel === "[data-pills]") return pills;
         if (sel === "[data-filter-badge]") return badge;
         if (sel === "[data-sort]") return select;
+        if (sel === "[data-library-search]") return searchEl;
         if (sel === "[data-clear-filters]") return clearBtn;
         return null;  // no empty-message shim needed here
       }},
-      addEventListener() {{}},
+      addEventListener(name, fn) {{ (docHandlers[name] ||= []).push(fn); }},
+      baseURI: "http://localhost:8611/library/",
       createElement(tag) {{
         const el = makeEl();
         el.tagName = String(tag).toUpperCase();
@@ -501,10 +543,12 @@ def run_dom(filter_mod, search: str, fire: str = "") -> str:
       badgeText: badge.textContent,
       badgeHidden: badge.hidden,
       clearHidden: clearBtn.hidden,
+      searchValue: searchEl.value,
       pillCount: pills.children.length,
       pillLabels: pills.children.map((p) =>
         (p.children[0] && p.children[0].textContent) || ""),
       chipPressed: chips.map((c) => c.attrs["aria-pressed"]),
+      linkCurrent: cardLinks.map((l) => l.attrs["aria-current"] ?? null),
       hidden: cards.map((c) => c.hidden),
       lastUrl,
     }}));
@@ -571,6 +615,81 @@ class TestFilterToolbarBehavior:
         assert data["hidden"] == [False, False]
         assert data["lastUrl"] == "/library/"
 
+    def test_deep_link_q_fills_input_and_filters(self, filter_mod):
+        data = json.loads(run_dom(filter_mod, "?q=alias"))
+        assert data["searchValue"] == "alias"
+        assert data["hidden"] == [True, False]  # only the Alias card remains
+        assert data["clearHidden"] is False     # Clear covers a lone search
+        assert data["badgeHidden"] is True      # badge counts chip filters only
+        assert data["lastUrl"] == "/library/?q=alias"
+
+    def test_typing_live_filters_without_changing_chips(self, filter_mod):
+        fire = """
+        searchEl.value = "vanish";
+        for (const fn of searchHandlers.input ?? []) fn();
+        """
+        data = json.loads(run_dom(filter_mod, "", fire))
+        assert data["hidden"] == [False, True]
+        assert data["chipPressed"] == ["false", "false", "false"]
+        assert data["lastUrl"] == "/library/?q=vanish"
+
+    def test_search_ands_with_chip_filters(self, filter_mod):
+        fire = """
+        searchEl.value = "noir";
+        for (const fn of searchHandlers.input ?? []) fn();
+        """
+        data = json.loads(run_dom(filter_mod, "?category=Characters", fire))
+        # Vanishing is Film Analysis (hidden by the category chip); Alias is
+        # Characters but its tags ("eyes") don't contain "noir".
+        assert data["hidden"] == [True, True]
+
+    def test_clear_button_resets_search_and_input_value(self, filter_mod):
+        fire = """
+        searchEl.value = "vanish";
+        for (const fn of searchHandlers.input ?? []) fn();
+        for (const fn of clearHandlers) fn();
+        """
+        data = json.loads(run_dom(filter_mod, "", fire))
+        assert data["searchValue"] == ""
+        assert data["hidden"] == [False, False]
+        assert data["lastUrl"] == "/library/"
+
+    def test_card_chips_mirror_active_facet_via_aria_current(self, filter_mod):
+        """The card chip you clicked highlights in place: render() sets
+        aria-current on card anchors whose facet value is active."""
+        data = json.loads(run_dom(filter_mod, "?category=Characters"))
+        # category link active; tag link (eyes) not part of the state
+        assert data["linkCurrent"] == ["true", None]
+
+        data = json.loads(run_dom(filter_mod, "?tag=eyes"))
+        assert data["linkCurrent"] == [None, "true"]
+
+        # no active filters → nothing highlighted
+        data = json.loads(run_dom(filter_mod, ""))
+        assert data["linkCurrent"] == [None, None]
+
+    def test_outside_click_closes_disclosure_panel(self, filter_mod):
+        """Clicking anywhere outside the open filter panel dismisses it;
+        clicks inside the panel (chips) keep it open."""
+        fire = """
+        details.open = true;
+        const inside = {
+          closest: (sel) =>
+            sel === "details.filterbar__details" ? details : null,
+        };
+        for (const fn of docHandlers.click ?? []) fn({ target: inside });
+        const openAfterInsideClick = details.open;
+        const outside = { closest: () => null };
+        for (const fn of docHandlers.click ?? []) fn({ target: outside });
+        console.log(JSON.stringify({
+          openAfterInsideClick,
+          openAfterOutsideClick: details.open,
+        }));
+        """
+        data = json.loads(run_dom(filter_mod, "", fire).splitlines()[0])
+        assert data["openAfterInsideClick"] is True
+        assert data["openAfterOutsideClick"] is False
+
 
 class TestFilterJsContract:
 
@@ -624,6 +743,65 @@ class TestFilterJsContract:
     def test_to_search_empty_state_yields_empty_string(self, filter_mod):
         out = run_filter(filter_mod, f"console.log(JSON.stringify(toSearch({EMPTY_STATE}, null)))")
         assert out == '""'
+
+    def test_parse_params_reads_q_scalar(self, filter_mod):
+        out = run_filter(
+            filter_mod,
+            """
+            const a = parseParams("?q=eyes&tag=noir");
+            const b = parseParams("?q=&tag=noir");
+            console.log(JSON.stringify({
+              q: a.q, keepsTag: [...a.state.tag], blankQIgnored: b.q === "",
+            }));
+            """,
+        )
+        assert '"q":"eyes"' in out
+        assert '"keepsTag":["noir"]' in out
+        assert '"blankQIgnored":true' in out
+
+    def test_to_search_round_trips_q(self, filter_mod):
+        out = run_filter(
+            filter_mod,
+            f"""
+            const parsed = parseParams("?tag=eyes&q=blade runner&sort=az");
+            console.log(toSearch(parsed.state, parsed.sort, parsed.q));
+            console.log(JSON.stringify(toSearch({EMPTY_STATE}, null, "")));
+            """,
+        )
+        first, second = out.splitlines()
+        assert first == "?tag=eyes&sort=az&q=blade+runner"
+        assert second == '""'
+
+    def test_matches_query_substring_over_fields(self, filter_mod):
+        out = run_with_card(
+            filter_mod,
+            """
+            console.log(JSON.stringify([
+              matchesQuery(makeCard(), ""),            // empty matches all
+              matchesQuery(makeCard(), "   "),         // whitespace matches all
+              matchesQuery(makeCard(), "batty"),       // title, case-insensitive
+              matchesQuery(makeCard(), "LAMENT"),      // title substring
+              matchesQuery(makeCard(), "deckard"),     // author
+              matchesQuery(makeCard(), "film ana"),    // category substring
+              matchesQuery(makeCard(), "visual"),      // tag slug
+              matchesQuery(makeCard(), "zzz"),
+            ]));
+            """,
+        )
+        assert out == "[true,true,true,true,true,true,true,false]"
+
+    def test_matches_query_ignores_unrelated_dataset_fields(self, filter_mod):
+        out = run_with_card(
+            filter_mod,
+            """
+            const card = makeCard({ decade: "1990s" });
+            console.log(JSON.stringify([
+              matchesQuery(card, "1990"),   // decade is not searchable
+              matchesQuery(card, "3"),      // minutes/dates not searchable
+            ]));
+            """,
+        )
+        assert out == "[false,false]"
 
     def test_matches_and_across_groups_or_within_tags(self, filter_mod):
         """AND between groups, OR among values within one group."""
@@ -684,7 +862,7 @@ class TestFilterJsContract:
         ];
         const placed = [];
         const grid = {{
-          querySelectorAll: () => [...cards],
+          querySelectorAll: (sel) => (sel === "[data-link]" ? [] : [...cards]),
           appendChild(card) {{ placed.push(card.dataset.title); }},
         }};
         const select = {{ value: "", addEventListener() {{}} }};
@@ -746,7 +924,7 @@ class TestFilterJsContract:
             title: 'Alias' }}, hidden: false }},
         ];
         const grid = {{
-          querySelectorAll: () => [...cards],
+          querySelectorAll: (sel) => (sel === "[data-link]" ? [] : [...cards]),
           appendChild() {{}},
         }};
         const handlers = {{}};

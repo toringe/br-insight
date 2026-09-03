@@ -412,8 +412,10 @@ class TestArticleAnatomy:
             article=_ns_article(cover_artist=None),
             **ANATOMY_CTX,
         )
-        assert "Cover art by an unknown artist — know the creator?" in html
-        assert '../../about.html">Get in touch</a>' in html
+        assert '<figcaption class="credit">' not in html
+        assert "Cover art by an unknown artist" in html
+        assert '<a href="../../about.html">Get in touch</a> with us if you know the creator.' in html
+        assert html.index("cover-note") > html.index('class="prose"')
 
     def test_byline_format(self, html):
         assert 'By <span class="byline__author">K. Deckard</span>' in html
@@ -623,9 +625,16 @@ class TestBuildPipeline:
             a.slug: (out / "library" / a.slug / "index.html").read_text(encoding="utf-8")
             for a in load_all(REPO_ROOT)
         }
-        credited = [t for t in texts.values() if "Cover art © " in t]
-        invited = [t for t in texts.values() if "unknown artist" in t]
+        # Known artists get the hero figcaption; unknown ones get only the
+        # end-of-article invite note. (The site footer's blanket "Cover art ©
+        # their respective artists" line appears on every page, so match on
+        # the markup, not the credit text.)
+        credited = [t for t in texts.values() if '<figcaption class="credit">' in t]
+        invited = [t for t in texts.values() if '<p class="cover-note">' in t]
         assert credited and invited
+        assert all("Cover art © " in t for t in credited)
+        assert all('<figcaption class="credit">' not in t for t in invited)
+        assert all("unknown artist" in t for t in invited)
         assert all('../../about.html">Get in touch</a>' in t for t in invited)
 
     def test_focus_hooks_present_progress_untouched(self, built):

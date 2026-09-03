@@ -21,7 +21,7 @@
   <link rel="preload" href="../assets/fonts/rajdhani-latin-400.woff2?v=e8dbeb7e" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../assets/fonts/rajdhani-latin-600.woff2?v=35f7e628" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../assets/fonts/source-serif-4-latin-400.woff2?v=02194deb" as="font" type="font/woff2" crossorigin>
-  <link rel="icon" href="../assets/img/favicon.png" type="image/png">  <link rel="stylesheet" href="../assets/css/main.min.css?v=a1bd5237"><script type="speculationrules">
+  <link rel="icon" href="../assets/img/favicon.png" type="image/png">  <link rel="stylesheet" href="../assets/css/main.min.css?v=3d788ac0"><script type="speculationrules">
   {
     "prerender": [
       {
@@ -108,6 +108,9 @@
         </details>
         <span class="filterbar__pills" data-pills aria-label="Active filters"></span>
         <span class="filterbar__spacer"></span>
+        <input class="filterbar__search" type="search" data-library-search
+               placeholder="Search title, author, tag…"
+               aria-label="Search articles">
         <label class="filterbar__sort-label" for="library-sort" hidden>Sort</label>
         <select name="sort" id="library-sort" data-sort>
           <option value="" selected>Newest first</option>
@@ -121,7 +124,7 @@
     </form>
 
     <p class="library__empty" data-empty hidden>
-      No essays match those filters.
+      No essays match those filters or that search.
       <button type="button" class="btn btn--ghost" data-clear-filters>Clear filters</button>
     </p>
 
@@ -146,11 +149,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/love-letter/">Love Letter to a Human from a Replicant</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Mansour%20Chow">Mansour Chow</a>
+      <a class="card__author" data-link="author" href="/library/?author=Mansour%20Chow">by Mansour Chow</a>
       <span class="card__reading-time">13 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Creative Works</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=fan-fiction">fan-fiction</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=rachael">rachael</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Creative%20Works">Creative Works</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=fan-fiction">fan-fiction</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=rachael">rachael</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -174,11 +177,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/how-science-became-god/">How Science Became God in Blade Runner</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Tony%20Schloss">Tony Schloss</a>
+      <a class="card__author" data-link="author" href="/library/?author=Tony%20Schloss">by Tony Schloss</a>
       <span class="card__reading-time">13 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Technology &amp; Society</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=tyrell">tyrell</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Technology%20%26%20Society">Technology &amp; Society</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=tyrell">tyrell</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -202,11 +205,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/worn-down-hell/">The World 2019 - A Worn Down Hell</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Niclas%20Hermansson">Niclas Hermansson</a>
+      <a class="card__author" data-link="author" href="/library/?author=Niclas%20Hermansson">by Niclas Hermansson</a>
       <span class="card__reading-time">13 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">World &amp; Setting</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=los-angeles-2019">los-angeles-2019</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=dystopia">dystopia</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=World%20%26%20Setting">World &amp; Setting</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=los-angeles-2019">los-angeles-2019</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=dystopia">dystopia</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -230,11 +233,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/picturing-the-human/">Picturing the Human</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Stephen%20Mulhall">Stephen Mulhall</a>
+      <a class="card__author" data-link="author" href="/library/?author=Stephen%20Mulhall">by Stephen Mulhall</a>
       <span class="card__reading-time">50 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Themes &amp; Humanity</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=philosophy">philosophy</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=personhood">personhood</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Themes%20%26%20Humanity">Themes &amp; Humanity</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=philosophy">philosophy</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=personhood">personhood</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -258,11 +261,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/a-study-of-blade-runner/">A Study of Ridley Scott&#39;s Blade Runner</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Majid%20Salim">Majid Salim</a>
+      <a class="card__author" data-link="author" href="/library/?author=Majid%20Salim">by Majid Salim</a>
       <span class="card__reading-time">52 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=cinematography">cinematography</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=noir">noir</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=tears-in-rain">tears-in-rain</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=cinematography">cinematography</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=noir">noir</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=tears-in-rain">tears-in-rain</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -286,11 +289,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/analysis-of-an-itch/">Analysis of an Itch</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Justin%20Case">Justin Case</a>
+      <a class="card__author" data-link="author" href="/library/?author=Justin%20Case">by Justin Case</a>
       <span class="card__reading-time">4 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Characters</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=deckard">deckard</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Characters">Characters</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=deckard">deckard</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -314,11 +317,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/measure-of-a-man/">The Measure of a Man</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Jonathan%20Blanton">Jonathan Blanton</a>
+      <a class="card__author" data-link="author" href="/library/?author=Jonathan%20Blanton">by Jonathan Blanton</a>
       <span class="card__reading-time">6 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Themes &amp; Humanity</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=personhood">personhood</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=replicant-or-human">replicant-or-human</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Themes%20%26%20Humanity">Themes &amp; Humanity</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=personhood">personhood</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=replicant-or-human">replicant-or-human</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -342,11 +345,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/genealogy-of-abdul-ben-hassan/">Genealogy of Abdul Ben Hassan</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Muhammed%20Hozien">Muhammed Hozien</a>
+      <a class="card__author" data-link="author" href="/library/?author=Muhammed%20Hozien">by Muhammed Hozien</a>
       <span class="card__reading-time">19 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">World &amp; Setting</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=race">race</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=World%20%26%20Setting">World &amp; Setting</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=race">race</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -370,11 +373,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/replicant-i-used-to-know/">The Replicant I Used to Know</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Niclas%20Hermansson">Niclas Hermansson</a>
+      <a class="card__author" data-link="author" href="/library/?author=Niclas%20Hermansson">by Niclas Hermansson</a>
       <span class="card__reading-time">4 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Characters</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=empathy">empathy</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=deckard">deckard</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Characters">Characters</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=empathy">empathy</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=deckard">deckard</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -398,11 +401,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/how-and-why-movie-is-different/">How &amp; Why the Movie is Different</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Jeffrey%20James%20Oleniacz">Jeffrey James Oleniacz</a>
+      <a class="card__author" data-link="author" href="/library/?author=Jeffrey%20James%20Oleniacz">by Jeffrey James Oleniacz</a>
       <span class="card__reading-time">4 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Novel &amp; Adaptation</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=adaptation">adaptation</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Novel%20%26%20Adaptation">Novel &amp; Adaptation</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=adaptation">adaptation</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -426,11 +429,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/br-demystified/">Blade Runner Demystified</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Wez%20Mills">Wez Mills</a>
+      <a class="card__author" data-link="author" href="/library/?author=Wez%20Mills">by Wez Mills</a>
       <span class="card__reading-time">19 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">World &amp; Setting</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=dystopia">dystopia</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=World%20%26%20Setting">World &amp; Setting</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=dystopia">dystopia</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -454,11 +457,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/appreciation-assessment-of-dircut/">Appreciation &amp; Assessment of Dir. Cut</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Adrian%20McOran-Campbell">Adrian McOran-Campbell</a>
+      <a class="card__author" data-link="author" href="/library/?author=Adrian%20McOran-Campbell">by Adrian McOran-Campbell</a>
       <span class="card__reading-time">9 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=director%27s-cut">director&#39;s-cut</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=noir">noir</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=director%27s-cut">director&#39;s-cut</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=noir">noir</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -482,11 +485,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/postmodernist-view/">Blade Runner - a Postmodernist View</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Jean-Paul%20Gossman">Jean-Paul Gossman</a>
+      <a class="card__author" data-link="author" href="/library/?author=Jean-Paul%20Gossman">by Jean-Paul Gossman</a>
       <span class="card__reading-time">7 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=postmodernism">postmodernism</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=tears-in-rain">tears-in-rain</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=postmodernism">postmodernism</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=tears-in-rain">tears-in-rain</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -510,11 +513,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/city-eyes-and-christ/">The City, Eyes and Christ</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Amotz%20Zakai">Amotz Zakai</a>
+      <a class="card__author" data-link="author" href="/library/?author=Amotz%20Zakai">by Amotz Zakai</a>
       <span class="card__reading-time">9 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Religion &amp; Symbolism</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=eyes">eyes</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=christ-figure">christ-figure</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=visual-style">visual-style</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Religion%20%26%20Symbolism">Religion &amp; Symbolism</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=eyes">eyes</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=christ-figure">christ-figure</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=visual-style">visual-style</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -538,11 +541,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/do-androids-dream/">Do Androids Dream of Electric Sheep? - No Really, Do They?</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Andr%C3%A9%20M%C3%B8llerhaug">André Møllerhaug</a>
+      <a class="card__author" data-link="author" href="/library/?author=Andr%C3%A9%20M%C3%B8llerhaug">by André Møllerhaug</a>
       <span class="card__reading-time">4 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Novel &amp; Adaptation</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=philip-k-dick">philip-k-dick</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=empathy">empathy</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Novel%20%26%20Adaptation">Novel &amp; Adaptation</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=philip-k-dick">philip-k-dick</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=empathy">empathy</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -566,11 +569,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/aboutfilm-analysis/">AboutFilm.com&#39;s Analysis of Blade Runner</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Carlo%20Cavagna">Carlo Cavagna</a>
+      <a class="card__author" data-link="author" href="/library/?author=Carlo%20Cavagna">by Carlo Cavagna</a>
       <span class="card__reading-time">18 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=noir">noir</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=visual-style">visual-style</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=noir">noir</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=visual-style">visual-style</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -594,11 +597,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/what-defines-human/">What Defines Human?</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Jens%20Brandt">Jens Brandt</a>
+      <a class="card__author" data-link="author" href="/library/?author=Jens%20Brandt">by Jens Brandt</a>
       <span class="card__reading-time">31 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Themes &amp; Humanity</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=philip-k-dick">philip-k-dick</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=personhood">personhood</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Themes%20%26%20Humanity">Themes &amp; Humanity</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=philip-k-dick">philip-k-dick</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=personhood">personhood</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -622,11 +625,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/least-scary-option/">The Least Scary Option</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Stephen%20Rowley">Stephen Rowley</a>
+      <a class="card__author" data-link="author" href="/library/?author=Stephen%20Rowley">by Stephen Rowley</a>
       <span class="card__reading-time">15 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Technology &amp; Society</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=dystopia">dystopia</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Technology%20%26%20Society">Technology &amp; Society</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=dystopia">dystopia</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -650,11 +653,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/humans-and-technology/">Humans &amp; Technology: What Separates Them?</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Thomas%20Gramstad">Thomas Gramstad</a>
+      <a class="card__author" data-link="author" href="/library/?author=Thomas%20Gramstad">by Thomas Gramstad</a>
       <span class="card__reading-time">10 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Technology &amp; Society</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=creator-creation">creator-creation</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=roy-batty">roy-batty</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Technology%20%26%20Society">Technology &amp; Society</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=creator-creation">creator-creation</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=roy-batty">roy-batty</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -678,11 +681,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/br-a-sf-movie/">Blade Runner, a Science-Fiction Movie?</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Tony%20Chang">Tony Chang</a>
+      <a class="card__author" data-link="author" href="/library/?author=Tony%20Chang">by Tony Chang</a>
       <span class="card__reading-time">5 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=genre">genre</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=genre">genre</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -706,11 +709,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/an-analysis-of-blade-runner/">An Analysis of Blade Runner</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Mark%20Lachniel">Mark Lachniel</a>
+      <a class="card__author" data-link="author" href="/library/?author=Mark%20Lachniel">by Mark Lachniel</a>
       <span class="card__reading-time">21 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=visual-style">visual-style</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=visual-style">visual-style</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -734,11 +737,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/significance-of-the-unicorn/">What is the Significance of the Unicorn?</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Murray%20Chapman">Murray Chapman</a>
+      <a class="card__author" data-link="author" href="/library/?author=Murray%20Chapman">by Murray Chapman</a>
       <span class="card__reading-time">4 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Religion &amp; Symbolism</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=unicorn">unicorn</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=dreams">dreams</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Religion%20%26%20Symbolism">Religion &amp; Symbolism</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=unicorn">unicorn</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=dreams">dreams</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -762,11 +765,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/analysis-of-a-sf-movie/">An Analysis of a Science-Fiction Movie</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Samantha%20Ricker">Samantha Ricker</a>
+      <a class="card__author" data-link="author" href="/library/?author=Samantha%20Ricker">by Samantha Ricker</a>
       <span class="card__reading-time">10 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=genre">genre</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=genre">genre</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -790,11 +793,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/sf-with-an-angle/">Science-Fiction with an Angle</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Maria%20Caldwell">Maria Caldwell</a>
+      <a class="card__author" data-link="author" href="/library/?author=Maria%20Caldwell">by Maria Caldwell</a>
       <span class="card__reading-time">5 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Technology &amp; Society</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=cloning-genetics">cloning-genetics</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Technology%20%26%20Society">Technology &amp; Society</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=cloning-genetics">cloning-genetics</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -818,11 +821,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/br-an-analysis/">Blade Runner: an Analysis</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Unknown">Unknown</a>
+      <a class="card__author" data-link="author" href="/library/?author=Unknown">by Unknown</a>
       <span class="card__reading-time">4 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Film Analysis</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=special-effects">special-effects</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Film%20Analysis">Film Analysis</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=special-effects">special-effects</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -846,11 +849,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/christian-symbolism/">Christian Symbolism</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Dan%20Newland">Dan Newland</a>
+      <a class="card__author" data-link="author" href="/library/?author=Dan%20Newland">by Dan Newland</a>
       <span class="card__reading-time">9 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Religion &amp; Symbolism</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=christ-figure">christ-figure</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=tyrell">tyrell</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Religion%20%26%20Symbolism">Religion &amp; Symbolism</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=christ-figure">christ-figure</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=tyrell">tyrell</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -874,11 +877,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/parting-of-the-mist/">The Parting of the Mist</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Joseph%20Reagle%20Jr.">Joseph Reagle Jr.</a>
+      <a class="card__author" data-link="author" href="/library/?author=Joseph%20Reagle%20Jr.">by Joseph Reagle Jr.</a>
       <span class="card__reading-time">6 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Religion &amp; Symbolism</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=dreams">dreams</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Religion%20%26%20Symbolism">Religion &amp; Symbolism</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=dreams">dreams</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -902,11 +905,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/deckards-identity-debate/">Deckard&#39;s Identity Debate</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Multiple%20Sources">Multiple Sources</a>
+      <a class="card__author" data-link="author" href="/library/?author=Multiple%20Sources">by Multiple Sources</a>
       <span class="card__reading-time">3 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Characters</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=deckard">deckard</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=unicorn">unicorn</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=replicant-or-human">replicant-or-human</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Characters">Characters</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=deckard">deckard</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=unicorn">unicorn</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=replicant-or-human">replicant-or-human</a>    </p>
   </div>
 </article>
       <article class="card"
@@ -918,11 +921,11 @@
   data-date="1995-11-03">
   <a class="card__cover" href="/library/editors-article/" tabindex="-1" aria-hidden="true">
     <picture>  <source type="image/webp"
-          srcset="../library/editors-article/cover-crop-480.webp 480w, ../library/editors-article/cover-crop-800.webp 800w, ../library/editors-article/cover-crop-1006.webp 1006w"
+          srcset="../library/editors-article/cover-crop-480.webp 480w, ../library/editors-article/cover-crop-800.webp 800w, ../library/editors-article/cover-crop-1280.webp 1280w"
           sizes="(min-width: 64em) 340px, (min-width: 48em) 45vw, calc(100vw - 2rem)">
   <img
-    src="../library/editors-article/cover-crop-1006.jpg"
-    srcset="../library/editors-article/cover-crop-480.jpg 480w, ../library/editors-article/cover-crop-800.jpg 800w, ../library/editors-article/cover-crop-1006.jpg 1006w"
+    src="../library/editors-article/cover-crop-1280.jpg"
+    srcset="../library/editors-article/cover-crop-480.jpg 480w, ../library/editors-article/cover-crop-800.jpg 800w, ../library/editors-article/cover-crop-1280.jpg 1280w"
     sizes="(min-width: 64em) 340px, (min-width: 48em) 45vw, calc(100vw - 2rem)"
     alt="" loading="lazy" decoding="async" width="505" height="295"></picture>
 
@@ -930,11 +933,11 @@
   <div class="card__body">
     <h3 class="card__title"><a href="/library/editors-article/">Editor&#39;s Article</a></h3>
     <p class="card__meta">
-      <a class="chip" data-link="author" href="/library/?author=Tor%20Inge%20Skaar">Tor Inge Skaar</a>
+      <a class="card__author" data-link="author" href="/library/?author=Tor%20Inge%20Skaar">by Tor Inge Skaar</a>
       <span class="card__reading-time">6 min read</span>
     </p>
     <p class="card__tax">
-      <span class="chip chip--category">Themes &amp; Humanity</span>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=editorial">editorial</a>      <a class="chip chip--tag" data-link="tag" href="/library/?tag=eyes">eyes</a>    </p>
+      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category=Themes%20%26%20Humanity">Themes &amp; Humanity</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=editorial">editorial</a>      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag=eyes">eyes</a>    </p>
   </div>
 </article>
     </div>
@@ -968,6 +971,6 @@
   </dialog>
 
 <script type="module" src="../assets/js/modules/filter.js"></script>
-  <script>window.__FX__={"enabled": true, "flicker": {"enabled": true, "welcome": true}, "grain": {"enabled": true}, "rain": {"density": 120, "enabled": true, "speed": 1.0, "tier_auto": true}, "scanlines": {"enabled": true}};</script>  <script type="module" src="../assets/js/main.js?v=499c8acf"></script>
+  <script>window.__FX__={"enabled": true, "flicker": {"enabled": true, "welcome": true}, "grain": {"enabled": true}, "rain": {"density": 120, "enabled": true, "speed": 1.0, "tier_auto": true}, "scanlines": {"enabled": true}};</script>  <script type="module" src="../assets/js/main.js?v=52fedcd3"></script>
 </body>
 </html>

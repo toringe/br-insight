@@ -1,16 +1,21 @@
 /**
- * Library filter/sort — progressive enhancement over the server-rendered
- * grid. Zero-JS keeps the full list browsable; with JS, chips toggle
- * filters (AND across groups, OR within a group), the select reorders,
- * and state syncs to ?category=&tag=&author=&decade=&sort= so filtered
- * views are shareable. Incoming params are applied on load too, so
- * author/tag chip links elsewhere deep-link straight into a filtered view.
- * A Clear filters action resets chips, sort, and params to the full list.
+ * Library filter/sort/search — progressive enhancement over the
+ * server-rendered grid. Zero-JS keeps the full list browsable; with JS,
+ * chips toggle filters (AND across groups, OR within a group), the
+ * select reorders, and the search input live-filters cards by
+ * title/author/category/tag substring. State syncs to
+ * ?category=&tag=&author=&decade=&q=&sort= so filtered views are
+ * shareable. Incoming params are applied on load too, so author/tag chip
+ * links elsewhere deep-link straight into a filtered view.
+ * A Clear filters action resets chips, search, sort, and params to the
+ * full list.
  *
- * Exports pure helpers (parseParams, toSearch, matches, compareCards)
- * for testing; init() wires the prerendered DOM. Active filters also
- * render as removable pills with an active-count badge on the toolbar;
- * incoming params auto-open the disclosure panel.
+ * Exports pure helpers (parseParams, toSearch, matches, matchesQuery,
+ * compareCards) for testing; init() wires the prerendered DOM. Active
+ * filters also render as removable pills with an active-count badge on
+ * the toolbar; incoming params auto-open the disclosure panel. Card
+ * chips mirror the active state via aria-current so a clicked facet
+ * highlights in place.
  */
 
 const GROUPS = ["category", "tag", "author", "decade"];
@@ -26,24 +31,28 @@ export function parseParams(search) {
   const state = {};
   for (const g of GROUPS) state[g] = [];
   let sort = null;
+  let q = "";
   for (const [key, value] of new URLSearchParams(search)) {
     if (key === "sort") {
       sort = SORTS.has(value) ? value : null;
+    } else if (key === "q") {
+      if (value) q = value;
     } else if (key in state && value) {
       state[key].push(value);
     }
   }
   const sets = {};
   for (const g of GROUPS) sets[g] = new Set(state[g]);
-  return { state: sets, sort };
+  return { state: sets, sort, q };
 }
 
-export function toSearch(state, sort) {
+export function toSearch(state, sort, q = "") {
   const params = new URLSearchParams();
   for (const g of GROUPS) {
     for (const value of [...(state[g] || [])].sort()) params.append(g, value);
   }
   if (SORTS.has(sort)) params.append("sort", sort);
+  if (q) params.append("q", q);
   const query = params.toString();
   return query ? `?${query}` : "";
 }
@@ -66,6 +75,20 @@ function cardTitle(card) {
   return String(el ? el.textContent : card.dataset.title || "")
     .trim()
     .toLowerCase();
+}
+
+/** Live-search: case-insensitive substring over title, author, category,
+ *  and tag slugs. Empty query matches everything. ANDs with matches(). */
+export function matchesQuery(card, q) {
+  const needle = String(q ?? "").trim().toLowerCase();
+  if (!needle) return true;
+  const d = card.dataset;
+  return (
+    cardTitle(card).includes(needle) ||
+    String(d.author ?? "").toLowerCase().includes(needle) ||
+    String(d.category ?? "").toLowerCase().includes(needle) ||
+    String(d.tags ?? "").toLowerCase().includes(needle)
+  );
 }
 
 /** Comparator honoring dataset strings (dates are ISO, minutes numeric). */
@@ -95,14 +118,34 @@ export function init(doc = document) {
   const clearBtn = doc.querySelector("[data-clear-filters]");
   const pills = doc.querySelector("[data-pills]");
   const badge = doc.querySelector("[data-filter-badge]");
+  const searchInput = doc.querySelector("[data-library-search]");
   const originalOrder = new Map(
     [...grid.querySelectorAll(".card")].map((card, i) => [card, i])
   );
 
+  // Card chip deep links: parse each href once so render() can cheaply
+  // toggle aria-current on the chips whose facet is active. Non-filter
+  // or unparseable hrefs are ignored.
+  const cardLinks = [...grid.querySelectorAll("[data-link]")]
+    .flatMap((link) => {
+      const group = link.dataset.link;
+      if (!GROUPS.includes(group)) return [];
+      let value = null;
+      try {
+        value = new URL(link.getAttribute("href") || "", doc.baseURI)
+          .searchParams.get(group);
+      } catch {
+        value = null;
+      }
+      return value === null ? [] : [{ link, group, value }];
+    });
+
   const incoming = parseParams(doc.defaultView.location.search);
   const state = incoming.state;
   let sort = incoming.sort || "";
+  let q = incoming.q || "";
   if (select && SORTS.has(sort)) select.value = sort;
+  if (searchInput) searchInput.value = q;
 
   // Deep link: incoming filter params open the disclosure panel so the
   // pressed chips are visible without a second click.
@@ -128,6 +171,20 @@ export function init(doc = document) {
       const chip = event.target.closest("button[data-group]");
       if (!chip) return;
       toggle(chip.dataset.group, chip.dataset.value);
+    });
+  }
+
+  // Click anywhere outside the disclosure panel closes it — native
+  // <details> ignores outside clicks, so this adds the expected dismiss
+  // behavior. Clicks inside the panel (chips, counts) keep it open, and
+  // the summary toggle still handles open/close itself.
+  if (details) {
+    doc.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target.closest && target.closest("details.filterbar__details")) {
+        return;
+      }
+      details.open = false;
     });
   }
 
@@ -157,12 +214,21 @@ export function init(doc = document) {
     });
   }
 
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      q = searchInput.value.trim();
+      render();
+    });
+  }
+
   if (clearBtn) clearBtn.addEventListener("click", reset);
 
   function reset() {
     for (const g of GROUPS) state[g].clear();
     sort = "";
+    q = "";
     if (select) select.value = "";
+    if (searchInput) searchInput.value = "";
     render();
   }
 
@@ -217,7 +283,7 @@ export function init(doc = document) {
       badge.textContent = String(total);
       badge.hidden = total === 0;
     }
-    if (clearBtn) clearBtn.hidden = total === 0;
+    if (clearBtn) clearBtn.hidden = total === 0 && !q;
   }
 
   function render() {
@@ -230,6 +296,11 @@ export function init(doc = document) {
         );
       }
     }
+    for (const { link, group, value } of cardLinks) {
+      const active = value !== null && !!state[group] && state[group].has(value);
+      if (active) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    }
     let ordered = [...originalOrder.keys()];
     ordered.sort(compareOrder);
     function compareOrder(a, b) {
@@ -238,7 +309,7 @@ export function init(doc = document) {
     }
     let visibleCount = 0;
     for (const card of ordered) {
-      const visible = matches(card, state);
+      const visible = matches(card, state) && matchesQuery(card, q);
       card.hidden = !visible;
       if (visible) visibleCount++;
       grid.appendChild(card);
@@ -248,7 +319,7 @@ export function init(doc = document) {
       null,
       "",
       doc.defaultView.location.pathname +
-        toSearch(state, sort) +
+        toSearch(state, sort, q) +
         doc.defaultView.location.hash
     );
   }

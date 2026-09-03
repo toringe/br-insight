@@ -634,7 +634,8 @@ button.chip {
     background-color 160ms ease;
 }
 
-a.chip:hover {
+a.chip:hover,
+button.chip:hover {
   border-color: var(--line-strong);
   color: var(--text);
 }
@@ -816,6 +817,14 @@ h2.eyebrow {
      strip rather than a poster; shrink the title. */
   .article-hero {
     height: 30svh;
+    /* Let the title block hang a line or two past the strip's bottom edge:
+       the scrim fades to the page background there, so the byline reads as
+       sitting just below the artwork rather than clipped by it. */
+    overflow: visible;
+  }
+
+  .article-hero__content {
+    bottom: calc(-1 * var(--space-m));
   }
 
   .article-hero__title {
@@ -910,11 +919,14 @@ h2.eyebrow {
   line-height: 1.55;
 }
 
+/* Meta row: fixed two-slot grid so the read time is always flush right on
+   the author line — long author names truncate instead of pushing it around.
+   The author is plain byline text ("by Name"), styled like the read time;
+   only the category/tag chips below keep the boxed look. */
 .card__meta {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2xs);
   margin-top: auto;
   padding-top: var(--space-2xs);
@@ -922,15 +934,36 @@ h2.eyebrow {
   font-size: var(--fs-sm);
 }
 
-.card__reading-time {
-  display: inline-flex;
-  align-items: center;
-  gap: .35em;
+.card__reading-time,
+.card__author {
   font-family: var(--font-display);
   font-size: var(--fs-xs);
   letter-spacing: .1em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.card__author {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+  transition: color 160ms ease;
+}
+
+.card__author:hover {
+  color: var(--text);
+}
+
+.card__author[aria-current="true"] {
+  color: var(--cyan);
+}
+
+.card__reading-time {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
 }
 
 /* --- Page head + library ---------------------------------------------------- */
@@ -945,10 +978,187 @@ h2.eyebrow {
   }
 }
 
+/* About page borrows the .library page rhythm: same header-to-title
+   breathing room, and the lead wears the tagline face (Lato Thin) like the
+   library/topic leads. The prose itself already matches article pages. */
+.about {
+  padding-block: var(--space-xl);
+}
+
+@media (min-width: 1024px) {
+  .about {
+    padding-block: var(--space-2xl);
+  }
+}
+
+.about .page-head__lead {
+  font-family: var(--font-tagline);
+}
+
+/* --- About: revision-screenshot gallery -------------------------------------- */
+
+/* Fluid flexbox accordion (after Simey's "Stripe Sessions" carousel, MIT).
+   All 8 revision strips sit in one flex row: collapsed strips show a dimmed
+   center slice of their screenshot, the active strip flex-expands to reveal
+   the full image. Every revision is visible and clickable at all times, and
+   the active image never exceeds its native size. Strips are radio + label
+   driven (:has + :checked), so click-to-expand works without JS;
+   assets/js/modules/revisions.js adds the arrows, counter and keyboard
+   support (server-rendered hidden until it initializes). */
+.rev-accordion {
+  container-type: inline-size;
+  --rev-active-w: min(52cqw, 28rem);
+  --rev-h: clamp(11rem, 58cqw, 15rem);
+  margin-block-start: var(--space-l);
+}
+
+@media (min-width: 768px) {
+  .rev-accordion {
+    --rev-active-w: min(40cqw, 28rem);
+    --rev-h: clamp(14rem, 26cqw, 19rem);
+  }
+}
+
+ul.rev-accordion__list {
+  display: flex;
+  gap: var(--space-3xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rev-accordion__item {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: var(--rev-h);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: flex-basis 550ms cubic-bezier(.55, .24, .18, 1),
+    flex-grow 550ms cubic-bezier(.55, .24, .18, 1),
+    border-color 200ms ease;
+}
+
+@media (hover: hover) {
+  .rev-accordion__item:hover {
+    flex-grow: 2.2;
+    border-color: var(--line-strong);
+  }
+}
+
+.rev-accordion__item:has(.rev-accordion__radio:checked) {
+  flex: 0 0 var(--rev-active-w);
+  border-color: var(--line-strong);
+}
+
+.rev-accordion__item:has(.rev-accordion__radio:focus-visible) {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.rev-accordion__item img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--rev-active-w);
+  height: 100%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  filter: saturate(.3) contrast(.85) brightness(.75);
+  transition: filter 400ms ease;
+}
+
+.rev-accordion__item:has(.rev-accordion__radio:checked) img {
+  filter: none;
+}
+
+/* Screenshot-tinted overlay on collapsed strips; slides away when the strip
+   becomes active (after the reference pen, in site neon colors). */
+.rev-accordion__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(160deg,
+    rgba(2, 0, 36, 0) 40%,
+    rgba(255, 46, 136, .55) 100%);
+  transition: transform 660ms cubic-bezier(.55, .24, .18, 1);
+}
+
+.rev-accordion__item:has(.rev-accordion__radio:checked)::after {
+  transform: translateY(100%);
+}
+
+.rev-accordion__caption {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
+  margin: 0;
+  padding: 1.5em var(--space-xs) .6em;
+  background: linear-gradient(transparent, rgba(10, 14, 20, .88));
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-bright);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(.5em);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.rev-accordion__item:has(.rev-accordion__radio:checked) .rev-accordion__caption {
+  opacity: 1;
+  transform: none;
+  transition-delay: 120ms;
+}
+
+.rev-accordion__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.rev-accordion__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-s);
+  margin-block-start: var(--space-s);
+}
+
+.rev-accordion__counter {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
 .page-head__lead {
   max-width: 60ch;
   color: var(--muted);
   line-height: 1.6;
+}
+
+/* Library lead borrows the tagline face (Lato Thin). Same OS/2 quirk caveat
+   as the home tagline: never bold this element, or the browser will
+   synthesize a heavy weight from the 100 face. Kept to a single line on
+   desktop; narrow viewports let it wrap again. */
+.library .page-head__lead {
+  font-family: var(--font-tagline);
+}
+
+@media (min-width: 768px) {
+  .library .page-head__lead {
+    max-width: none;
+    white-space: nowrap;
+  }
 }
 
 .page-head__meta {
@@ -958,6 +1168,31 @@ h2.eyebrow {
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+/* Topic-page h1: Sixtyfour advances exactly 1em per glyph, so long topic
+   names must drop font tiers to wrap at word boundaries on phones instead
+   of breaking mid-word (the global overflow-wrap: break-word would split
+   "Adaptation" after "Adaptatio"). Tiers sized so the longest word fits a
+   line at 320px (fs-3xl/2xl/xl/lg fit ~8/10/12/16 chars there):
+   lg ≤7 chars, md ≤9, sm ≤11, xs ≥12 — tier class set by the build.
+   Desktop (≥1024px) always fits at fs-3xl, so tiers are phone/tablet-only. */
+.page-head__title {
+  overflow-wrap: normal;
+}
+
+@media (max-width: 1023.98px) {
+  .page-head__title--md {
+    font-size: var(--fs-2xl);
+  }
+
+  .page-head__title--sm {
+    font-size: var(--fs-xl);
+  }
+
+  .page-head__title--xs {
+    font-size: var(--fs-lg);
+  }
 }
 
 .filterbar {
@@ -1020,7 +1255,7 @@ h2.eyebrow {
 .filterbar__badge {
   padding: .05em .45em;
   border-radius: var(--radius-xs);
-  background: var(--amber);
+  background: var(--red);
   color: var(--ink-on-neon);
   font-family: var(--font-mono);
   font-size: .6875rem;
@@ -1101,6 +1336,36 @@ h2.eyebrow {
 .filterbar select:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 2px;
+}
+
+/* Live search sits between the filter pills and the sort select; the
+   toolbar has room for it on desktop only. */
+.filterbar__search {
+  flex: 0 1 14rem;
+  min-width: 9rem;
+  padding: .3em .85em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  background: var(--bg-1);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  letter-spacing: .08em;
+}
+
+.filterbar__search::placeholder {
+  color: var(--muted);
+}
+
+.filterbar__search:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+  .filterbar__search {
+    display: none;
+  }
 }
 
 .pill {
@@ -1280,6 +1545,15 @@ h2.eyebrow {
 }
 
 .topics { padding-block: var(--space-xl); }
+
+/* Topics hub: vertical rhythm around the two cloud navs. Without this the
+   eyebrows hug their neighbors — [Categories] sits on the lead paragraph
+   and [All tags] nearly touches the last category row. Only the hub is
+   affected: on home, the single cloud has no page-head/cloud siblings. */
+.library .page-head + .topic-cloud,
+.library .topic-cloud + .topic-cloud {
+  margin-top: var(--space-xl);
+}
 
 .topic-cloud ul {
   margin: 0;
@@ -1760,6 +2034,12 @@ main {
 /* Post-reading navigation: back-to-library link and related essays. Full
    container width (wider than the prose measure), separated from the reading
    flow and from each other by hairline rules — the home page's band rhythm. */
+
+.cover-note {
+  margin-block-start: var(--space-l);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
 
 .end-block {
   margin-block-start: var(--space-2xl);

@@ -63,6 +63,10 @@
       {{ article.html | safe }}
     </div>
 
+    {%- if not article.cover_artist %}
+    <p class="cover-note">Cover art by an unknown artist — <a href="{{ asset_prefix | default('/') }}about.html">Get in touch</a> with us if you know the creator.</p>
+    {%- endif %}
+
     <nav class="end-block" aria-label="Continue reading">
       <p class="end-block__back" data-focus-hide>
         <a class="btn btn--ghost" href="/library/">&#8592; Back to Library</a>

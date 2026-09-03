@@ -370,7 +370,6 @@ class TestRelated:
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 NO_CAUTOR_SLUGS = {
-    "editors-article",
     "parting-of-the-mist",
     "significance-of-the-unicorn",
 }
@@ -405,7 +404,7 @@ class TestRealLibrary:
         by_slug = {a.slug: a for a in corpus}
         for slug in NO_CAUTOR_SLUGS:
             assert by_slug[slug].cover_artist is None
-        assert sum(a.cover_artist is None for a in corpus) == 3
+        assert sum(a.cover_artist is None for a in corpus) == 2
 
     def test_unknown_author_passes_through_unchanged(self, corpus):
         by_slug = {a.slug: a for a in corpus}

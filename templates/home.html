@@ -70,11 +70,15 @@
   </div>
 </section>
 
-<section class="recent" aria-labelledby="recent-title">
+ <section class="recent" aria-labelledby="archive-title">
   <div class="container">
-    <h2 class="eyebrow" id="recent-title">Recent additions</h2>
-    <div class="grid grid--cards">
-      {%- for a in recent %}
+    <h2 class="eyebrow" id="archive-title">From the archive</h2>
+    <div class="grid grid--cards" data-archive-grid
+         data-build-week="{{ iso_year_week }}"
+         data-featured-slug="{{ featured.slug }}">
+      {#- Server picks (build week) are the no-JS fallback; JS replaces
+          them with the visitor's current-week picks at load. -#}
+      {%- for a in archive_picks %}
       {{ card(a, asset_prefix | default('/'), plan=(variants | default({})).get(a.slug)) }}
       {%- endfor %}
     </div>
@@ -84,6 +88,8 @@
 
 {% block scripts %}
 {#- Slug payload consumed by main.js's random-essay action; home only so the
-    slug JSON never ships on pages without a random link. -#}
+    slug JSON never ships on pages without a random link. The archive payload
+    drives the weekly carousel (client-side ISO-week digest pick). -#}
 <script type="application/json" id="essay-slugs">{{ essay_slugs | default([]) | tojson }}</script>
+<script type="application/json" id="archive-payload">{{ archive_payload | default([]) | tojson }}</script>
 {% endblock %}

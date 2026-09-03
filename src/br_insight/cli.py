@@ -56,10 +56,15 @@ def _run_serve(args: argparse.Namespace) -> int:
     import http.server
     import functools
 
+    class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
+        """Dev server must never let the browser cache stale assets."""
+
+        def end_headers(self) -> None:
+            self.send_header("Cache-Control", "no-cache")
+            super().end_headers()
+
     root = Path.cwd()
-    handler = functools.partial(
-        http.server.SimpleHTTPRequestHandler, directory=str(root)
-    )
+    handler = functools.partial(NoCacheHandler, directory=str(root))
     with http.server.ThreadingHTTPServer(("", 8000), handler) as httpd:
         print("serve: serving the built site at http://localhost:8000 (Ctrl-C stops)")
         try:

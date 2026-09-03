@@ -59,6 +59,9 @@
         </details>
         <span class="filterbar__pills" data-pills aria-label="Active filters"></span>
         <span class="filterbar__spacer"></span>
+        <input class="filterbar__search" type="search" data-library-search
+               placeholder="Search title, author, tag…"
+               aria-label="Search articles">
         <label class="filterbar__sort-label" for="library-sort" hidden>Sort</label>
         <select name="sort" id="library-sort" data-sort>
           <option value="" selected>Newest first</option>
@@ -72,7 +75,7 @@
     </form>
 
     <p class="library__empty" data-empty hidden>
-      No essays match those filters.
+      No essays match those filters or that search.
       <button type="button" class="btn btn--ghost" data-clear-filters>Clear filters</button>
     </p>
 
