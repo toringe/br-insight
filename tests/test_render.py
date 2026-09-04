@@ -24,9 +24,11 @@ def article():
         title="Voight-Kampff Test",
         author="K. Deckard",
         summary="A machine to measure empathy.",
+        meta_description="A machine to measure empathy.",
         slug="voight-kampff-test",
         date=datetime.datetime(2024, 5, 1),
         minutes=6,
+        words=1300,
         cover="cover.jpg",
     )
 
@@ -354,6 +356,7 @@ def _ns_article(**overrides):
         title="Voight-Kampff Test",
         author="K. Deckard",
         summary="A machine to measure empathy.",
+        meta_description="A machine to measure empathy.",
         slug="voight-kampff-test",
         date=datetime.datetime(2024, 5, 1),
         minutes=6,
@@ -525,7 +528,7 @@ class TestBuildPipeline:
     def _expected_outputs(self):
         """Full Task 11 output set: articles + listing + home + topic
         routes (used categories & tags only) + about/404/error twins +
-        sitemap/feed."""
+        sitemap/feed/llms."""
         from br_insight.articles import load_all
         from br_insight.config import apply_taxonomy, load_taxonomy
         from br_insight.render import topic_pages
@@ -546,6 +549,7 @@ class TestBuildPipeline:
         expected.add(Path("topics") / "index.html")  # fix r1: topics hub
         expected.add(Path("sitemap.xml"))  # Task 11
         expected.add(Path("feed.xml"))     # Task 11
+        expected.add(Path("llms.txt"))     # SEO/AEO: LLM-consumable corpus list
         return expected
 
     def test_writes_every_library_index_html(self, built):
@@ -803,7 +807,9 @@ class TestOgImageCoverFallback:
 
         article = SimpleNamespace(slug="voight-kampff-test", cover="cover.png",
                                   title="t", author="a", summary="s",
-                                  date=datetime.datetime(2024, 5, 1))
+                                  meta_description="s",
+                                  date=datetime.datetime(2024, 5, 1),
+                                  words=100)
         plain = unescape(render_template("base.html", site=site, article=article))
         _, ld = self._emitted_image_urls(plain)
         assert ld.endswith("/library/voight-kampff-test/cover.png")

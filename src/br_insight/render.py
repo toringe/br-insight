@@ -9,8 +9,8 @@ Task 10 scope: ``archive_stats``/``topic_cloud``/``home_context``
 helpers and the root ``index.html`` home page.
 Task 11 scope: ``topic_pages`` + ``templates/topic.html`` fan-out to
 ``/topics/<cat-slug>/`` and ``/topics/tag/<tag-slug>/`` pages, the new
-``about.html``, byte-twin ``404.html``/``error.html``, ``sitemap.xml``
-and ``feed.xml``.
+``about.html``, byte-twin ``404.html``/``error.html``, ``sitemap.xml``,
+``feed.xml`` and ``llms.txt``.
 """
 
 from __future__ import annotations
@@ -48,8 +48,8 @@ TOC_MIN_HEADINGS = 3
 # config.ARCHIVE_PICK_COUNT).
 TOPIC_TAG_LIMIT = 10
 
-# RSS full-summary feed: newest-N window.
-FEED_ITEM_LIMIT = 20
+# RSS feed window: None = the whole archive (slice semantics `[:None]`).
+FEED_ITEM_LIMIT = None
 
 
 def _toc_heading_count(toc: list[dict]) -> int:
@@ -274,19 +274,35 @@ def sitemap_entries(
 ) -> list[dict]:
     """All indexable routes as ``{"loc", "lastmod"}``.
 
-    Articles carry their own publish date as ``lastmod``; every index
-    route (home, library, topics hub, about) gets the build date.
+    Articles carry their own publish date as ``lastmod``. Index routes
+    follow the newest essay in the corpus and topic pages the newest
+    essay they list — rebuilds no longer stamp unchanged pages as
+    modified. Only the about page (no article content) uses the build
+    date.
     """
+    newest = (
+        max(a.date for a in articles).date().isoformat()
+        if articles
+        else now.date().isoformat()
+    )
     today = now.date().isoformat()
 
     def entry(path: str, lastmod: str) -> dict:
         return {"loc": f"{site.base_url}{path}", "lastmod": lastmod}
 
     entries = [
-        entry(p, today)
-        for p in ("/", "/library/", "/topics/", "/about.html")
+        entry("/", newest),
+        entry("/library/", newest),
+        entry("/topics/", newest),
+        entry("/about.html", today),
     ]
-    entries += [entry(t["href"], today) for t in topic_pages(articles)]
+    entries += [
+        entry(
+            t["href"],
+            max(a.date for a in t["articles"]).date().isoformat(),
+        )
+        for t in topic_pages(articles)
+    ]
     entries += [
         entry(f"/library/{article.slug}/", article.date.date().isoformat())
         for article in articles
@@ -295,10 +311,12 @@ def sitemap_entries(
 
 
 def feed_items(base_url: str, articles) -> list[dict]:
-    """Newest ``FEED_ITEM_LIMIT`` essays as RSS 2.0 ``<item>`` fields.
+    """Every essay as RSS 2.0 ``<item>`` fields, newest first.
 
     ``pubdate`` is RFC-822 (UTC-naive article dates pinned to UTC);
-    ``description`` is the front-matter summary credited to the author.
+    ``description`` is the front-matter summary credited to the author;
+    ``guid`` is the canonical permalink and ``categories`` carry the
+    article's taxonomy (category first, then tags).
     """
     items = []
     for article in articles[:FEED_ITEM_LIMIT]:
@@ -311,9 +329,37 @@ def feed_items(base_url: str, articles) -> list[dict]:
                 "link": f"{base_url}/library/{article.slug}/",
                 "pubdate": pubdate,
                 "description": f"{article.summary} — {article.author}",
+                "guid": f"{base_url}/library/{article.slug}/",
+                "categories": [article.category, *article.tags],
             }
         )
     return items
+
+
+def llms_txt(site: SiteConfig, articles) -> str:
+    """Flat markdown inventory of the corpus for LLM consumption (AEO).
+
+    One bullet per essay — title, canonical URL, summary-derived
+    description — following the llms.txt convention so answer engines can
+    enumerate the archive without crawling every page.
+    """
+    lines = [
+        f"# {site.name}",
+        "",
+        f"> {site.tagline}",
+        "",
+        f"{site.base_url} — essays of in-depth Blade Runner analysis,",
+        "organized by category and tag under /topics/.",
+        "",
+        "## Essays",
+        "",
+    ]
+    for article in articles:
+        lines.append(
+            f"- [{article.title}]({site.base_url}/library/{article.slug}/):"
+            f" {article.meta_description}"
+        )
+    return "\n".join(lines) + "\n"
 
 
 class _Clock:
@@ -569,6 +615,10 @@ def build(root: Path, out: Path) -> list[Path]:
         encoding="utf-8",
     )
     written.append(feed)
+
+    llms = out / "llms.txt"
+    llms.write_text(llms_txt(site, articles), encoding="utf-8")
+    written.append(llms)
     return written
 
 

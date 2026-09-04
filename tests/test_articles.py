@@ -160,6 +160,56 @@ class TestExtractSummary:
         assert summary == "First quoted line second quoted line"
 
 
+class TestMetaDescription:
+    def test_short_text_passes_through_intact(self):
+        text = "A tight little summary sentence."
+        assert articles.meta_description(text) == text
+
+    def test_long_text_cut_at_sentence_boundary(self):
+        text = (
+            "Historically, sentience has been fairly easy to define, and the"
+            " debate around replicant personhood is therefore a rich one. "
+            "The film keeps asking whether memory alone can carry a soul, "
+            "and every answer it offers dissolves under pressure. More and "
+            "more and more text follows here to push the length well past "
+            "the description window for search engines."
+        )
+        out = articles.meta_description(text)
+        assert len(out) <= 160
+        assert out.endswith(".")
+        assert out.startswith("Historically")
+
+    def test_no_sentence_boundary_falls_back_to_word_ellipsis(self):
+        text = "word " * 60
+        out = articles.meta_description(text.strip())
+        assert out.endswith("…")
+        assert len(out) <= 160
+        assert " " not in out.split("…")[0][-1:] or out[:-1].endswith(
+            out[:-1].rstrip().split(" ")[-1]
+        )  # ellipsis lands on a word boundary, not mid-word
+
+    def test_sentence_too_short_falls_back_to_word_ellipsis(self):
+        text = "No. " + "word " * 60
+        out = articles.meta_description(text.strip())
+        assert out.endswith("…")
+        assert len(out) <= 160
+        assert out.startswith("No.")
+
+    def test_article_property_uses_meta_description(self):
+        body = (
+            "The replicant question has haunted critics and casual viewers "
+            "alike ever since the film first premiered. " + "Filler word " * 40
+        )
+        article = articles.Article(
+            slug="meta-desc", title="T", author="A", cover="cover.jpg",
+            cover_artist=None, date=articles.parse_date("2001-04-11"),
+            words=100, minutes=1, summary=articles.extract_summary(body),
+            copyright=None, source=None, category="article", tags=[], html="",
+        )
+        assert article.meta_description.endswith(".")
+        assert len(article.meta_description) <= 160
+
+
 def _write_article(root, slug, front_matter, body):
     directory = root / "library" / slug
     directory.mkdir(parents=True)

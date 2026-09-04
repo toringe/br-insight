@@ -353,6 +353,7 @@ class TestHomeAnatomy:
         for attrs, body in scripts:
             if (
                 'type="application/json"' in attrs
+                or 'type="application/ld+json"' in attrs  # inert schema.org data
                 or 'type="module"' in attrs
                 # speculationrules are a declarative browser hint, never executed
                 or 'type="speculationrules"' in attrs

@@ -55,6 +55,11 @@ class Article:
     tags: list[str]
     html: str  # rendered markdown
 
+    @property
+    def meta_description(self) -> str:
+        """SERP-sized description derived from the card summary."""
+        return meta_description(self.summary)
+
 
 def reading_time(words: int) -> int:
     """Estimated reading time in minutes: ceil(words/220), minimum 1."""
@@ -104,6 +109,30 @@ def extract_summary(body: str, size: int = 100) -> str:
     if len(words) <= size:
         return " ".join(words)
     return " ".join(words[:size]) + "…"
+
+
+_META_LIMIT = 160
+_META_SENTENCE_MIN = 80
+
+
+def meta_description(text: str, limit: int = _META_LIMIT) -> str:
+    """Search-engine description: ``text`` cut at a sentence boundary.
+
+    Card summaries are first-paragraph word truncations (often 300+ chars),
+    far past the ~155–160 characters SERPs display. Prefers the last
+    complete sentence that fits the window (and is not pathologically
+    short); otherwise hard-cuts on a word boundary with an ellipsis.
+    """
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    window = text[:limit]
+    sentence = None
+    for match in re.finditer(r"[.!?](?=\s)", window):
+        sentence = match
+    if sentence and sentence.start() + 1 >= _META_SENTENCE_MIN:
+        return window[: sentence.start() + 1]
+    return window.rsplit(" ", 1)[0].rstrip(",;:") + "…"
 
 
 def render_markdown(body: str) -> str:

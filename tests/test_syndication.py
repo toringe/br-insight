@@ -3,6 +3,7 @@
 import datetime
 import re
 import xml.etree.ElementTree as ET
+from html import unescape
 
 import pytest
 
@@ -74,7 +75,6 @@ class TestSitemap:
         from br_insight.render import topic_pages
 
         locs = set(re.findall(r"<loc>(.*?)</loc>", sitemap))
-        today = datetime.date.today().strftime("%Y-%m-%d")
         base = SiteConfig.load(REPO_ROOT).base_url
         assert f"{base}/" in locs
         assert f"{base}/library/" in locs
@@ -82,6 +82,61 @@ class TestSitemap:
         assert f"{base}/about.html" in locs
         for topic in topic_pages(corpus()):
             assert f"{base}{topic['href']}" in locs
+
+    def test_topic_lastmod_matches_newest_member_article(self, sitemap):
+        from br_insight.render import topic_pages
+
+        ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        root = ET.fromstring(sitemap)
+        lastmods = {
+            u.find("s:loc", ns).text: u.find("s:lastmod", ns).text
+            for u in root.findall("s:url", ns)
+        }
+        base = SiteConfig.load(REPO_ROOT).base_url
+        for topic in topic_pages(corpus()):
+            expected = max(
+                a.date for a in topic["articles"]
+            ).strftime("%Y-%m-%d")
+            actual = lastmods[f"{base}{topic['href']}"]
+            assert actual == expected, topic["href"]
+
+    def test_static_lastmod_derived_from_corpus_not_build_clock(self, sitemap):
+        """Index routes follow the newest essay, not the build date, so
+        rebuilds don't stamp unchanged pages as modified."""
+        ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+        root = ET.fromstring(sitemap)
+        lastmods = {
+            u.find("s:loc", ns).text: u.find("s:lastmod", ns).text
+            for u in root.findall("s:url", ns)
+        }
+        base = SiteConfig.load(REPO_ROOT).base_url
+        newest = max(a.date for a in corpus()).strftime("%Y-%m-%d")
+        for path in ("/", "/library/", "/topics/"):
+            assert lastmods[f"{base}{path}"] == newest, path
+
+
+class TestLlmsTxt:
+    def test_generated_at_build_root(self, built):
+        text = (built / "llms.txt").read_text(encoding="utf-8")
+        site = SiteConfig.load(REPO_ROOT)
+        assert text.startswith(f"# {site.name}")
+        assert site.tagline in text
+
+    def test_lists_every_essay_with_url_and_summary(self, built):
+        text = (built / "llms.txt").read_text(encoding="utf-8")
+        base = SiteConfig.load(REPO_ROOT).base_url
+        for a in corpus():
+            assert f"[{a.title}]({base}/library/{a.slug}/)" in text
+            assert a.summary[:40] in text
+
+    def test_markdown_link_lines_only(self, built):
+        text = (built / "llms.txt").read_text(encoding="utf-8")
+        essay_lines = [
+            l for l in text.splitlines() if l.startswith("- [")
+        ]
+        assert len(essay_lines) == len(corpus())
+        for line in essay_lines:
+            assert re.fullmatch(r"- \[.+?\]\(https://www\.br-insight\.com/library/.+?/\): .+", line)
 
     def test_404_error_sitemap_feed_excluded(self, sitemap):
         assert "404.html" not in sitemap
@@ -116,10 +171,11 @@ class TestFeed:
         assert site.tagline in unescape(feed)
         assert "<lastBuildDate>" in feed
 
-    def test_latest_twenty_articles_newest_first(self, feed):
+    def test_all_articles_newest_first(self, feed):
         items = re.findall(r"<item>(.*?)</item>", feed, re.DOTALL)
-        assert len(items) == 20
-        newest = {a.slug for a in corpus()[:20]}
+        expected = corpus()
+        assert len(items) == len(expected)
+        newest = {a.slug for a in expected}
         linked = {
             m for item in items
             for m in re.findall(
@@ -129,9 +185,35 @@ class TestFeed:
         }
         assert linked == newest
 
+    def test_every_item_has_guid_and_categories(self, feed):
+        items = re.findall(r"<item>(.*?)</item>", feed, re.DOTALL)
+        assert items
+        for item in items:
+            assert '<guid isPermaLink="true">' in item
+            assert "<category>" in item
+
+    def test_guid_matches_link(self, feed):
+        for item in re.findall(r"<item>(.*?)</item>", feed, re.DOTALL):
+            link = re.search(r"<link>(.*?)</link>", item).group(1)
+            guid = re.search(r'<guid isPermaLink="true">(.*?)</guid>', item).group(1)
+            assert guid == link
+
+    def test_categories_carry_article_category_and_tags(self, feed):
+        article = next(
+            a for a in corpus() if a.tags
+        )
+        item = next(
+            i for i in re.findall(r"<item>(.*?)</item>", feed, re.DOTALL)
+            if f"/library/{article.slug}/</link>" in i
+        )
+        plain = unescape(item)
+        assert f"<category>{article.category}</category>" in plain
+        for tag in article.tags:
+            assert f"<category>{tag}</category>" in plain
+
     def test_pub_dates_are_rfc822(self, feed):
         pub_dates = re.findall(r"<pubDate>(.*?)</pubDate>", feed)
-        assert len(pub_dates) == 20
+        assert len(pub_dates) == len(corpus())
         for stamp in pub_dates:
             assert _RFC822.match(stamp), stamp
 

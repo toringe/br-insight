@@ -11,8 +11,12 @@
     <item>
       <title>{{ item.title }}</title>
       <link>{{ item.link }}</link>
+      <guid isPermaLink="true">{{ item.guid }}</guid>
       <pubDate>{{ item.pubdate }}</pubDate>
       <description>{{ item.description }}</description>
+      {%- for category in item.categories %}
+      <category>{{ category }}</category>
+      {%- endfor %}
     </item>
 {%- endfor %}
   </channel>

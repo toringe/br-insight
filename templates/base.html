@@ -36,17 +36,22 @@
   <title>{{ page_title }} — {{ site.name }}</title>
   <meta name="description" content="{{ meta_description }}">
   <link rel="canonical" href="{{ canonical_url }}">
+  <link rel="alternate" type="application/rss+xml" title="{{ site.name }}" href="{{ site.base_url }}/feed.xml">
 
   <meta property="og:site_name" content="{{ site.name }}">
   <meta property="og:title" content="{% if article %}{{ article.title }}{% else %}{{ page_title }}{% endif %}">
-  <meta property="og:description" content="{% if article %}{{ article.summary }}{% else %}{{ meta_description }}{% endif %}">
+  <meta property="og:description" content="{% if article %}{{ article.meta_description }}{% else %}{{ meta_description }}{% endif %}">
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:url" content="{{ canonical_url }}">
   <meta property="og:image" content="{{ site.base_url }}{{ og_image }}">
+  <meta property="og:image:alt" content="{% block og_image_alt %}{{ site.name }}{% endblock %}">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@{{ site.social.twitter }}">
   <meta name="twitter:title" content="{% if article %}{{ article.title }}{% else %}{{ page_title }}{% endif %}">
-  <meta name="twitter:description" content="{% if article %}{{ article.summary }}{% else %}{{ meta_description }}{% endif %}">
+  <meta name="twitter:description" content="{% if article %}{{ article.meta_description }}{% else %}{{ meta_description }}{% endif %}">
   <meta name="twitter:image" content="{{ site.base_url }}{{ og_image }}">
+
+  {% block head_meta %}{% endblock %}
 
   {% if article %}
   <script type="application/ld+json">
@@ -54,14 +59,24 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": {{ article.title | tojson }},
-    "description": {{ article.summary | tojson }},
+    "description": {{ article.meta_description | tojson }},
     "author": {"@type": "Person", "name": {{ article.author | tojson }}},
+    "publisher": {
+      "@type": "Organization",
+      "name": {{ site.name | tojson }},
+      "logo": {"@type": "ImageObject", "url": "{{ site.base_url }}/assets/img/bri-logo.png"}
+    },
     "datePublished": "{{ article.date.strftime('%Y-%m-%d') }}",
+    "dateModified": "{{ article.date.strftime('%Y-%m-%d') }}",
+    "wordCount": {{ article.words }},
+    "inLanguage": "en",
     "image": "{{ site.base_url }}/library/{{ article.slug }}/{{ og_cover | default(article.cover) }}",
     "mainEntityOfPage": "{{ canonical_url }}"
   }
   </script>
   {% endif %}
+
+  {%- block structured_data %}{% endblock -%}
 
   {#- Font preload strategy (Task 14): regular Chakra 400/600, header chrome
       Rajdhani 400/600, and regular Source Serif only. The italic serif is

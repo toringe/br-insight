@@ -5,12 +5,31 @@
 
 {% block og_type %}article{% endblock %}
 {% block title %}{{ article.title }}{% endblock %}
-{% block description %}{{ article.summary }}{% endblock %}
+{% block description %}{{ article.meta_description }}{% endblock %}
 {% block canonical_path %}library/{{ article.slug }}/{% endblock %}
+
+{%- block head_meta %}
+<meta property="article:published_time" content="{{ article.date.strftime('%Y-%m-%d') }}">
+{%- endblock %}
 
 {#- Social images cite the largest generated JPEG variant — crawlers do
     not decode WebP. Render passes the filename via og_cover (Task 14). -#}
 {% block og_image %}/library/{{ article.slug }}/{{ og_cover | default(article.cover) }}{% endblock %}
+{% block og_image_alt %}Cover art for {{ article.title }}{% endblock %}
+
+{%- block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "{{ site.base_url }}/"},
+    {"@type": "ListItem", "position": 2, "name": "Library", "item": "{{ site.base_url }}/library/"},
+    {"@type": "ListItem", "position": 3, "name": {{ article.title | tojson }}, "item": "{{ canonical_url }}"}
+  ]
+}
+</script>
+{%- endblock %}
 
 {#- Task 14 LCP preload: mirrors the banner <picture> candidate list exactly
     so the browser resolves the same URL once — no double fetch. The prose

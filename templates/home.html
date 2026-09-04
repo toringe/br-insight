@@ -1,6 +1,23 @@
 {% extends "base.html" %}
 
+{% block title %}In-depth Blade Runner analysis{% endblock %}
 {% block description %}Thirty years of in-depth Blade Runner analysis — browse {{ stats.essays }} essays by topic, or start with this month's featured essay.{% endblock %}
+
+{%- block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": {{ site.name | tojson }},
+  "url": "{{ site.base_url }}/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {"@type": "EntryPoint", "urlTemplate": "{{ site.base_url }}/library/?q={search_term_string}"},
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{%- endblock %}
 
 {% from "partials/card.html" import card %}
 {% from "partials/cover.html" import lazy_cover %}
