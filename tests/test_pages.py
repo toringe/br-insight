@@ -20,29 +20,29 @@ SCREENSHOTS = (
     ("/assets/img/site_rev8.png", "Screenshot of 8th revision"),
 )
 
-# Legacy caption typos preserved intentionally (owner's narrative).
+# Carousel captions, one per revision screenshot, in display order.
 REVISION_CAPTIONS = (
     "First Revision - 1996",
     "Second Revision - 1998",
     "Third Revision - 1999",
     "Fourth Revision - 2002",
-    "Fifth Revision - 1999",
-    "Sixth Revision - 2007",
+    "Fifth Revision - 2008",
+    "Sixth Revision - 2014",
     "Seventh Revision - 2015",
     "Eighth Revision - 2017",
 )
 
 HISTORY_FACTS = (
-    "Blade Runner Insight started as a project in November 1995",
-    "went online in July 1996",
+    "I started working on this project in November 1995",
+    "officially launched it in July 1996",
     "The Unofficial In-Depth Analysis of Blade Runner",
-    "In 1999 the name of the site was changed",
-    "br-insight.com</strong>",
-    "In May 2002, the Blade Runner Insight Forum was created",
+    "rebranded to <strong>Blade Runner Insight</strong>",
+    "secured <strong>br-insight.com</strong> in 1999",
+    "By May 2002",
     "Radomir Balint",
     'href="https://en.wikipedia.org/wiki/Yahoo!_GeoCities">GeoCities</a>',
     'href="https://en.wikipedia.org/wiki/PhpBB">phpBB</a>',
-    "Amazon Web Services",
+    "Cloudflare",
 )
 
 

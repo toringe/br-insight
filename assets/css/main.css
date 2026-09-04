@@ -995,6 +995,28 @@ h2.eyebrow {
   font-family: var(--font-tagline);
 }
 
+/* Same lead-to-content gap as the listing pages (library gives its
+   first .topic-cloud a --space-xl margin-top). */
+.about .page-head {
+  margin-block-end: var(--space-xl);
+}
+
+/* Sits inside the .prose flow, between the intro paragraphs and the Site
+   history section — two classes so the wider margin survives the cascade
+   against .prose > * + * further down the file. */
+.prose .about-contact {
+  margin-block-start: var(--space-xl);
+  font-size: 1.0625rem;
+  color: var(--muted);
+}
+
+/* About prose spans the container like the listing pages do, instead of the
+   narrow article measure. (Two classes so this wins the cascade over the
+   .prose measure rule further down the file.) */
+.prose.about-history {
+  max-width: none;
+}
+
 /* --- About: revision-screenshot gallery -------------------------------------- */
 
 /* Fluid flexbox accordion (after Simey's "Stripe Sessions" carousel, MIT).
@@ -1083,7 +1105,7 @@ ul.rev-accordion__list {
   z-index: 1;
   background: linear-gradient(160deg,
     rgba(2, 0, 36, 0) 40%,
-    rgba(255, 46, 136, .55) 100%);
+    rgba(0, 229, 255, .55) 100%);
   transition: transform 660ms cubic-bezier(.55, .24, .18, 1);
 }
 
@@ -2253,6 +2275,17 @@ html[data-fx-flicker] .neon {
   animation: neon-flicker 7s linear infinite;
 }
 
+/* Header wordmark flickers like the neon signage in the film — subtle dips,
+   rare by keyframe design (only ~0.8s per cycle). Whole wordmark and the red
+   "Insight" run out-of-sync rhythms so the two halves never dip together. */
+html[data-fx-flicker] .site-header__brand {
+  animation: neon-flicker 8s linear infinite;
+}
+
+html[data-fx-flicker] .site-header__brand-accent {
+  animation: neon-flicker 11s linear 2.5s infinite;
+}
+
 .neon--cyan {
   color: var(--cyan);
   text-shadow: 0 0 calc(var(--fx-flicker-strength) * 140px) rgba(0, 229, 255, .8),
@@ -2287,7 +2320,9 @@ html[data-fx-off] .fx-layer {
   display: none !important;
 }
 
-html[data-fx-off] .neon {
+html[data-fx-off] .neon,
+html[data-fx-off] .site-header__brand,
+html[data-fx-off] .site-header__brand-accent {
   animation: none !important;
 }
 
