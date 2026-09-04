@@ -433,6 +433,7 @@ def get_env() -> Environment:
     env.globals["fx_config"] = fx_config
     env.globals["asset_ver"] = asset_ver
     env.filters["decade"] = decade
+    env.filters["slugify"] = slugify
     return env
 
 

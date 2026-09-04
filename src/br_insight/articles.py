@@ -226,7 +226,13 @@ def load_all(root: Path) -> list[Article]:
 
 
 def related(article: Article, all_articles: list[Article]) -> list[Article]:
-    """Top 3 articles sharing the most tags with ``article``, descending."""
+    """Top 3 related essays: tag matches first, then category peers.
+
+    Tag overlaps rank by shared count (ties newest-first) and are padded
+    to three with same-category essays — most of this legacy corpus
+    shares zero or one tag, so category is what keeps the related
+    section from collapsing to a single card.
+    """
     tags = set(article.tags)
     scored = []
     for other in all_articles:
@@ -234,9 +240,21 @@ def related(article: Article, all_articles: list[Article]) -> list[Article]:
             continue
         shared = len(tags & set(other.tags))
         if shared:
-            scored.append((shared, other))
-    scored.sort(key=lambda pair: -pair[0])
-    return [other for _, other in scored[:3]]
+            scored.append((-shared, -other.date.timestamp(), other))
+    scored.sort(key=lambda triple: triple[:2])
+
+    picked = [other for _, _, other in scored]
+    if len(picked) < 3:
+        for other in sorted(
+            all_articles, key=lambda a: a.date.timestamp(), reverse=True
+        ):
+            if len(picked) >= 3:
+                break
+            if other is article or other in picked:
+                continue
+            if other.category == article.category:
+                picked.append(other)
+    return picked[:3]
 
 
 def _build_article(slug: str, data: dict, body: str) -> Article:

@@ -210,6 +210,65 @@ class TestMetaDescription:
         assert len(article.meta_description) <= 160
 
 
+class TestRelated:
+    @staticmethod
+    def make(slug, category="article", tags=(), year=2000):
+        return articles.Article(
+            slug=slug, title=slug, author="A", cover="cover.jpg",
+            cover_artist=None, date=articles.parse_date(f"{year}-01-01"),
+            words=100, minutes=1, summary="", copyright=None, source=None,
+            category=category, tags=list(tags), html="",
+        )
+
+    def test_tag_matches_rank_newest_first_and_cap_at_three(self):
+        target = self.make("t", tags=("eyes", "rain"))
+        pool = [
+            self.make("one", tags=("eyes",), year=2001),
+            self.make("two", tags=("eyes", "rain"), year=2002),
+            self.make("three", tags=("rain",), year=2003),
+            self.make("four", tags=("eyes", "rain", "unicorn"), year=2004),
+        ]
+        related = articles.related(target, pool)
+        assert [a.slug for a in related] == ["four", "two", "one"]
+
+    def test_fills_to_three_from_same_category_when_tags_run_out(self):
+        target = self.make("t", category="analysis", tags=("eyes",))
+        pool = [
+            self.make("tagged", tags=("eyes",), year=2005),
+            self.make("cat-1", category="analysis", year=2001),
+            self.make("cat-2", category="analysis", year=2002),
+            self.make("cat-3", category="analysis", year=2003),
+            self.make("other-cat", category="design", year=2004),
+        ]
+        related = articles.related(target, pool)
+        assert [a.slug for a in related] == ["tagged", "cat-3", "cat-2"]
+
+    def test_no_tags_falls_back_to_category_peers(self):
+        target = self.make("t", category="analysis")
+        pool = [
+            self.make("peer-1", category="analysis", year=2001),
+            self.make("peer-2", category="analysis", year=2002),
+            self.make("peer-3", category="analysis", year=2003),
+            self.make("other", category="design", year=2004),
+        ]
+        related = articles.related(target, pool)
+        assert [a.slug for a in related] == ["peer-3", "peer-2", "peer-1"]
+
+    def test_self_excluded_from_category_fallback(self):
+        target = self.make("t", category="analysis")
+        pool = [target, self.make("peer", category="analysis")]
+        related = articles.related(target, pool)
+        assert [a.slug for a in related] == ["peer"]
+
+    def test_no_overlap_at_all_yields_empty_list(self):
+        target = self.make("t", category="analysis")
+        pool = [self.make("other", category="design")]
+        assert articles.related(target, pool) == []
+
+    def test_empty_pool_yields_empty_list(self):
+        assert articles.related(self.make("t"), []) == []
+
+
 def _write_article(root, slug, front_matter, body):
     directory = root / "library" / slug
     directory.mkdir(parents=True)
@@ -380,7 +439,9 @@ class TestExtractToc:
         assert articles.extract_toc("<p>no headings</p>") == []
 
 
-def _make_article(slug, tags=(), date=datetime.datetime(2000, 1, 1)):
+def _make_article(
+    slug, tags=(), date=datetime.datetime(2000, 1, 1), category="article"
+):
     return articles.Article(
         slug=slug,
         title=f"Title {slug}",
@@ -393,7 +454,7 @@ def _make_article(slug, tags=(), date=datetime.datetime(2000, 1, 1)):
         summary="Summary.",
         copyright=None,
         source=None,
-        category="article",
+        category=category,
         tags=list(tags),
         html="<p>x</p>",
     )
@@ -419,9 +480,9 @@ class TestRelated:
         target = _make_article("target", tags=["x"])
         assert articles.related(target, [target]) == []
 
-    def test_articles_without_shared_tags_are_excluded(self):
-        target = _make_article("target", tags=["x"])
-        other = [_make_article("unrelated", tags=["q"])]
+    def test_articles_without_shared_tags_or_category_are_excluded(self):
+        target = _make_article("target", tags=["x"], category="analysis")
+        other = [_make_article("unrelated", tags=["q"], category="design")]
         assert articles.related(target, other) == []
 
     def test_returns_at_most_three(self):

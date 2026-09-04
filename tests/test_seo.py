@@ -150,6 +150,60 @@ class Test404Head:
         assert '<meta name="robots" content="noindex">' in h
 
 
+class TestTopicGraph:
+    """Crawlable link graph: cards and article headers point at real
+    topic pages instead of JS-only filter URLs."""
+
+    def test_article_category_eyebrow_links_to_topic_page(self, built):
+        h = head("library/measure-of-a-man/index.html", built)  # head-only helper
+        page = (built / "library/measure-of-a-man/index.html").read_text(
+            encoding="utf-8"
+        )
+        assert '<p class="eyebrow article__category"><a href="/topics/' in page
+
+    def test_built_library_cards_link_topic_pages_not_filters(self, built):
+        page = (built / "library/index.html").read_text(encoding="utf-8")
+        assert 'href="/topics/film-analysis/"' in page
+        assert 'href="/topics/tag/' in page
+        # author chips keep the filter deep link (no author topic pages)
+        assert 'href="/library/?author=' in page
+        # card chips no longer deep-link the JS filter UI
+        assert 'data-link="tag"' not in page
+
+    def test_topic_pages_use_h2_card_titles_under_the_h1(self, built):
+        page = (built / "topics/tag/deckard/index.html").read_text(
+            encoding="utf-8"
+        )
+        assert '<h2 class="card__title">' in page
+
+    def test_article_related_cards_keep_h3_under_h2_heading(self, built):
+        page = (built / "library/measure-of-a-man/index.html").read_text(
+            encoding="utf-8"
+        )
+        related_at = page.index('class="end-block__related"')
+        section = page[related_at:]
+        assert '<h3 class="card__title">' in section
+
+    def test_related_section_fills_to_three_via_category(self, built):
+        """Legacy corpus shares few tags; same-category essays must pad
+        the related grid. Every article gets three picks unless its
+        category literally has fewer peers."""
+        from br_insight.articles import related
+
+        articles = corpus()
+        for a in articles:
+            picks = related(a, articles)
+            candidates = [
+                other for other in articles
+                if other is not a and (
+                    set(a.tags) & set(other.tags)
+                    or other.category == a.category
+                )
+            ]
+            expected = min(3, len(candidates))
+            assert len(picks) == expected, a.slug
+
+
 class TestTopicHead:
     def test_tag_titles_are_prettified(self, built):
         h = head("topics/tag/deckard/index.html", built)

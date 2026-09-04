@@ -81,7 +81,7 @@
 
     <div class="grid grid--cards" data-grid>
       {%- for a in articles %}
-      {{ card(a, asset_prefix, plan=(variants | default({})).get(a.slug)) }}
+      {{ card(a, asset_prefix, plan=(variants | default({})).get(a.slug), heading="h2") }}
       {%- endfor %}
     </div>
   </div>

@@ -50,7 +50,7 @@
     {{ banner_picture(article.slug, asset_prefix, "Cover art for " ~ article.title, cover_variants) }}
     <div class="article-hero__scrim" aria-hidden="true"></div>
     <div class="article-hero__content">
-      <p class="eyebrow article__category">{{ article.category }}</p>
+      <p class="eyebrow article__category"><a href="/topics/{{ article.category | slugify }}/">{{ article.category }}</a></p>
       <h1 class="article-hero__title">{{ article.title }}</h1>
       {% include "partials/byline.html" %}
     </div>

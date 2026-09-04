@@ -238,16 +238,23 @@ class TestLibraryAnatomy:
         assert 'width="505"' in html and 'height="295"' in html
         assert 'href="/library/voight-kampff-test/">Voight-Kampff Test</a>' in html
         assert "min read" in html
-        # deep-linkable anchors on the card itself; author is plain byline
-        # text ("by Name") — only category/tags keep the boxed chip look
+        # author stays a library filter deep link (no author topic pages);
+        # taxonomy chips crawl the real crawlable topic pages instead
         assert '/library/?author=' in html
-        assert '/library/?category=' in html
-        assert '/library/?tag=' in html
         assert 'class="card__author"' in html
         assert ">by " in html
         assert 'chip chip--sm chip--category' in html
         assert 'chip chip--sm chip--tag' in html
         assert 'chip chip--sm chip--author' not in html
+        assert 'href="/topics/film-analysis/">' in html
+        assert 'href="/topics/tag/empathy/">' in html
+        # library page title is the h1, so card titles step up to h2
+        assert '<h2 class="card__title">' in html
+        assert '<h3 class="card__title">' not in html
+        # card chips no longer deep-link the JS filter UI
+        assert 'data-link="category"' not in html
+        assert 'data-link="tag"' not in html
+        assert 'data-link="author"' in html
 
     def test_zero_js_fallback_full_list(self, html):
         """Every article is present regardless of JS; empty-state starts hidden."""

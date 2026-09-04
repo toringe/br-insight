@@ -3,11 +3,14 @@
     Expects an ``a`` with: slug, title, author, minutes, category, tags, date.
     ``prefix`` is the relative asset depth ("../", "../../"). ``plan`` is the
     optional Task 14 ``CoverVariants`` entry for the article — when present
-    the cover renders as a responsive <picture>. Data attributes drive the
-    client-side filter module without any extra DOM queries.
+    the cover renders as a responsive <picture>. ``heading`` is the card
+    title's heading level: h3 under an h2 section (home/article), h2 when
+    the listing's page title is the h1 (library/topic pages) so the outline
+    never skips a level. Data attributes drive the client-side filter
+    module without any extra DOM queries.
 -#}
 {% from "partials/cover.html" import lazy_cover %}
-{% macro card(a, prefix, plan=None) %}
+{% macro card(a, prefix, plan=None, heading="h3") %}
 <article class="card"
   data-category="{{ a.category }}"
   data-tags="{{ a.tags | join(' ') }}"
@@ -19,15 +22,18 @@
     {{ lazy_cover(a.slug, prefix, plan) }}
   </a>
   <div class="card__body">
-    <h3 class="card__title"><a href="/library/{{ a.slug }}/">{{ a.title }}</a></h3>
+    <{{ heading }} class="card__title"><a href="/library/{{ a.slug }}/">{{ a.title }}</a></{{ heading }}>
     <p class="card__meta">
       <a class="card__author" data-link="author" href="/library/?author={{ a.author | urlencode }}">by {{ a.author }}</a>
       <span class="card__reading-time">{{ a.minutes }} min read</span>
     </p>
     <p class="card__tax">
-      <a class="chip chip--sm chip--category" data-link="category" href="/library/?category={{ a.category | urlencode }}">{{ a.category }}</a>
+      {#- Taxonomy chips crawl the real topic pages (SEO); only the author
+          link stays a library filter deep link — authors have no topic
+          pages. -#}
+      <a class="chip chip--sm chip--category" href="/topics/{{ a.category | slugify }}/">{{ a.category }}</a>
       {%- for tag in a.tags %}
-      <a class="chip chip--sm chip--tag" data-link="tag" href="/library/?tag={{ tag | urlencode }}">{{ tag }}</a>
+      <a class="chip chip--sm chip--tag" href="/topics/tag/{{ tag | slugify }}/">{{ tag }}</a>
       {%- endfor %}
     </p>
   </div>

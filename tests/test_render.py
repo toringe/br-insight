@@ -422,7 +422,10 @@ class TestArticleAnatomy:
         assert "6 min read" in html
 
     def test_category_eyebrow_above_byline(self, html):
-        assert '<p class="eyebrow article__category">article</p>' in html
+        assert (
+            '<p class="eyebrow article__category">'
+            '<a href="/topics/article/">article</a></p>' in html
+        )
         assert (
             html.index("article__category") < html.index('class="byline"')
         )

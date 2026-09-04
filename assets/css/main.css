@@ -702,6 +702,19 @@ h2.eyebrow {
   margin-bottom: var(--space-2xs);
 }
 
+/* The category eyebrow links to its topic page; inherit the signature
+   red so the link reads as chrome, with a soft glow on hover. */
+.article__category a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.article__category a:hover,
+.article__category a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .byline {
   display: flex;
   flex-wrap: wrap;

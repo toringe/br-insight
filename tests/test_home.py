@@ -34,6 +34,12 @@ def _cloud_hrefs(cloud_html: str) -> list[str]:
     ]
 
 
+def _topics_section(html: str) -> str:
+    """Just the topic-cloud nav (card taxonomy chips also link /topics/)."""
+    start = html.index('aria-label="Topics"')
+    return html[start:html.index("</section>", start)]
+
+
 # ---------------------------------------------------------------------------
 # Pure helpers: archive stats + topic cloud
 # ---------------------------------------------------------------------------
@@ -316,7 +322,7 @@ class TestHomeAnatomy:
         assert ">29 essays · 12 authors · 79,321 words · est. 1996</" in html
 
     def test_topic_cloud_links_categories_then_tags(self, html):
-        cloud = html[html.index('aria-label="Topics"'):]
+        cloud = _topics_section(html)
         joined = "\n".join(_cloud_hrefs(cloud))
         assert 'href="/topics/characters/"' in joined
         assert 'href="/topics/themes-humanity/"' in joined
@@ -465,7 +471,7 @@ class TestBuildHomePage:
         from br_insight.textutils import slugify
 
         text = (built_home / "index.html").read_text(encoding="utf-8")
-        cloud = text[text.index('aria-label="Topics"'):text.index("From the archive")]
+        cloud = _topics_section(text)
         hrefs = {h.removeprefix('href="').removesuffix('"') for h in _cloud_hrefs(cloud)}
         expected_cats = {
             f"/topics/{slugify(c)}/" for c in taxonomy_categories()
