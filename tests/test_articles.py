@@ -141,6 +141,24 @@ class TestExtractSummary:
             "Actual prose begins."
         )
 
+    def test_strips_blockquote_markers_from_summary_text(self):
+        body = (
+            "> The Postmodern reply to the Modern consists of recognizing"
+            " that the past must be revisited.\n\nProse follows.\n"
+        )
+        summary = articles.extract_summary(body, size=100)
+        assert summary.startswith("The Postmodern reply to the Modern")
+        assert ">" not in summary
+
+    def test_strips_blockquote_markers_from_lazy_continuation_lines(self):
+        body = (
+            "> First quoted line\n"
+            "> second quoted line\n\n"
+            "Prose follows.\n"
+        )
+        summary = articles.extract_summary(body, size=100)
+        assert summary == "First quoted line second quoted line"
+
 
 def _write_article(root, slug, front_matter, body):
     directory = root / "library" / slug
@@ -431,6 +449,7 @@ class TestRealLibrary:
                 ),
                 "",
             )
+            paragraph = re.sub(r"^\s{0,3}>\s?", "", paragraph, flags=re.MULTILINE)
             paragraph_words = len(paragraph.split())
             if paragraph_words > 100:
                 assert len(article.summary.rstrip("…").split()) == 100

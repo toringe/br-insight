@@ -23,6 +23,7 @@ _HEADING_WITH_ID = re.compile(r"<h([1-6]) id=\"([^\"]*)\">(.*?)</h\1>", re.DOTAL
 _ANCHOR_TAG = re.compile(r'<a class="anchor"[^>]*>.*?</a>', re.DOTALL)
 _INLINE_TAGS = re.compile(r"<[^>]+>")
 _ATX_HEADING = re.compile(r"^\s{0,3}#{1,6}(?:\s|$)")
+_BLOCKQUOTE = re.compile(r"^\s{0,3}>\s?", re.MULTILINE)
 
 _MARKDOWN = MarkdownIt().use(footnote_plugin)
 
@@ -82,8 +83,8 @@ def extract_summary(body: str, size: int = 100) -> str:
     """First ``size`` words of the body's first prose paragraph, stripped.
 
     Pure ATX-heading blocks are skipped so a heading-led body yields real
-    summary text. Emphasis markers are stripped and an ellipsis is appended
-    when the paragraph is truncated.
+    summary text. Emphasis and blockquote markers are stripped and an
+    ellipsis is appended when the paragraph is truncated.
     """
     paragraph = next(
         (
@@ -98,6 +99,7 @@ def extract_summary(body: str, size: int = 100) -> str:
         ),
         "",
     )
+    paragraph = _BLOCKQUOTE.sub("", paragraph)
     words = _ITALIC.sub(r"\2", _BOLD.sub(r"\2", paragraph)).split()
     if len(words) <= size:
         return " ".join(words)
