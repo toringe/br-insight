@@ -5,7 +5,7 @@
     <a class="site-header__brand" href="{{ site.nav[0].href if site.nav else '/' }}"
        aria-label="Blade Runner Insight">Blade Runner <span class="site-header__brand-accent">Insight</span></a>
 
-    <nav class="site-nav" id="primary-nav" aria-label="Primary" data-focus-hide>
+    <nav class="site-nav" id="primary-nav" aria-label="Primary">
       <ul class="site-nav__list" role="list">
         {%- set _current = current_path | default('') %}
         {%- set _page_path = ('/' ~ (_current | trim('/'))) if _current else '' %}
@@ -18,8 +18,7 @@
 
       {#- Mobile-only action rows (search + atmosphere move into the menu
           below 768px; CSS hides them on desktop and hides the header twins
-          on mobile). No data-focus-hide: the nav container already hides in
-          focus mode, and the mobile menu button remains the visible exit. -#}
+          on mobile). -#}
       <div class="site-nav__actions">
         <button type="button" class="btn btn--ghost site-nav__action" data-search-open aria-haspopup="dialog" aria-controls="search-dialog" aria-label="Search">
           <span aria-hidden="true">🔍</span> Search
@@ -32,23 +31,18 @@
       </div>
     </nav>
 
-    {#- Focus mode contract: on desktop, search + atmosphere buttons stay
-        visible so the mode always has an exit; on mobile the Menu button
-        plays that role (CSS keeps it visible under html[data-focus]). Esc
-        and the `f` shortcut also toggle/exit. Focus mode hides nav, menu,
-        and atmosphere extras via [data-focus-hide] (see main.css). -#}
     <div class="site-header__controls">
       <button type="button" class="btn btn--ghost search-btn" data-search-open aria-haspopup="dialog" aria-controls="search-dialog"
               aria-label="Search" title="Search (⌘K)">
         <span aria-hidden="true">🔍</span>
       </button>
       {%- if site.fx.enabled and site.fx.atmosphere_toggle %}
-      <button type="button" class="btn btn--ghost fx-btn" data-fx-toggle data-focus-hide aria-pressed="true"
+      <button type="button" class="btn btn--ghost fx-btn" data-fx-toggle aria-pressed="true"
               aria-label="Atmosphere" title="Atmosphere — toggle rain & film effects">
         <span aria-hidden="true">💧</span>
       </button>
       {%- endif %}
-      <button type="button" class="btn btn--ghost menu-btn" data-menu-toggle data-focus-hide aria-expanded="false" aria-controls="primary-nav">
+      <button type="button" class="btn btn--ghost menu-btn" data-menu-toggle aria-expanded="false" aria-controls="primary-nav">
         Menu
       </button>
     </div>

@@ -2,17 +2,15 @@
  * Cinematic FX orchestrator (Task 13).
  *
  * Reads window.__FX__ (build-time serialization of SiteConfig.fx) and owns
- * what actually runs: the persisted atmosphere toggle, focus mode, and
- * prefers-reduced-motion all blanket-disable every effect. Effect visuals
+ * what actually runs: the persisted atmosphere toggle and
+ * prefers-reduced-motion both blanket-disable every effect. Effect visuals
  * themselves live in CSS behind data-fx-* presence flags on <html>; this
  * module only syncs those flags and manages the rain canvas lifecycle.
  *
  * Gating precedence (any one kill = everything off):
  *   1. no window.__FX__              -> nothing configured
  *   2. localStorage bri:atmosphere=0 -> html[data-fx-off]
- *   3. <html data-focus>             -> html[data-fx-off] (also reacts to
- *      attribute changes made by focus.js)
- *   4. prefers-reduced-motion: reduce-> html[data-fx-off]
+ *   3. prefers-reduced-motion: reduce-> html[data-fx-off]
  *
  * Exports pure helpers for tests; exposes init() as the only runtime entry.
  */
@@ -50,7 +48,7 @@ export function resolve(config, env = {}) {
     return { configured: false, blanketOff: true, active };
   }
   const blanketOff =
-    env.focus === true || env.reduced === true || env.atmosphere === false;
+    env.reduced === true || env.atmosphere === false;
   if (blanketOff) return { configured: true, blanketOff: true, active };
   active.rain = config.rain?.enabled === true;
   active.scanlines = config.scanlines?.enabled === true;
@@ -143,7 +141,6 @@ export function init(doc = document) {
     const atmosphereOn = loadPref(store);
     const resolved = resolve(config, {
       atmosphere: atmosphereOn,
-      focus: htmlEl.hasAttribute("data-focus"),
       reduced: media ? media.matches : false,
     });
     applyFx(htmlEl, resolved);
@@ -171,14 +168,6 @@ export function init(doc = document) {
   };
 
   for (const btn of btns) btn.addEventListener("click", toggleAtmosphere);
-
-  // Focus mode toggles data-focus on <html> from focus.js — react to it.
-  if (typeof MutationObserver === "function") {
-    new MutationObserver(sync).observe(htmlEl, {
-      attributes: true,
-      attributeFilter: ["data-focus"],
-    });
-  }
 
   if (media && typeof media.addEventListener === "function") {
     media.addEventListener("change", sync);

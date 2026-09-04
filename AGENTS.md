@@ -28,7 +28,7 @@ uv run python scripts/minify_css.py    # REQUIRED after editing any assets/css/*
 - `scripts/normalize_frontmatter.py` normalizes article front matter in place.
 - The built tree must stay pristine w.r.t. the test suite: run `uv run pytest -q` after builds/edits; keep `404.html` and `error.html` identical.
 - Article URLs are stable (`/library/<slug>/`) — renaming slugs changes public URLs; don't do it casually.
-- Atmosphere FX (rain, scanlines, grain, neon flicker, welcome flicker) are gated by `data-fx-*` attributes baked on `<html>` at build time and synced at runtime by `modules/fx.js` (payload in `window.__FX__`); CSS honors `prefers-reduced-motion` and focus mode (`html[data-focus]`) — new decorative animation must hook the same flags, not run unconditionally.
+- Atmosphere FX (rain, scanlines, grain, neon flicker, welcome flicker) are gated by `data-fx-*` attributes baked on `<html>` at build time and synced at runtime by `modules/fx.js` (payload in `window.__FX__`); CSS honors `prefers-reduced-motion` — new decorative animation must hook the same flags, not run unconditionally.
 - The about page's mailto link relies on **Cloudflare Email Address Obfuscation** (Scrape Shield) for scraping protection; if the site ever moves off Cloudflare, switch to client-side email assembly.
 - Cache busting: `asset_ver` hashes only `assets/js/main.js` and `assets/css/main.min.css` — files under `assets/js/modules/` have no version param, so after changing a module assume cached copies in production.
 - Some JS-contract tests (`tests/test_archive_js.py`, `tests/test_main_random.py`) run under Node and are skipped automatically when Node isn't installed.

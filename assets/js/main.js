@@ -13,7 +13,6 @@
 import { init as initProgress } from "./modules/progress.js";
 import { init as initToc } from "./modules/toc.js";
 import { init as initEndnav } from "./modules/endnav.js";
-import { init as initFocus } from "./modules/focus.js";
 import { init as initMemory } from "./modules/memory.js";
 import { init as initShortcuts } from "./modules/shortcuts.js";
 import { init as initSearch } from "./modules/search.js";
@@ -33,7 +32,6 @@ function safe(name, fn) {
 safe("progress", () => initProgress());
 safe("toc", () => initToc());
 safe("endnav", () => initEndnav());
-safe("focus", () => initFocus());
 safe("memory", () => initMemory());
 safe("shortcuts", () => initShortcuts());
 

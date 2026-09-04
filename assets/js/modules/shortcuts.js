@@ -1,6 +1,6 @@
 /**
- * Keyboard shortcuts — `/` or Cmd/Ctrl-K → search, `f` → focus mode,
- * `t` → back to top. Plain letters are ignored while typing in inputs/
+ * Keyboard shortcuts — `/` or Cmd/Ctrl-K → search, `t` → back to top.
+ * Plain letters are ignored while typing in inputs/
  * textareas/selects/contenteditable and while any modifier besides Shift is
  * held; Cmd/Ctrl-K deliberately works everywhere (it's a command chord, not
  * text entry).
@@ -15,13 +15,12 @@ export function isTyping(target) {
   return !!target.isContentEditable;
 }
 
-/** Action name ("search"|"focus"|"top") for a key event, else null. */
+/** Action name ("search"|"top") for a key event, else null. */
 export function route(key, mods = {}, target = null) {
   const meta = !!(mods.meta || mods.ctrl);
   if ((key === "k" || key === "K") && meta) return "search";
   if (meta || mods.alt || isTyping(target)) return null;
   if (key === "/") return "search";
-  if (key === "f" || key === "F") return "focus";
   if (key === "t" || key === "T") return "top";
   return null;
 }
@@ -45,8 +44,6 @@ export function init(doc = document) {
 
     if (action === "search") {
       openSearch(doc);
-    } else if (action === "focus") {
-      doc.dispatchEvent(new CustomEvent("bri:focus-toggle"));
     } else if (action === "top") {
       const win = doc.defaultView;
       if (!win) return;

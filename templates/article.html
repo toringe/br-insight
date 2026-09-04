@@ -68,12 +68,12 @@
     {%- endif %}
 
     <nav class="end-block" aria-label="Continue reading">
-      <p class="end-block__back" data-focus-hide>
+      <p class="end-block__back">
         <a class="btn btn--ghost" href="/library/">&#8592; Back to Library</a>
       </p>
 
       {%- if related %}
-      <section class="end-block__related" data-focus-hide aria-labelledby="related-title">
+      <section class="end-block__related" aria-labelledby="related-title">
         <h2 class="end-block__heading" id="related-title">Related essays</h2>
         <div class="grid grid--cards">
           {%- for rel in related %}

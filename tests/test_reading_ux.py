@@ -1,5 +1,5 @@
 """Task 12 reading-UX modules: template anatomy, build integration, and the
-pure-helper contracts of progress/toc/focus/memory/shortcuts (run under Node,
+pure-helper contracts of progress/toc/memory/shortcuts (run under Node,
 following the subprocess harness established in test_library.py)."""
 
 import datetime
@@ -55,32 +55,14 @@ class TestHeaderAnatomy:
 
         return render_template("base.html", site=SiteConfig.load(REPO_ROOT))
 
-    def test_focus_toggle_button_removed(self, html):
-        """Focus mode has no header button; `f` shortcut + Esc own the toggle."""
-        assert not re.findall(r"<button[^>]*data-focus-toggle[^>]*>", html)
-
-    def test_focus_mode_hides_nav_not_exit_buttons(self, html):
-        """data-focus-hide sits on nav/menu extras, never on search."""
-        assert '<nav class="site-nav" id="primary-nav" aria-label="Primary" data-focus-hide>' in html
-
-        controls = html.split('<div class="site-header__controls">', 1)[1].split("</div>", 1)[0]
-
-        for hidden in ("data-menu-toggle", "data-fx-toggle"):
-            assert "data-focus-hide" in re.search(f"<button[^>]*{hidden}[^>]*>", controls).group(0)
-        assert "data-focus-hide" not in re.search(
-            r"<button[^>]*data-search-open[^>]*>", controls
-        ).group(0)
-
     def test_mobile_nav_carries_search_and_atmosphere_actions(self, html):
         """Mobile menu owns search + atmosphere: labeled duplicate actions
-        live inside the nav panel (hidden on desktop via CSS); they carry no
-        data-focus-hide because the nav container already hides them."""
+        live inside the nav panel (hidden on desktop via CSS)."""
         nav = html.split('<nav class="site-nav"', 1)[1].split("</nav>", 1)[0]
         for sel in ("data-search-open", "data-fx-toggle"):
             btn = re.search(f"<button[^>]*{sel}[^>]*>", nav)
             assert btn, f"nav panel is missing a {sel} action"
             assert "site-nav__action" in btn.group(0)
-            assert "data-focus-hide" not in btn.group(0)
         fx_nav_btn = re.search(r"<button[^>]*data-fx-toggle[^>]*>", nav).group(0)
         assert "aria-pressed" in fx_nav_btn
 
@@ -160,11 +142,6 @@ def shortcuts_uri(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
-def focus_uri(tmp_path_factory):
-    return _copy_module(tmp_path_factory, "focus.js")
-
-
-@pytest.fixture(scope="module")
 def progress_uri(tmp_path_factory):
     return _copy_module(tmp_path_factory, "progress.js")
 
@@ -237,7 +214,7 @@ class TestShortcutsJs:
             "  route('x', {}, p),\n"
             "]));\n"
         )
-        assert out == '["search","search",null,"search","focus","top",null]'
+        assert out == '["search","search",null,"search",null,"top",null]'
 
     def test_typing_guard_blocks_plain_keys_but_not_cmd_k(self, shortcuts_uri):
         out = _run(
@@ -249,7 +226,7 @@ class TestShortcutsJs:
             "  { tagName: 'DIV', isContentEditable: true },\n"
             "]) {\n"
             "  if (route('/', {}, sel) !== null) throw new Error('leaked / in ' + sel.tagName);\n"
-            "  if (route('f', {}, sel) !== null) throw new Error('leaked f in ' + sel.tagName);\n"
+            "  if (route('t', {}, sel) !== null) throw new Error('leaked t in ' + sel.tagName);\n"
             "}\n"
             "console.log(route('k', { ctrl: true }, { tagName: 'INPUT' }));\n"
         )
@@ -263,10 +240,10 @@ class TestShortcutsJs:
             "  route('f', { meta: true }, p),\n"
             "  route('f', { ctrl: true }, p),\n"
             "  route('t', { alt: true }, p),\n"
-            "  route('f', { shift: true }, p),\n"
+            "  route('t', { shift: true }, p),\n"
             "]));\n"
         )
-        assert out == "[null,null,null,\"focus\"]"
+        assert out == "[null,null,null,\"top\"]"
 
     def test_is_typing_classifications(self, shortcuts_uri):
         out = _run(
@@ -281,35 +258,6 @@ class TestShortcutsJs:
             "]));\n"
         )
         assert out == "[true,true,true,true,false,false]"
-
-
-class TestFocusJs:
-    def test_persistence_round_trip(self, focus_uri):
-        out = _run(
-            f'import {{ loadPref, savePref }} from "{focus_uri}";\n'
-            "const store = new Map();\n"
-            "const shim = { getItem: (k) => store.has(k) ? store.get(k) : null,"
-            " setItem: (k, v) => store.set(k, String(v)) };\n"
-            "savePref(shim, true);\n"
-            "const on = loadPref(shim);\n"
-            "savePref(shim, false);\n"
-            "const off = loadPref(shim);\n"
-            "console.log(JSON.stringify({ on, off }));\n"
-        )
-        assert json.loads(out) == {"on": True, "off": False}
-
-    def test_load_pref_tolerates_missing_broken_storage(self, focus_uri):
-        out = _run(
-            f'import {{ loadPref }} from "{focus_uri}";\n'
-            "const absent = { getItem: () => null };\n"
-            "const throwing = { getItem() { throw new Error('blocked'); } };\n"
-            "console.log(JSON.stringify({\n"
-            "  absent: loadPref(absent),\n"
-            "  unsetValue: loadPref({ getItem: () => undefined }),\n"
-            "  throwing: loadPref(throwing),\n"
-            "}));\n"
-        )
-        assert json.loads(out) == {"absent": False, "unsetValue": False, "throwing": False}
 
 
 class TestProgressJs:

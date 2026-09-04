@@ -585,7 +585,7 @@ a {
 /* --- Atmosphere + Search toggles (icon-only) -------------------------------
 
    Icon-only: tighter padding, square-ish footprint. The droplet dims and
-   desaturates while the atmosphere is off (storage off, focus mode, or
+   desaturates while the atmosphere is off (storage off or
    prefers-reduced-motion) so the button itself communicates the state. */
 .fx-btn,
 .search-btn {
@@ -2314,7 +2314,7 @@ html[data-fx-welcome] .hero__title {
   animation: welcome-flicker 950ms linear 1;
 }
 
-/* Runtime blanket (fx.js): atmosphere toggle off, focus mode, or reduced
+/* Runtime blanket (fx.js): atmosphere toggle off or reduced
    motion — every FX layer gone, all flicker motion dead, no exceptions. */
 html[data-fx-off] .fx-layer {
   display: none !important;
@@ -2440,7 +2440,7 @@ html[data-fx-off] .site-header__brand-accent {
 }
 
 /* --------------------------------------------------------------------------
-   10. READING UX — back-to-top + focus mode (Task 12).
+   10. READING UX — back-to-top button (Task 12).
    JS owns visibility/state; CSS only presents it.
    -------------------------------------------------------------------------- */
 
@@ -2480,22 +2480,6 @@ html[data-fx-off] .site-header__brand-accent {
   opacity: 1;
   border-color: var(--cyan);
   text-shadow: 0 0 8px rgba(0, 229, 255, .4);
-}
-
-/* Focus mode: <html data-focus> (focus.js) hides all [data-focus-hide]
-   chrome/decoration plus fx layers. Search + Focus header buttons carry no
-   data-focus-hide so the mode always has an exit. */
-html[data-focus] [data-focus-hide],
-html[data-focus] .fx-layer {
-  display: none !important;
-}
-
-/* Mobile focus-mode exit: search/atmosphere live inside the (hidden) menu
-   below 768px, so the Menu button itself must stay visible as the exit. */
-@media (max-width: 767.98px) {
-  html[data-focus] .menu-btn {
-    display: inline-flex !important;
-  }
 }
 
 /* --------------------------------------------------------------------------

@@ -253,12 +253,11 @@ for (const [label, config, env] of CASES) {
 
 
 class TestFxGatingMatrix:
-    """config (on/off/partial) x atmosphere toggle x focus attr x reduced-motion."""
+    """config (on/off/partial) x atmosphere toggle x reduced-motion."""
 
     CASES = [
         ("all_on", FULL_CONFIG, "atm"),
         ("atmosphere_off", FULL_CONFIG, "noatm"),
-        ("focus_mode", FULL_CONFIG, "focus"),
         ("reduced_motion", FULL_CONFIG, "reduced"),
         ("no_config", None, "atm"),
         ("rain_only", RAIN_ONLY_CONFIG, "atm"),
@@ -274,13 +273,6 @@ class TestFxGatingMatrix:
                       "data-fx-scanlines", "data-fx-welcome"],
         },
         "atmosphere_off": {
-            "configured": True,
-            "blanketOff": True,
-            "active": {"rain": False, "scanlines": False, "grain": False,
-                       "flicker": False, "welcome": False},
-            "attrs": ["data-fx-off"],
-        },
-        "focus_mode": {
             "configured": True,
             "blanketOff": True,
             "active": {"rain": False, "scanlines": False, "grain": False,
@@ -312,18 +304,16 @@ class TestFxGatingMatrix:
 
     def test_matrix(self, fx_uri):
         envs = json.dumps([
-            {"atmosphere": True, "focus": False, "reduced": False},
-            {"atmosphere": False, "focus": False, "reduced": False},
-            {"atmosphere": True, "focus": True, "reduced": False},
-            {"atmosphere": True, "focus": False, "reduced": True},
+            {"atmosphere": True, "reduced": False},
+            {"atmosphere": False, "reduced": False},
+            {"atmosphere": True, "reduced": True},
         ])
         cases = [
             f'["{label}", "{cfg}", "{env_ix}"]'
             for label, cfg, env_ix in [
                 ("all_on", "full", 0),
                 ("atmosphere_off", "full", 1),
-                ("focus_mode", "full", 2),
-                ("reduced_motion", "full", 3),
+                ("reduced_motion", "full", 2),
                 ("no_config", "none", 0),
                 ("rain_only", "rainOnly", 0),
             ]
@@ -442,45 +432,6 @@ console.log(JSON.stringify({ bound, initial, afterToggle }));
         assert data["bound"] == [1, 1]
         assert data["initial"] == ["true", "true"]
         assert data["afterToggle"] == ["false", "false"]
-
-    def test_focus_attr_change_reapplies_gating(self, fx_uri):
-        out = _run(
-            f'import {{ init }} from "{fx_uri}";\n'
-            + _el_shim()
-            + """
-let mutationCb = null;
-globalThis.MutationObserver = class {
-  constructor(cb) { mutationCb = cb; }
-  observe() {}
-  disconnect() {}
-};
-const html = mkEl();
-globalThis.document = {
-  documentElement: html,
-  querySelector: () => null,
-  querySelectorAll: () => [],
-  addEventListener() {},
-  defaultView: {
-    __FX__: """ + FULL_CONFIG + """,
-    matchMedia: () => ({ matches: false, addEventListener() {} }),
-  },
-};
-init(document);
-const afterInit = Object.keys(html.attrs).sort();
-// Focus mode engages elsewhere (focus.js); the observer must react.
-html.setAttribute('data-focus', '');
-mutationCb();
-const afterFocus = Object.keys(html.attrs).sort();
-console.log(JSON.stringify([afterInit, afterFocus]));
-"""
-        )
-        after_init, after_focus = json.loads(out)
-        assert "data-fx-rain" in after_init and "data-fx-off" not in after_init
-        # data-focus stays (focus.js owns it); every fx attr but the blanket goes.
-        assert "data-fx-off" in after_focus and "data-focus" in after_focus
-        assert not any(a.startswith("data-fx-") and a != "data-fx-off"
-                       for a in after_focus)
-
 
 class TestRainHelpers:
     def test_drop_count_scales_with_viewport_and_clamps(self, rain_uri):

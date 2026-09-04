@@ -142,8 +142,8 @@
 
   {% block scripts %}{% endblock %}
   {#- Cinematic FX payload (Task 13): plain config truth for the runtime
-      module; fx.js decides what actually runs (atmosphere toggle, focus
-      mode, reduced motion). Omitted entirely when fx.enabled is false. -#}
+      module; fx.js decides what actually runs (atmosphere toggle, reduced
+      motion). Omitted entirely when fx.enabled is false. -#}
   {% set fx_payload = fx_config(site) %}
   {%- if fx_payload %}
   <script>window.__FX__={{ fx_payload | tojson }};</script>

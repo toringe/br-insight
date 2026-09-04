@@ -313,8 +313,8 @@ class TestCssAnchorContract:
 
     def test_mobile_menu_owns_actions_and_dropdown_is_a_card(self):
         """Mobile menu contract: header search/atmosphere buttons hide below
-        768px, the dropdown renders as a padded bordered card (no edge-hugging
-        text), and focus mode keeps the menu button visible as the exit."""
+        768px and the dropdown renders as a padded bordered card (no
+        edge-hugging text)."""
         for name in ("main.css", "main.min.css"):
             css = (REPO_ROOT / "assets/css" / name).read_text(encoding="utf-8")
             # Desktop hides the in-menu actions; mobile hides the header ones.
@@ -342,10 +342,6 @@ class TestCssAnchorContract:
             nav_rule = re.search(r"\.site-nav\s*\{[^}]*", nav_block)
             assert nav_rule and "border-radius" in nav_rule.group(0), name
             assert re.search(r"\.site-nav\s*\{[^}]*(padding-inline|padding\s*:)", nav_block), name
-            # Focus mode keeps the Menu button as the visible mobile exit.
-            assert re.search(
-                r"html\[data-focus\] \.menu-btn\s*\{[^}]*display:\s*inline-flex\s*!important", css
-            ), name
 
 
 # ---------------------------------------------------------------------------
@@ -482,12 +478,9 @@ class TestArticleAnatomy:
         assert "K. Deckard" in html
         assert "min read" in html
 
-    def test_focus_hide_on_chrome_but_not_progress_or_prose(self, html):
-        assert html.count("data-focus-hide") >= 3  # header controls, footer, end-block extras
+    def test_progress_present_in_article(self, html):
         progress = html[html.index('class="progress"'):html.index('class="progress"') + 60]
-        assert "data-focus-hide" not in progress
-        prose_at = html.index('class="prose"')
-        assert "data-focus-hide" not in html[prose_at - 40:prose_at]
+        assert 'role="progressbar"' in progress
 
 
 # ---------------------------------------------------------------------------
@@ -637,11 +630,10 @@ class TestBuildPipeline:
         assert all("unknown artist" in t for t in invited)
         assert all('../../about.html">Get in touch</a>' in t for t in invited)
 
-    def test_focus_hooks_present_progress_untouched(self, built):
+    def test_progress_a11y_contract_baked_into_build(self, built):
         out, _ = built
         sample = next((out / "library").glob("*/index.html"))
         text = sample.read_text(encoding="utf-8")
-        assert text.count("data-focus-hide") >= 3
         # Task 12: progress a11y contract is server-rendered (JS only repaints)
         assert (
             '<div class="progress" role="progressbar" '
