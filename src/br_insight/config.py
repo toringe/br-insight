@@ -372,11 +372,12 @@ def resolve_archive_picks(
 
 _DEV_BRANCH = "dev"
 
-# Branch-name env vars, in probe order: Cloudflare Pages CI, GitHub
-# Actions, Cloudflare Workers Builds, then other CI conventions before
+# Branch-name env vars, in probe order: Cloudflare Pages CI, Cloudflare
+# Workers Builds, GitHub Actions, then generic CI conventions before
 # falling back to the local checkout.
 _BRANCH_ENV_VARS = (
     "CF_PAGES_BRANCH",
+    "WORKERS_CI_BRANCH",
     "GITHUB_REF_NAME",
     "GIT_BRANCH",
     "BRANCH_NAME",
