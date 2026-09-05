@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
 import warnings
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, replace
@@ -366,3 +368,52 @@ def resolve_archive_picks(
         key=lambda a: (cyrb53_hex(f"{a.slug}:{iso_year_week}"), a.slug),
     )[:ARCHIVE_PICK_COUNT]
     return sorted(picks, key=lambda a: a.date, reverse=True)
+
+
+_DEV_BRANCH = "dev"
+
+# Branch-name env vars, in probe order: Cloudflare Pages CI, GitHub
+# Actions, Cloudflare Workers Builds, then other CI conventions before
+# falling back to the local checkout.
+_BRANCH_ENV_VARS = (
+    "CF_PAGES_BRANCH",
+    "GITHUB_REF_NAME",
+    "GIT_BRANCH",
+    "BRANCH_NAME",
+)
+
+
+def _git_branch() -> str | None:
+    """Current branch of the local checkout, tolerating any git failure."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return result.stdout.strip() or None
+
+
+def dev_banner_enabled() -> bool:
+    """Show the DEVELOPMENT VERSION banner? True only for dev builds.
+
+    Deliberately a build-time decision, not a template fact: the banner
+    markup merges identically across branches, while this probe keeps
+    the rendered output branch-conditional. ``BRI_DEV_BANNER`` ("1"/"0")
+    overrides every probe — handy for forcing a local preview either
+    way. Probe order: explicit override, then CI-provided branch names
+    (Cloudflare Pages, GitHub Actions, Workers Builds, generic), then
+    the local checkout's branch.
+    """
+    override = os.environ.get("BRI_DEV_BANNER")
+    if override is not None:
+        return override.strip() == "1"
+    branch = next(
+        (os.environ[name] for name in _BRANCH_ENV_VARS if os.environ.get(name)),
+        None,
+    ) or _git_branch()
+    return branch is not None and branch.strip() == _DEV_BRANCH
