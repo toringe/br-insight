@@ -1721,6 +1721,21 @@ main {
   border-bottom: 1px solid var(--line);
 }
 
+/* Development banner: hard to miss, rides the sticky header on every
+   page. Amber strip with dark mono text — only exists on dev builds. */
+.dev-banner {
+  margin: 0;
+  padding: var(--space-3xs) var(--space-s);
+  background: var(--amber);
+  color: #1a1000;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
 @supports not (backdrop-filter: blur(1px)) {
   .site-header { background: var(--bg-0); }
 }
