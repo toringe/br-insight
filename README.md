@@ -61,4 +61,4 @@ The build emits a compact search index to `assets/js/search-index.json`: one rec
 
 ## Hosting
 
-Cloudflare Workers are building the page, and deploy to Cloudflare Pages, triggered by pushing/PR to master or dev branches.
+A Cloudflare Worker is building the page, and deploy to Cloudflare Pages, triggered by pushing/PR to master or dev branches.
