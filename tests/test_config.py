@@ -436,7 +436,7 @@ class TestDevBannerEnabled:
         monkeypatch.setenv("CF_PAGES_BRANCH", "master")
         assert config.dev_banner_enabled() is True
 
-    @pytest.mark.parametrize("env_name", ["CF_PAGES_BRANCH", "GITHUB_REF_NAME", "GIT_BRANCH", "BRANCH_NAME"])
+    @pytest.mark.parametrize("env_name", ["CF_PAGES_BRANCH", "WORKERS_CI_BRANCH", "GITHUB_REF_NAME", "GIT_BRANCH", "BRANCH_NAME"])
     def test_ci_branch_probes(self, monkeypatch, env_name):
         monkeypatch.delenv("BRI_DEV_BANNER", raising=False)
         for name in config._BRANCH_ENV_VARS:
