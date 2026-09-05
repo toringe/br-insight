@@ -1,4 +1,4 @@
-# Blade Runner Insight
+# Blade Runner Insight Website
 
 This repository contains all static files for the [Blade Runner Insight](https://www.br-insight.com) website. Articles are updated and revised here; the rendered tree at the repo root is the deployable site.
 
