@@ -30,6 +30,7 @@ uv run python scripts/minify_css.py    # REQUIRED after editing any assets/css/*
 - Article URLs are stable (`/library/<slug>/`) — renaming slugs changes public URLs; don't do it casually.
 - Atmosphere FX (rain, scanlines, grain, neon flicker, welcome flicker) are gated by `data-fx-*` attributes baked on `<html>` at build time and synced at runtime by `modules/fx.js` (payload in `window.__FX__`); CSS honors `prefers-reduced-motion` — new decorative animation must hook the same flags, not run unconditionally.
 - The about page's mailto link relies on **Cloudflare Email Address Obfuscation** (Scrape Shield) for scraping protection; if the site ever moves off Cloudflare, switch to client-side email assembly.
+- The DEVELOPMENT VERSION banner is branch-conditional at **build time** (`dev_banner_enabled()` in `src/br_insight/config.py`): it renders only when building from `dev`. Branch signal comes from CI env vars (`CF_PAGES_BRANCH`, `GITHUB_REF_NAME`, `GIT_BRANCH`, `BRANCH_NAME`) or the local checkout; `BRI_DEV_BANNER=1/0` forces it either way. Never hard-code the banner in templates.
 - Cache busting: `asset_ver` hashes only `assets/js/main.js` and `assets/css/main.min.css` — files under `assets/js/modules/` have no version param, so after changing a module assume cached copies in production.
 - Some JS-contract tests (`tests/test_archive_js.py`, `tests/test_main_random.py`) run under Node and are skipped automatically when Node isn't installed.
 

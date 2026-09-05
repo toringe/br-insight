@@ -29,6 +29,7 @@ from br_insight.articles import extract_toc, load_all, related
 from br_insight.config import (
     SiteConfig,
     apply_taxonomy,
+    dev_banner_enabled,
     load_taxonomy,
     resolve_archive_picks,
     resolve_featured,
@@ -432,6 +433,7 @@ def get_env() -> Environment:
     env.globals["now"] = _Clock()
     env.globals["fx_config"] = fx_config
     env.globals["asset_ver"] = asset_ver
+    env.globals["dev_banner"] = dev_banner_enabled()
     env.filters["decade"] = decade
     env.filters["slugify"] = slugify
     return env

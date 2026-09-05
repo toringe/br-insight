@@ -1,4 +1,7 @@
 <header class="site-header" data-header>
+  {%- if dev_banner %}
+  <p class="dev-banner" role="status">Development version</p>
+  {%- endif %}
   <div class="container site-header__inner">
     {#- Wordmark rides the Rajdhani chrome face like the rest of the header;
         'Insight' wears the eyebrow red via .site-header__brand-accent. -#}

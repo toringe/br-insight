@@ -423,3 +423,46 @@ class TestRealSiteYaml:
         site = config.SiteConfig.load(REPO_ROOT)
         article = config.resolve_featured(site, real_corpus, "202608")
         assert article.slug == "postmodernist-view"
+
+
+class TestDevBannerEnabled:
+    """Branch-conditional dev banner: build-time probe, not a template fact."""
+
+    def test_explicit_override_wins(self, monkeypatch):
+        monkeypatch.setenv("BRI_DEV_BANNER", "0")
+        monkeypatch.setenv("CF_PAGES_BRANCH", "dev")
+        assert config.dev_banner_enabled() is False
+        monkeypatch.setenv("BRI_DEV_BANNER", "1")
+        monkeypatch.setenv("CF_PAGES_BRANCH", "master")
+        assert config.dev_banner_enabled() is True
+
+    @pytest.mark.parametrize("env_name", ["CF_PAGES_BRANCH", "GITHUB_REF_NAME", "GIT_BRANCH", "BRANCH_NAME"])
+    def test_ci_branch_probes(self, monkeypatch, env_name):
+        monkeypatch.delenv("BRI_DEV_BANNER", raising=False)
+        for name in config._BRANCH_ENV_VARS:
+            monkeypatch.delenv(name, raising=False)
+        monkeypatch.setenv(env_name, "dev")
+        assert config.dev_banner_enabled() is True
+        monkeypatch.setenv(env_name, "master")
+        assert config.dev_banner_enabled() is False
+
+    def test_no_branch_signal_defaults_off(self, monkeypatch):
+        monkeypatch.delenv("BRI_DEV_BANNER", raising=False)
+        for name in config._BRANCH_ENV_VARS:
+            monkeypatch.delenv(name, raising=False)
+        monkeypatch.setenv("PATH", "")  # git subprocess cannot run
+        assert config.dev_banner_enabled() is False
+
+    def test_header_template_gates_on_flag(self):
+        from br_insight.render import render_template
+
+        site = config.SiteConfig.load(REPO_ROOT)
+        with_banner = render_template(
+            "partials/header.html", site=site, dev_banner=True
+        )
+        without = render_template(
+            "partials/header.html", site=site, dev_banner=False
+        )
+        assert 'class="dev-banner"' in with_banner
+        assert 'class="dev-banner"' not in without
+        # context values shadow the build-time global in both directions

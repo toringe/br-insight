@@ -58,3 +58,19 @@ Known cosmetic behavior: the welcome flicker replays on every full page load of 
 ## Search
 
 The build emits a compact search index to `assets/js/search-index.json`: one record per essay (slug, root-relative URL, title, author, ISO date, category, tags, summary, and the full stripped body text). The overlay (`assets/js/modules/search.js` + vendored MiniSearch v6) fetches it lazily on first open — header Search button, `⌘K`, or `/` — and never blocks page render. The index stays under a 200 KB gzipped budget, enforced by `uv run br-insight check`; a plain content edit refreshes it via `uv run br-insight build --out .`. Zero-JS visitors see a noscript pointer to the library filters instead of the modal.
+
+## Hosting
+
+A Cloudflare Worker is building the page, and deploy to Cloudflare Pages, triggered by pushing/PR to master or dev branches.
+
+Worker settings:
+```
+Build command: pip install uv && uv sync --frozen && uv run br-insight build && env | grep -iE 'branch|CI_' | sort
+Deploy command: npx wrangler pages project create br-insight --production-branch=master 2>/dev/null; npx wrangler pages deploy . --project-name=br-insight --branch="$WORKERS_CI_BRANCH"
+Version command: npx wrangler pages project create br-insight --production-branch=master 2>/dev/null; npx wrangler pages deploy . --project-name=br-insight --branch="$WORKERS_CI_BRANCH"
+```
+
+master -> https://br-insight.pages.dev/
+dev -> https://dev.br-insight.pages.dev/
+
+Other branches goes to the alias with the same name as the branch.
