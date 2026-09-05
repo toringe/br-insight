@@ -62,3 +62,15 @@ The build emits a compact search index to `assets/js/search-index.json`: one rec
 ## Hosting
 
 A Cloudflare Worker is building the page, and deploy to Cloudflare Pages, triggered by pushing/PR to master or dev branches.
+
+Worker settings:
+```
+Build command: pip install uv && uv sync --frozen && uv run br-insight build && env | grep -iE 'branch|CI_' | sort
+Deploy command: npx wrangler pages project create br-insight --production-branch=master 2>/dev/null; npx wrangler pages deploy . --project-name=br-insight --branch="$WORKERS_CI_BRANCH"
+Version command: npx wrangler pages project create br-insight --production-branch=master 2>/dev/null; npx wrangler pages deploy . --project-name=br-insight --branch="$WORKERS_CI_BRANCH"
+```
+
+master -> https://br-insight.pages.dev/
+dev -> https://dev.br-insight.pages.dev/
+
+Other branches goes to the alias with the same name as the branch.
