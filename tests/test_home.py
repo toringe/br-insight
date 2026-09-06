@@ -113,11 +113,11 @@ class TestHomeContext:
             datetime.datetime(2026, 8, 26, 14, 30),
         )
         # config slug wins over monthly rotation
-        assert ctx["featured"].slug == "postmodernist-view"
+        assert ctx["featured"].slug == "what-defines-human-existence"
         assert ctx["featured_month"] == "August"
         picks = ctx["archive_picks"]
         assert len(picks) == 3
-        assert "postmodernist-view" not in {a.slug for a in picks}
+        assert "what-defines-human-existence" not in {a.slug for a in picks}
         assert picks == sorted(picks, key=lambda a: a.date, reverse=True)
         assert ctx["iso_year_week"] == "2026-W35"
         assert ctx["stats"]["essays"] == len(articles)
@@ -449,10 +449,15 @@ class TestBuildHomePage:
 
     def test_built_featured_matches_config_slug(self, built_home):
         title = next(
-            a.title for a in corpus() if a.slug == "postmodernist-view"
+            a.title
+            for a in corpus()
+            if a.slug == "what-defines-human-existence"
         )
         text = (built_home / "index.html").read_text(encoding="utf-8")
-        assert f'href="/library/postmodernist-view/">{title}</a>' in text
+        assert (
+            f'href="/library/what-defines-human-existence/">{title}</a>'
+            in text
+        )
 
     def test_built_stats_band_matches_corpus(self, built_home):
         from br_insight.articles import load_all
