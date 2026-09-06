@@ -68,6 +68,9 @@ export function init(doc = document) {
   const lightboxCaption = lightbox && lightbox.querySelector("[data-rev-lightbox-caption]");
   if (lightbox && lightboxImg && typeof lightbox.showModal === "function") {
     section.addEventListener("click", (event) => {
+      // The label forwards a second click to the hidden radio, which by
+      // then reports checked — that synthetic event must not pop up.
+      if (event.target instanceof HTMLInputElement) return;
       const item = event.target.closest(".rev-accordion__item");
       if (!item) return;
       const radio = item.querySelector('input[name="rev-history"]');

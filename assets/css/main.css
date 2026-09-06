@@ -1179,6 +1179,7 @@ ul.rev-accordion__list {
    strip is clicked again. Same dialog treatment as the search overlay;
    any click (content or ::backdrop) closes. */
 .rev-lightbox {
+  margin: auto; /* the global reset kills the UA centering */
   max-width: min(92vw, 60rem);
   padding: 0;
   border: 1px solid var(--line-strong);
