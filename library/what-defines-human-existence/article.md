@@ -260,3 +260,6 @@ Thus, in the end the existence of qualia is the decisive factor that makes us hu
 [^18]: https://en.oxforddictionaries.com/definition/quale, last access: February 26th, 2018
 [^19]: Rolf, Bernd / Peters, Jörg (eds.): philo Qualifikationsphase, pp. 65-66. Bamberg, C.C. Buchner Verlag 2015.
 [^20]: https://www.cs.hs-rm.de/~panitz/prog3WS08/perceptron.pdf, last access: March 7th, 2018
+
+Written by
+*Florian van Ophoven*
