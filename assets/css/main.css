@@ -1484,6 +1484,20 @@ ul.rev-accordion__list {
   font-family: var(--font-logo);
 }
 
+/* COLRv1-less engines (WebKit/iOS — every iOS browser rides WebKit, and
+   WebKit still ships no COLRv1) render this face as plain monochrome
+   glyphs. Shade those dots with an element-wide red gradient instead;
+   the font's own paint graph ignores CSS color, so COLRv1 engines are
+   untouched behind the @supports gate. */
+@supports not (font-tech(color-COLRv1)) {
+  .hero__title-logo {
+    background: linear-gradient(180deg, #ff2e2e, #c00d0d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
 .hero__tagline {
   max-width: var(--measure);
   margin-inline: auto;
