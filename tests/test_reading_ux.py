@@ -93,7 +93,7 @@ class TestHomeEssaySlugs:
         assert marker in home_html
         blob = home_html.split(marker, 1)[1].split("</script>", 1)[0]
         slugs = json.loads(blob)
-        assert len(slugs) == 29
+        assert len(slugs) == 30
         assert all(isinstance(s, str) and "/" not in s for s in slugs)
 
     def test_non_home_pages_skip_the_slug_payload(self, tmp_path_factory):

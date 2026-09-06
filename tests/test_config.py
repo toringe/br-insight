@@ -160,7 +160,7 @@ class TestRealCorpus:
     def test_owner_reviewed_counts(self, real_taxonomy):
         assert len(real_taxonomy.categories) == 8
         assert len(real_taxonomy.tag_vocab) == 29
-        assert len(real_taxonomy.assignments) == 29
+        assert len(real_taxonomy.assignments) == 30
 
     def test_known_entries_transcribed_verbatim(self, real_taxonomy):
         assert real_taxonomy.categories[:2] == (
@@ -175,8 +175,8 @@ class TestRealCorpus:
             )
         )
 
-    def test_all_29_articles_validate_and_enrich(self, enriched_corpus):
-        assert len(enriched_corpus) == 29
+    def test_all_30_articles_validate_and_enrich(self, enriched_corpus):
+        assert len(enriched_corpus) == 30
         slugs = {a.slug for a in enriched_corpus}
         assert slugs == set(real_taxonomy_assignments_slugs())
 

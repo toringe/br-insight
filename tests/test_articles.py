@@ -510,8 +510,8 @@ def corpus():
 
 
 class TestRealLibrary:
-    def test_loads_exactly_29_articles(self, corpus):
-        assert len(corpus) == 29
+    def test_loads_exactly_30_articles(self, corpus):
+        assert len(corpus) == 30
 
     def test_sorted_newest_first(self, corpus):
         dates = [a.date for a in corpus]
