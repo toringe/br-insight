@@ -11,7 +11,7 @@ summary:
   size: 100
 ---
 
-> *[As there are several versions of the movie, this essay is exclusively based on movie scenes and footage independent of the various releases. All movie running time references, however, refer to the latest film version, i.e. the 2007 final cut version of the movie.]*
+> *As there are several versions of the movie, this essay is exclusively based on movie scenes and footage independent of the various releases. All movie running time references, however, refer to the latest film version, i.e. the 2007 final cut version of the movie.*
 
 ## 1. Introductory Questions and Aims of the Essay
 
