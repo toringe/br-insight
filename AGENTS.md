@@ -6,6 +6,10 @@ Static site for [Blade Runner Insight](https://www.br-insight.com) (br-insight.c
 
 Implementation work happens on the `dev` branch only. **Before any code, template, CSS, JS, data, or content edit: run `git branch --show-current` and confirm it says `dev`.** If the checkout is on any other branch (e.g. `master`), STOP and ask the user whether to switch to `dev` before proceeding — do not edit files or create commits on another branch without explicit approval. This includes work carried across branches via stash: move it to `dev` first.
 
+## Clean-tree rule (always applies)
+
+When the user asks to push, **the working tree must be clean first**. Run `git status --porcelain` before pushing; if anything is uncommitted, explain what it is and why, and let the user decide (commit it, discard it, or hold off). Never silently bundle stray changes into a push, and never push with a dirty tree.
+
 ## Layout
 
 - `src/br_insight/` — the build pipeline package (`br-insight` console script: `build` / `serve` / `check`). Render templates live in `templates/`.
