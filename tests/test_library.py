@@ -78,10 +78,10 @@ class TestLibraryFacets:
         counts = library_facets(articles)
 
         assert set(counts) == {"category", "tag", "author", "decade"}
-        # Known values verified against the 29-essay corpus (28 authors).
+        # Known values verified against the 30-essay corpus (29 authors).
         assert counts["tag"]["noir"] == 3
-        assert sum(counts["decade"].values()) == 29
-        assert len(counts["author"]) == 28 == len({a.author for a in articles})
+        assert sum(counts["decade"].values()) == 30
+        assert len(counts["author"]) == 29 == len({a.author for a in articles})
         # Same vocabularies as facets(); multi-tag articles count once per tag.
         vocab = facets(articles)
         for group, key in (
@@ -288,9 +288,9 @@ class TestBuildLibraryPage:
         page = built_lib / "library" / "index.html"
         assert page.is_file()
 
-    def test_all_29_articles_in_output(self, built_lib):
+    def test_all_30_articles_in_output(self, built_lib):
         text = (built_lib / "library" / "index.html").read_text(encoding="utf-8")
-        assert text.count('class="card"') == 29
+        assert text.count('class="card"') == 30
 
     def test_chip_counts_match_corpus(self, built_lib):
         from br_insight.articles import load_all

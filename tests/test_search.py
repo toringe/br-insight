@@ -34,7 +34,7 @@ class TestBuildIndex:
         from br_insight.search import build_index
 
         records = build_index(articles)
-        assert len(records) == len(articles) == 29
+        assert len(records) == len(articles) == 30
 
     def test_record_fields_complete(self, articles):
         from br_insight.search import build_index
@@ -157,7 +157,7 @@ class TestBuildIntegration:
         target = built / "assets" / "js" / "search-index.json"
         assert target.is_file()
         records = json.loads(target.read_bytes())
-        assert len(records) == 29
+        assert len(records) == 30
 
     def test_real_index_passes_its_budget(self, built):
         """The emitted index passes a checks.audit run scoped to itself."""

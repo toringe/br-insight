@@ -94,4 +94,13 @@
     <p class="rev-accordion__counter" data-rev-counter aria-live="polite" hidden>1 / 8</p>
     <button type="button" class="btn btn--ghost rev-accordion__btn" data-rev-next aria-label="Next revision" hidden>&#8594;</button>
   </div>
+
+  {#- Screenshot lightbox: revisions.js swaps in the clicked strip's image and
+      showModal()s this dialog when an already-selected strip is clicked
+      again; any click inside (or on the ::backdrop) closes it, Esc is
+      native. The default img is a placeholder — JS overwrites src/alt. -#}
+  <dialog class="rev-lightbox" data-rev-lightbox aria-label="Enlarged screenshot of a past site version">
+    <img class="rev-lightbox__img" data-rev-lightbox-img src="/assets/img/site_rev1.jpg" alt="" width="640" height="440" loading="lazy">
+    <p class="rev-lightbox__caption" data-rev-lightbox-caption></p>
+  </dialog>
 </section>

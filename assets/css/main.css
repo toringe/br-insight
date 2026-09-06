@@ -1175,6 +1175,44 @@ ul.rev-accordion__list {
   color: var(--muted);
 }
 
+/* Screenshot lightbox: opened by revisions.js when an already-selected
+   strip is clicked again. Same dialog treatment as the search overlay;
+   any click (content or ::backdrop) closes. */
+.rev-lightbox {
+  margin: auto; /* the global reset kills the UA centering */
+  max-width: min(92vw, 60rem);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-1);
+  box-shadow: var(--shadow-lg);
+}
+
+.rev-lightbox::backdrop {
+  background: rgba(4, 8, 14, .72);
+  backdrop-filter: blur(3px);
+}
+
+.rev-lightbox__img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 78vh;
+}
+
+.rev-lightbox__caption {
+  margin: 0;
+  padding: .7em var(--space-s) .9em;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
 .page-head__lead {
   max-width: 60ch;
   color: var(--muted);
@@ -1193,6 +1231,22 @@ ul.rev-accordion__list {
   .library .page-head__lead {
     max-width: none;
     white-space: nowrap;
+  }
+}
+
+/* Phones render hairline faces and dim grays poorly: brighten every
+   page-head lead, and swap the library/about leads off Lato Thin 100
+   onto the loaded Light 300 cut (same rationale as the home hero
+   fix). Desktop keeps the muted gossamer look. */
+@media (max-width: 767.98px) {
+  .page-head__lead {
+    color: var(--text);
+  }
+
+  .library .page-head__lead,
+  .about .page-head__lead {
+    font-family: var(--font-prose);
+    font-weight: 300;
   }
 }
 
@@ -1484,6 +1538,20 @@ ul.rev-accordion__list {
   font-family: var(--font-logo);
 }
 
+/* COLRv1-less engines (WebKit/iOS — every iOS browser rides WebKit, and
+   WebKit still ships no COLRv1) render this face as plain monochrome
+   glyphs. Shade those dots with an element-wide red gradient instead;
+   the font's own paint graph ignores CSS color, so COLRv1 engines are
+   untouched behind the @supports gate. */
+@supports not (font-tech(color-COLRv1)) {
+  .hero__title-logo {
+    background: linear-gradient(180deg, #ff2e2e, #c00d0d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
 .hero__tagline {
   max-width: var(--measure);
   margin-inline: auto;
@@ -1511,6 +1579,19 @@ ul.rev-accordion__list {
   font-weight: 100;
   font-size: var(--fs-xs);
   letter-spacing: .08em;
+}
+
+/* Lato Thin hairlines get rounded away by mobile antialiasing — swap the
+   hero's thin faces to the loaded Light 300 cut and brighten them on
+   phones. Desktop keeps the gossamer look. Sits after both base rules so
+   the cascade lets it win. */
+@media (max-width: 767.98px) {
+  .hero__tagline,
+  .hero__anniversary {
+    color: var(--text);
+    font-family: var(--font-prose);
+    font-weight: 300;
+  }
 }
 
 .hero__actions {
@@ -1819,7 +1900,8 @@ main {
 }
 
 /* Mobile (<768px): nav collapses into a slide-down card behind the menu
-   button; search + atmosphere live here (header twins hide). JS toggles
+   button — a compact 2×2 grid of nav cells over one row of side-by-side
+   actions; search + atmosphere live here (header twins hide). JS toggles
    data-menu-open on the header (hooks only here). */
 @media (max-width: 767.98px) {
   .site-nav {
@@ -1827,7 +1909,7 @@ main {
     inset-inline: var(--space-2xs);
     top: calc(100% + var(--space-3xs));
     display: none;
-    padding: var(--space-s) var(--space-m) var(--space-m);
+    padding: var(--space-2xs) var(--space-s) var(--space-s);
     background: color-mix(in srgb, var(--bg-1) 96%, transparent);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
@@ -1846,34 +1928,41 @@ main {
   }
 
   .site-nav__list {
-    flex-direction: column;
-    gap: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
+  /* Hairline cross divider: every cell carries bottom + right edges, then
+     the right column and the last row drop theirs. */
   .site-nav__link {
     display: block;
-    padding: .8em .25em;
+    padding: 1em .75em;
+    text-align: center;
     border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
   }
 
-  .site-nav__list li:last-child .site-nav__link {
+  .site-nav__list li:nth-child(even) .site-nav__link {
+    border-right: 0;
+  }
+
+  .site-nav__list li:nth-child(n + 3) .site-nav__link {
     border-bottom: 0;
   }
 
   .site-nav__actions {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
     gap: var(--space-3xs);
-    margin-top: var(--space-s);
-    padding-top: var(--space-s);
+    margin-top: var(--space-2xs);
+    padding-top: var(--space-2xs);
     border-top: 1px solid var(--line);
   }
 
   .site-nav__action {
-    justify-content: flex-start;
+    flex: 1;
+    justify-content: center;
     gap: var(--space-2xs);
-    padding: .6em .5em;
+    padding: .7em .5em;
     font-size: .8125rem;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -2403,6 +2492,7 @@ html[data-fx-off] .site-header__brand-accent {
   .skip-link,
   .top-btn,
   .search-overlay,
+  .rev-lightbox,
   canvas {
     display: none !important;
   }

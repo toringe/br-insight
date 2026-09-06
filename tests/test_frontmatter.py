@@ -203,9 +203,9 @@ class TestIdempotency:
 
 
 class TestLibraryArticles:
-    def test_all_29_articles_parse_with_strict_yaml(self):
+    def test_all_30_articles_parse_with_strict_yaml(self):
         articles = sorted((REPO_ROOT / "library").glob("*/article.md"))
-        assert len(articles) == 29
+        assert len(articles) == 30
         failures = []
         for path in articles:
             text = path.read_text(encoding="utf-8")
