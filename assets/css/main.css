@@ -1196,6 +1196,22 @@ ul.rev-accordion__list {
   }
 }
 
+/* Phones render hairline faces and dim grays poorly: brighten every
+   page-head lead, and swap the library/about leads off Lato Thin 100
+   onto the loaded Light 300 cut (same rationale as the home hero
+   fix). Desktop keeps the muted gossamer look. */
+@media (max-width: 767.98px) {
+  .page-head__lead {
+    color: var(--text);
+  }
+
+  .library .page-head__lead,
+  .about .page-head__lead {
+    font-family: var(--font-prose);
+    font-weight: 300;
+  }
+}
+
 .page-head__meta {
   margin-block-start: var(--space-2xs);
   font-family: var(--font-display);
