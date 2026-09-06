@@ -1819,7 +1819,8 @@ main {
 }
 
 /* Mobile (<768px): nav collapses into a slide-down card behind the menu
-   button; search + atmosphere live here (header twins hide). JS toggles
+   button — a compact 2×2 grid of nav cells over one row of side-by-side
+   actions; search + atmosphere live here (header twins hide). JS toggles
    data-menu-open on the header (hooks only here). */
 @media (max-width: 767.98px) {
   .site-nav {
@@ -1827,7 +1828,7 @@ main {
     inset-inline: var(--space-2xs);
     top: calc(100% + var(--space-3xs));
     display: none;
-    padding: var(--space-s) var(--space-m) var(--space-m);
+    padding: var(--space-2xs) var(--space-s) var(--space-s);
     background: color-mix(in srgb, var(--bg-1) 96%, transparent);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
@@ -1846,34 +1847,41 @@ main {
   }
 
   .site-nav__list {
-    flex-direction: column;
-    gap: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
+  /* Hairline cross divider: every cell carries bottom + right edges, then
+     the right column and the last row drop theirs. */
   .site-nav__link {
     display: block;
-    padding: .8em .25em;
+    padding: 1em .75em;
+    text-align: center;
     border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
   }
 
-  .site-nav__list li:last-child .site-nav__link {
+  .site-nav__list li:nth-child(even) .site-nav__link {
+    border-right: 0;
+  }
+
+  .site-nav__list li:nth-child(n + 3) .site-nav__link {
     border-bottom: 0;
   }
 
   .site-nav__actions {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
     gap: var(--space-3xs);
-    margin-top: var(--space-s);
-    padding-top: var(--space-s);
+    margin-top: var(--space-2xs);
+    padding-top: var(--space-2xs);
     border-top: 1px solid var(--line);
   }
 
   .site-nav__action {
-    justify-content: flex-start;
+    flex: 1;
+    justify-content: center;
     gap: var(--space-2xs);
-    padding: .6em .5em;
+    padding: .7em .5em;
     font-size: .8125rem;
     letter-spacing: .08em;
     text-transform: uppercase;
