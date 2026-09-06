@@ -1527,6 +1527,19 @@ ul.rev-accordion__list {
   letter-spacing: .08em;
 }
 
+/* Lato Thin hairlines get rounded away by mobile antialiasing — swap the
+   hero's thin faces to the loaded Light 300 cut and brighten them on
+   phones. Desktop keeps the gossamer look. Sits after both base rules so
+   the cascade lets it win. */
+@media (max-width: 767.98px) {
+  .hero__tagline,
+  .hero__anniversary {
+    color: var(--text);
+    font-family: var(--font-prose);
+    font-weight: 300;
+  }
+}
+
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
