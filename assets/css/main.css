@@ -2388,9 +2388,6 @@ main {
 
 /* Glass plane: droplets sit ON the window — sharpest layer, slight blur
    takes the vector edge off the sprite without losing the highlight. */
-.fx-layer--rain .fx-rain--glass {
-  filter: blur(.4px);
-}
 
 /* Scanlines: static overlay, pure CSS; paints only while its presence flag
    lives on <html> (build sets it from YAML, fx.js keeps it honest). */

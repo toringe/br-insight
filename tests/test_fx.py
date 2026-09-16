@@ -468,54 +468,6 @@ class TestRainHelpers:
         assert results[2] == [3, 5]
         assert results[3] == [1, 1]
 
-    def test_droplets_for_width_scales_and_clamps(self, rain_uri):
-        """Glass droplets: ~30 at the 1280 reference width, never above 36,
-        never below 8 so the glass never looks empty."""
-        out = _run(
-            f'import {{ dropletsForWidth }} from "{rain_uri}";\n'
-            "console.log(JSON.stringify([\n"
-            "  dropletsForWidth(1280),\n"
-            "  dropletsForWidth(1920),\n"   # capped at the ceiling
-            "  dropletsForWidth(640),\n"    # half viewport: half density
-            "  dropletsForWidth(320),\n"    # tiny viewport: scale floor 0.4
-            "]));\n"
-        )
-        assert json.loads(out) == [30, 36, 15, 12]
-
-    def test_droplet_step_advances_lifecycle(self, rain_uri):
-        """Stick-slip machine: a stuck droplet holds position while its
-        hold timer runs, then transitions to sliding; a sliding droplet
-        moves down (with wind lean) and resets to stuck after its burst.
-        stepDroplet(droplet, seconds, rand) is pure: mutates + returns it."""
-        out = _run(
-            f'import {{ stepDroplet, STUCK, SLIDING }} from "{rain_uri}";\n'
-            "const mk = (over) => ({ state: STUCK, x: 10, y: 20, r: 3,"
-            " vy: 0, hold: 0, slide: 0, ...over });\n"
-            "const rand = (() => { let i = 0; const seq ="
-            " [0.9, 0.1, 0.5, 0.99]; return () => seq[i++ % seq.length]; })();\n"
-            "const a = mk({ hold: 0.5 });\n"
-            "stepDroplet(a, 0.1, rand);\n"
-            "const stillStuck = a.state === STUCK && Math.abs(a.x - 10) < 0.2"
-            " && a.y === 20;\n"
-            "const fired = mk({ hold: 0.05 });\n"
-            "stepDroplet(fired, 0.1, rand);\n"
-            "const beganSlide = fired.state === SLIDING && fired.vy > 0;\n"
-            "const mover = mk({ state: SLIDING, vy: 40, slide: 0.05 });\n"
-            "const beforeY = mover.y;\n"
-            "stepDroplet(mover, 0.1, rand);\n"
-            "const slidDown = mover.y > beforeY && mover.x !== 10;\n"
-            "const reset = mk({ state: SLIDING, vy: 40, slide: 0.005 });\n"
-            "stepDroplet(reset, 0.1, rand);\n"
-            "const wentStuck = reset.state === STUCK && reset.vy === 0;\n"
-            "console.log(JSON.stringify({ stillStuck, beganSlide, slidDown, wentStuck }));\n"
-        )
-        assert json.loads(out) == {
-            "stillStuck": True,
-            "beganSlide": True,
-            "slidDown": True,
-            "wentStuck": True,
-        }
-
     def test_downgrade_tiers_halve_density_to_floor(self, rain_uri):
         out = _run(
             f'import {{ downgradeTier }} from "{rain_uri}";\n'
@@ -548,6 +500,87 @@ class TestRainHelpers:
             "console.log(typeof rain.createRain);\n"
         )
         assert out == "function"
+
+
+class TestRainPaintLoop:
+    """createRain frame loop against a DOM stub: every rAF frame must run
+    without throwing, and paint() must stay bounded by the two rain
+    planes (regression: when the glass canvas joined the ctxs loop,
+    paint() indexed a third layers entry and threw every frame)."""
+
+    DOC_STUB = """
+const rafQ = [];
+const winStub = {
+  innerWidth: 1280, innerHeight: 720, devicePixelRatio: 1,
+  requestAnimationFrame(cb) { rafQ.push(cb); return rafQ.length; },
+  cancelAnimationFrame() { rafQ.length = 0; },
+  addEventListener() {}, removeEventListener() {},
+  setTimeout() { return 0; }, clearTimeout() {},
+};
+const mkCtx = () => ({
+  clearRects: 0, fillRects: 0, ops: [],
+  clearRect() { this.clearRects += 1; this.ops.push("clearRect"); },
+  fillRect() { this.fillRects += 1; this.ops.push("fillRect"); },
+  setTransform() {}, lineCap: null,
+  beginPath() {}, moveTo() {}, lineTo() {},
+  stroke() { this.strokeCount = (this.strokeCount || 0) + 1;
+    this.ops.push("stroke"); },
+  drawImage() { this.drawImageCount = (this.drawImageCount || 0) + 1;
+    this.ops.push("drawImage"); },
+  globalAlpha: 1, lineWidth: 1, strokeStyle: null, fillStyle: null,
+  globalCompositeOperation: "source-over",
+  fill() {}, arc() {}, ellipse() {},
+  createRadialGradient() { return { addColorStop() {} }; },
+});
+const canvases = [];
+const mkCanvas = () => {
+  const ctx = mkCtx();
+  canvases.push(ctx);
+  return {
+    width: 0, height: 0, setAttribute() {},
+    getContext() { return ctx; },
+  };
+};
+const docStub = {
+  defaultView: winStub,
+  hidden: false,
+  addEventListener() {}, removeEventListener() {},
+  createElement(tag) {
+    return tag === "canvas"
+      ? mkCanvas()
+      : { className: "", appendChild() {}, remove() {}, setAttribute() {} };
+  },
+  body: { appendChild() {} },
+};
+"""
+
+    def test_frames_run_without_throw_two_planes(self, rain_uri):
+        # Regression for the "drops is not iterable" console storm: the
+        # ctxs/plane loops and the layers array must stay in lockstep.
+        # Both rain planes must paint every pass without throwing.
+        out = _run(
+            f'import {{ createRain }} from "{rain_uri}";\n'
+            + self.DOC_STUB
+            + """
+const rain = createRain(docStub, { density: 50, speed: 1, tierAuto: false });
+let t = 0;
+for (let i = 0; i < 60; i += 1) {
+  t += 20;
+  const cbs = rafQ.splice(0, rafQ.length);
+  if (!cbs.length) break;
+  for (const cb of cbs) cb(t);
+}
+console.log(JSON.stringify({
+  canvasCount: canvases.length,
+  farStrokes: canvases[0].strokeCount,
+  nearStrokes: canvases[1].strokeCount,
+}));
+"""
+        )
+        data = json.loads(out)
+        assert data["canvasCount"] == 2, "only the far/near planes ship"
+        assert data["farStrokes"] > 0, "far plane must paint"
+        assert data["nearStrokes"] > 0, "near plane must paint"
 
 
 # ---------------------------------------------------------------------------
