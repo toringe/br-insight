@@ -351,8 +351,10 @@ class TestHomeAnatomy:
     def test_zero_js_no_executable_scripts(self, html):
         # graceful degradation only: Random essay stays an inert <a>; the
         # only scripts are the inert essay-slug JSON payload, the fx config
-        # payload (plain data assignment — Task 13), and deferred enhancement
-        # modules (Task 12 reading-UX orchestrator).
+        # payload (plain data assignment — Task 13), deferred enhancement
+        # modules (Task 12 reading-UX orchestrator), and the external
+        # Buy Me a Coffee widget (src-only, no inline logic; no JS → the
+        # footer noscript link is the fallback).
         assert 'data-random-link href="/library/">Random essay</a>' in html
         scripts = re.findall(r"<script\b([^>]*)>(.*?)</script>", html, re.S)
         assert scripts, "base chrome now ships at least one module script"
@@ -364,6 +366,9 @@ class TestHomeAnatomy:
                 # speculationrules are a declarative browser hint, never executed
                 or 'type="speculationrules"' in attrs
             ):
+                continue
+            if re.search(r'src="https://cdnjs\.buymeacoffee\.com/', attrs):
+                assert not body.strip(), "BMC widget must stay src-only"
                 continue
             # No-typed script allowed exactly once: the __FX__ config blob,
             # a single data assignment with zero executable logic.
