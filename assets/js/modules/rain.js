@@ -1,12 +1,11 @@
 /**
- * Rain — cinematic canvas streaks (Task 13, depth pass).
+ * Rain — cinematic canvas streaks (depth pass).
  *
  * Fixed full-viewport shell (.fx-layer--rain, z-index 80, pointer-events
- * none) holding THREE canvases behind content: .fx-rain--far (slow, dim,
- * CSS-blurred focus falloff), .fx-rain--near (foreground), and
- * .fx-rain--glass (stick-slip window droplets from a pre-rendered sprite).
- * All painted in one rAF loop. Config flows from window.__FX__ (density /
- * speed / tier_auto); visual tuning lives in --fx-* CSS vars + PLANES here.
+ * none) holding TWO canvases behind content: .fx-rain--far (slow, dim,
+ * CSS-blurred focus falloff) and .fx-rain--near (foreground). All painted
+ * in one rAF loop. Config flows from window.__FX__ (density / speed /
+ * tier_auto); visual tuning lives in --fx-* CSS vars + PLANES here.
  *
  * Runtime discipline:
  *   - ~30fps cap via timestamp accumulation inside one rAF loop (no setInterval)
@@ -33,14 +32,6 @@ const DPR_CAP = 2;
 const WIND_ANGLE = -0.06; // radians (~-3.4°): slight diagonal lean
 const RESIZE_DEBOUNCE_MS = 150;
 
-// Glass droplets: count scaling + stick-slip lifecycle bounds.
-const DROPLET_REF = 30;
-const DROPLET_MAX = 36;
-const DROPLET_MIN = 8;
-const WOBBLE_AMP = 0.35; // px of idle jitter while stuck
-export const STUCK = "stuck";
-export const SLIDING = "sliding";
-
 /** Drop count for a viewport width: linear scale below REFERENCE_WIDTH,
  * clamped so thin viewports never fall under an atmospheric minimum. */
 export function dropsForWidth(density, width) {
@@ -61,42 +52,6 @@ export function splitDrops(density) {
   const near = Math.max(1, Math.round(total * 0.6));
   const far = Math.max(1, total - near);
   return [far, near];
-}
-
-/** Glass droplet count for a viewport width: linear from DROPLET_REF at the
- * reference width, capped at DROPLET_MAX, floored at DROPLET_MIN. */
-export function dropletsForWidth(width) {
-  const scale = width / REFERENCE_WIDTH;
-  return Math.round(
-    Math.min(DROPLET_MAX, Math.max(DROPLET_MIN, DROPLET_REF * Math.max(scale, MIN_SCALE))),
-  );
-}
-
-/** One stick-slip step for a glass droplet. Stuck droplets hold position
- * (tiny wobble) while `hold` counts down; firing picks a burst speed and
- * slides (with wind lean) until `slide` expires, then sticks again.
- * Pure: mutates and returns the droplet. */
-export function stepDroplet(droplet, seconds, rand = Math.random) {
-  const d = droplet;
-  if (d.state === STUCK) {
-    d.hold -= seconds;
-    d.x += (rand() - 0.5) * WOBBLE_AMP * seconds * 60 * 0.05;
-    if (d.hold <= 0) {
-      d.state = SLIDING;
-      d.vy = 24 + rand() * 90;
-      d.slide = 0.4 + rand() * 2.4;
-    }
-    return d;
-  }
-  d.slide -= seconds;
-  d.y += d.vy * seconds;
-  d.x += UX * d.vy * seconds;
-  if (d.slide <= 0) {
-    d.state = STUCK;
-    d.vy = 0;
-    d.hold = 1.5 + rand() * 7;
-  }
-  return d;
 }
 
 /** Ladder: hold -> downgrade (once) -> pause permanently. */
@@ -128,10 +83,10 @@ function buildRain(doc, opts = {}) {
   shell.className = "fx-layer fx-layer--rain";
 
   // Depth planes: far reads soft/slow (CSS blur sells the focus falloff),
-  // near keeps the original foreground look. Third canvas: glass droplets.
+  // near keeps the original foreground look.
   const canvases = [];
   const ctxs = [];
-  for (const plane of ["far", "near", "glass"]) {
+  for (const plane of ["far", "near"]) {
     const canvas = doc.createElement("canvas");
     canvas.id = `fx-rain--${plane}`;
     canvas.className = `fx-rain fx-rain--${plane}`;
@@ -140,7 +95,7 @@ function buildRain(doc, opts = {}) {
     canvases.push(canvas);
     ctxs.push(canvas.getContext("2d", { alpha: true }));
   }
-  const [ctxFar, ctxNear, ctxGlass] = ctxs;
+  const [ctxFar, ctxNear] = ctxs;
   doc.body.appendChild(shell);
 
   if (ctxs.some((c) => !c)) {
@@ -151,9 +106,7 @@ function buildRain(doc, opts = {}) {
   let cssWidth = 0;
   let cssHeight = 0;
   let layers = [[], []]; // [far, near] drop arrays
-  let droplets = [];
   let tierDowns = 0;
-  let glassPaused = false; // watchdog freezes the priciest garnish first
 
   // Per-plane look: far is slower and blurred by CSS (focus falloff), so
   // its drops run brighter + longer to survive the blur; near is foreground.
@@ -161,29 +114,6 @@ function buildRain(doc, opts = {}) {
     { speedScale: 0.5, alphaBase: 0.25, alphaRange: 0.45, thickBias: 0.7 },
     { speedScale: 1.0, alphaBase: 0.14, alphaRange: 0.5, thickBias: 0.86 },
   ];
-
-  // Pre-rendered droplet sprite: one radial-gradient teardrop blob with a
-  // highlight; per-frame work is a single drawImage per droplet.
-  const sprite = doc.createElement("canvas");
-  sprite.width = 64;
-  sprite.height = 64;
-  {
-    const sctx = sprite.getContext("2d");
-    if (sctx) {
-      const g = sctx.createRadialGradient(26, 24, 2, 32, 32, 30);
-      g.addColorStop(0, "rgba(235,248,255,.95)");
-      g.addColorStop(0.45, "rgba(207,233,245,.38)");
-      g.addColorStop(1, "rgba(207,233,245,0)");
-      sctx.fillStyle = g;
-      sctx.beginPath();
-      sctx.arc(32, 32, 30, 0, Math.PI * 2);
-      sctx.fill();
-      sctx.fillStyle = "rgba(255,255,255,.85)";
-      sctx.beginPath();
-      sctx.ellipse(24, 22, 5, 3.4, -0.6, 0, Math.PI * 2);
-      sctx.fill();
-    }
-  }
 
   function newDrop(planeIx, fromTop) {
     const p = PLANES[planeIx];
@@ -198,18 +128,6 @@ function buildRain(doc, opts = {}) {
     };
   }
 
-  function newDroplet() {
-    return {
-      state: STUCK,
-      x: Math.random() * cssWidth,
-      y: Math.random() * cssHeight * 0.9,
-      r: 3 + Math.random() * 4,
-      vy: 0,
-      hold: Math.random() * 8,
-      slide: 0,
-    };
-  }
-
   function makeLayers(counts) {
     return layers.map((old, ix) => {
       const next = old.slice(0, counts[ix]);
@@ -218,15 +136,8 @@ function buildRain(doc, opts = {}) {
     });
   }
 
-  function makeDroplets(count) {
-    const next = droplets.slice(0, count);
-    while (next.length < count) next.push(newDroplet());
-    return next;
-  }
-
   function reseed() {
     layers = makeLayers(splitDrops(density));
-    droplets = makeDroplets(dropletsForWidth(cssWidth));
   }
 
   function resize() {
@@ -265,7 +176,6 @@ function buildRain(doc, opts = {}) {
     const verdict = watchdogVerdict(avg, tierDowns);
     if (verdict === "downgrade") {
       tierDowns += 1;
-      glassPaused = true; // garnish goes first; rain planes persist
       density = downgradeTier(density);
       reseed();
       samples = [];
@@ -280,7 +190,7 @@ function buildRain(doc, opts = {}) {
 
   function paint(stepMs) {
     const seconds = Math.min(stepMs, 100) / 1000;
-    for (let ix = 0; ix < ctxs.length; ix += 1) {
+    for (let ix = 0; ix < layers.length; ix += 1) {
       const ctx = ctxs[ix];
       const drops = layers[ix];
       ctx.clearRect(0, 0, cssWidth, cssHeight);
@@ -304,40 +214,6 @@ function buildRain(doc, opts = {}) {
     }
   }
 
-  /** Glass plane: step each droplet's stick-slip lifecycle and stamp the
-   * pre-rendered sprite (scaled to droplet radius); sliding droplets pull a
-   * short fading trail. Droplets that reach the floor re-stick near the top
-   * of their run instead of leaving the glass. */
-  function paintGlass(seconds) {
-    if (glassPaused) return;
-    const ctx = ctxGlass;
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
-    for (const d of droplets) {
-      stepDroplet(d, seconds);
-      if (d.y > cssHeight) {
-        d.y = -4 - Math.random() * 20;
-        d.x = Math.random() * cssWidth;
-        d.state = STUCK;
-        d.vy = 0;
-        d.hold = 0.5 + Math.random() * 4;
-      }
-      const size = d.r * 2;
-      if (d.state === SLIDING) {
-        ctx.globalAlpha = 0.3;
-        ctx.strokeStyle = "#cfe9f5";
-        ctx.lineWidth = Math.max(1.2, d.r * 0.8);
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(d.x, d.y - d.vy * 0.14);
-        ctx.lineTo(d.x, d.y);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.drawImage(sprite, d.x - d.r, d.y - d.r, size, size);
-    }
-    ctx.globalAlpha = 1;
-  }
-
   function frame(now) {
     if (!running) return;
     rafId = win.requestAnimationFrame(frame);
@@ -358,7 +234,6 @@ function buildRain(doc, opts = {}) {
       acc %= TARGET_INTERVAL_MS;
       watchdog(now);
       if (!running) return; // watchdog may have paused us
-      paintGlass(dt);
       paint(dt);
     }
   }
