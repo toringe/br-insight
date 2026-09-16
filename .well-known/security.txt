@@ -1,0 +1,9 @@
+# RFC 9116 — https://www.rfc-editor.org/rfc/rfc9116.html
+# This file must be reachable at /.well-known/security.txt
+# Fallback copy: /security.txt (byte-identical twin)
+
+Contact: mailto:security@br-insight.com
+Expires: 2027-09-16T00:00:00.000Z
+Encryption: https://www.br-insight.com/.well-known/pgp-key.txt (OpenPGP fingerprint B1D7 9928 47B5 F9FB 20B6 4C8C 7326 30BD 60EB 312E)
+Canonical: https://www.br-insight.com/.well-known/security.txt
+Preferred-Languages: en
