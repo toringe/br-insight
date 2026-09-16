@@ -2054,6 +2054,8 @@ main {
   height: 44px !important; /* matches the circular back-to-top (.top-btn) */
   padding: 0 16px !important;
   border-radius: 8px !important;
+  background: var(--bg-1) !important; /* blend with the footer band */
+  color: var(--cyan) !important; /* site link-accent color */
 }
 
 .bmc-slot .bmc-btn svg {
@@ -2062,7 +2064,7 @@ main {
 
 .bmc-slot .bmc-btn-text {
   margin-left: 8px !important;
-  font-size: 1.125rem !important;
+  font-size: 1.375rem !important;
   line-height: normal !important;
 }
 
