@@ -198,9 +198,9 @@ class TestOverlayMarkup:
         assert '<dialog' in html[header_at:]
 
     def test_noscript_fallback_points_to_library(self, html):
-        noscript = re.search(r"<noscript>(.*?)</noscript>", html, re.S)
-        assert noscript, "noscript fallback missing"
-        assert "/library/" in noscript.group(1)
+        noscripts = re.findall(r"<noscript>(.*?)</noscript>", html, re.S)
+        assert noscripts, "noscript fallback missing"
+        assert any("/library/" in ns for ns in noscripts), noscripts
 
     def test_dialog_starts_closed(self, html):
         opening = re.search(r"<dialog[^>]*>", html).group(0)
