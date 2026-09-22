@@ -47,6 +47,17 @@ uv run python scripts/minify_css.py    # REQUIRED after editing any assets/css/*
 
 Cloudflare Pages builds on push/PR to `master` or `dev` (build: `uv sync --frozen` + `br-insight build`; deploy: `wrangler pages deploy`). `master` → br-insight.pages.dev, `dev` → dev.br-insight.pages.dev, other branches get a same-named alias preview. Details and Worker settings live in the README's "Hosting" section.
 
+Merging `dev` → `master` always conflicts on `feed.xml` (both branches rebuild it with different timestamps/dev-banner state). The established resolution: on the mid-merge master checkout, run `uv run br-insight build`, `git add feed.xml`, then commit the merge.
+
+## Third-party widgets
+
+- The footer Buy Me a Coffee widget (`cdnjs.buymeacoffee.com/.../button.prod.min.js`) relies on `document.write` — it must stay an inline, synchronous script tag; `defer`/`async` wipes the whole page. It document.writes a `.bmc-btn-container`/`.bmc-btn` anchor sized 210×60px; all visual control lives in the `.bmc-slot` override block in `main.css` (higher specificity + `!important` beats the widget's own stylesheet). No-JS visitors get the `<noscript>` link fallback.
+- External `src=".js"` tags in HTML are deliberately excluded from the JS budget in `checks.py` (resolved targets that escape the tree are skipped) — don't "fix" that skip.
+
+## Evaluated and rejected
+
+- **raindrop-fx (SardineFish, WebGL)** was trialed (2026-09) and removed on purpose: the library draws its own opaque, fixed background image, which cannot follow scrolling pages and cannot refract live DOM — unsuitable for a reading-first site with long articles. Don't re-propose without addressing that constraint.
+
 ## Conventions
 
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, `chore:`, …). Adding a new essay to `library/index.html` listings is a "re-indexed" chore commit.
