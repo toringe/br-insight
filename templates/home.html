@@ -50,11 +50,13 @@
       </a>
       <div class="featured__body">
         <p class="chip chip--category">{{ featured.category }}</p>
-        <h3 class="featured__title"><a href="/library/{{ featured.slug }}/">{{ featured.title }}</a></h3>
-        <p class="card__meta">
-          <span>{{ featured.author }}</span>
-          <span class="card__reading-time">{{ featured.minutes }} min read</span>
-        </p>
+        <div class="featured__head">
+          <h3 class="featured__title"><a href="/library/{{ featured.slug }}/">{{ featured.title }}</a></h3>
+          <p class="card__meta">
+            <span>{{ featured.author }}</span>
+            <span class="card__reading-time">{{ featured.minutes }} min read</span>
+          </p>
+        </div>
         <p class="featured__summary">{{ featured.summary }}</p>
         <p class="featured__read"><a class="btn btn--ghost" href="/library/{{ featured.slug }}/">Read essay</a></p>
       </div>
