@@ -1615,12 +1615,17 @@ ul.rev-accordion__list {
 }
 
 @media (min-width: 768px) {
-  /* Spotlight split: cover beside body on wide screens. */
+  /* Spotlight split: cover beside body on wide screens. The cover bleeds
+     edge-to-edge down the card's left side and fades into the card
+     background toward the body column, so padding moves onto the body. */
   .featured__card {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    align-items: start;
-    padding: var(--space-l);
+    align-items: stretch;
+    padding: 0;
+    overflow: hidden;
   }
+
+  .featured__body { padding: var(--space-l); }
 }
 
 .featured__cover img {
@@ -1628,6 +1633,28 @@ ul.rev-accordion__list {
   width: 100%;
   height: auto;
   border-radius: var(--radius-sm);
+}
+
+@media (min-width: 768px) {
+  /* Placed after the base img rule so the overrides win the cascade.
+     The anchor stretches to the row height (driven by the body column);
+     the img absolutely fills it — percentage heights don't resolve
+     through the stretched anchor reliably. Fades into the card
+     background on its right edge via mask, so the card's own background
+     shows through. */
+  .featured__cover {
+    position: relative;
+  }
+
+  .featured__cover img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    -webkit-mask-image: linear-gradient(to right, #000 60%, transparent);
+    mask-image: linear-gradient(to right, #000 60%, transparent);
+  }
 }
 
 .featured__body > :first-child { margin-block-start: 0; }
