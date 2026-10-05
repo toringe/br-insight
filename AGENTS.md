@@ -54,9 +54,23 @@ Merging `dev` → `master` always conflicts on `feed.xml` (both branches rebuild
 - The footer Buy Me a Coffee widget (`cdnjs.buymeacoffee.com/.../button.prod.min.js`) relies on `document.write` — it must stay an inline, synchronous script tag; `defer`/`async` wipes the whole page. It document.writes a `.bmc-btn-container`/`.bmc-btn` anchor sized 210×60px; all visual control lives in the `.bmc-slot` override block in `main.css` (higher specificity + `!important` beats the widget's own stylesheet). No-JS visitors get the `<noscript>` link fallback.
 - External `src=".js"` tags in HTML are deliberately excluded from the JS budget in `checks.py` (resolved targets that escape the tree are skipped) — don't "fix" that skip.
 
+## Featured analysis
+
+- The featured essay is **unpinned** (`featured.slug: ''` in `_data/site.yaml`): the deterministic monthly rotation applies (`resolve_featured()` in `src/br_insight/config.py`), and the month label is baked at build time. A rebuild (i.e. any push) is what advances it — the owner does this **manually each month**; don't re-pin the slug casually.
+- Cloudflare Pages has **no native scheduled builds**. If automation is ever wanted, the documented pattern is a Pages Deploy Hook (Settings → Deploy Hooks, one per branch) POSTed from a GitHub Actions `schedule:` cron (or a Worker with a Cron Trigger). GitHub disables scheduled workflows after 60 days of repo inactivity.
+
+## Featured box design (owner-set)
+
+- The home featured box is deliberately tuned; keep these decisions when touching it:
+  - Ingress (`.featured__summary`) rides the **tagline face** (`--font-tagline`, Lato Thin 100) at `--fs-sm`/1.5 — an earlier Newsreader extralight cut was **rejected by the owner** (didn't match the design).
+  - The cover bleeds **edge-to-edge** down the card's left side (card padding moved onto `.featured__body`), fills the row height via an absolute fill + `object-fit: cover`, and **fades into the card background on its right edge** through a `mask-image` gradient. Mobile keeps the stacked rounded cover.
+  - A **blueprint grid mesh** (`::after`: 1px lines in `--bg-1`, `--space-m` cells) overlays the cover, with a hollow **glowing cyan target square** on top (`::before`, 4×4 cells, outer edges only, positioned in whole `--space-m` offsets so it stays grid-aligned).
+- Cascade gotcha: the base `.featured__cover img` rule sits **after** the wide-screen media query in `main.css`, so desktop image overrides must be placed after that base rule or `height: auto`/`border-radius` win the cascade.
+
 ## Evaluated and rejected
 
 - **raindrop-fx (SardineFish, WebGL)** was trialed (2026-09) and removed on purpose: the library draws its own opaque, fixed background image, which cannot follow scrolling pages and cannot refract live DOM — unsuitable for a reading-first site with long articles. Don't re-propose without addressing that constraint.
+- **Newsreader (Google Fonts) for the featured ingress** was tried and rejected by the owner (2026-10): it didn't match the site design. The ingress rides the Lato Thin tagline face instead.
 
 ## Conventions
 
