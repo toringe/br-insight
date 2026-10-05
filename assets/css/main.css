@@ -1666,27 +1666,7 @@ ul.rev-accordion__list {
   line-height: 1.5;
 }
 
-/* Featured head row: title on the left, byline/read-time on the right,
-   baseline-aligned; wraps below the title on narrow screens. Margins move
-   from the title to the row so the two stay on one line. */
-.featured__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-3xs) var(--space-s);
-  margin-block: var(--space-2xs) var(--space-3xs);
-}
-
-.featured__head .featured__title { margin-block: 0; }
-
-.featured__head .card__meta {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-s);
-  margin-top: 0;
-  padding-top: 0;
-}
+.featured__title { margin-block: var(--space-2xs) var(--space-3xs); }
 
 .featured__read {
   display: flex;
