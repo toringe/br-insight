@@ -1688,7 +1688,21 @@ ul.rev-accordion__list {
   padding-top: 0;
 }
 
-.featured__read { margin-block-start: var(--space-m); }
+.featured__read {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-block-start: var(--space-m);
+}
+
+/* Read time beside the button wears the muted ink the byline used; the
+   clock rides currentColor so it dims with the text. */
+.featured__read .card__reading-time { color: var(--muted); }
+
+.featured__clock {
+  flex: none;
+  translate: 0 1px;  /* optical alignment against the uppercase label */
+}
 
 .stats-band {
   padding-block: var(--space-m);
