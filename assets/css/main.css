@@ -1633,7 +1633,10 @@ ul.rev-accordion__list {
 .featured__body > :first-child { margin-block-start: 0; }
 .featured__summary {
   color: var(--muted);
-  font-family: var(--font-serif);
+  font-family: var(--font-tagline);
+  font-weight: 100;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
 }
 
 .featured__title { margin-block: var(--space-2xs) var(--space-3xs); }
