@@ -7,7 +7,7 @@ base_url: https://www.br-insight.com
 established: 1996
 
 featured:
-  slug: what-defines-human-existence   # empty => deterministic monthly rotation
+  slug: ''                            # empty => deterministic monthly rotation
   fallback: monthly-rotation
 
 social:

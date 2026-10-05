@@ -190,9 +190,15 @@ def audit(out: Path) -> tuple[bool, list[str]]:
             continue
         suffix = path_part.suffix.lower()
         if attr == "href" and suffix == ".css":
-            css_files.add(resolved := _resolve_target(page, root, url))
+            resolved = _resolve_target(page, root, url)
+            if resolved is None:
+                continue  # external stylesheet — not ours to budget
+            css_files.add(resolved)
         elif attr == "src" and suffix == ".js":
-            js_entrypoints.add(resolved := _resolve_target(page, root, url))
+            resolved = _resolve_target(page, root, url)
+            if resolved is None:
+                continue  # external script (e.g. the BMC widget) — not ours
+            js_entrypoints.add(resolved)
     js_files = _js_module_closure(js_entrypoints, root)
 
     def _sum_files(paths: set[Path]) -> int:

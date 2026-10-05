@@ -112,10 +112,10 @@ class TestBaseInjection:
     def test_flags_dropped_when_effect_disabled(self, override, dropped_attr):
         opening = re.search(r"<html[^>]*>", _render_base(**override)).group(0)
         for attr in dropped_attr:
-            assert attr not in opening
+            assert re.search(rf"{attr}(?![-\w])", opening) is None, attr
         for attr in FX_ATTRS:
             if attr not in dropped_attr:
-                assert attr in opening
+                assert re.search(rf"{attr}(?![-\w])", opening), attr
 
     def test_welcome_flag_still_requires_full_chain(self):
         # flicker.welcome requested but flicker.enabled off -> neither attr
