@@ -1661,6 +1661,7 @@ ul.rev-accordion__list {
   left: calc(var(--space-m) * 10);
   top: calc(var(--space-m) * 2);
   border: 1px solid var(--cyan);
+  box-shadow: var(--glow-cyan);
   pointer-events: none;
 }
 
