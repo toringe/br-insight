@@ -108,16 +108,21 @@ class TestHomeContext:
         from br_insight.render import home_context
 
         articles = corpus()
+        site = SiteConfig.load(REPO_ROOT)
         ctx = home_context(
-            SiteConfig.load(REPO_ROOT), articles,
+            site, articles,
             datetime.datetime(2026, 8, 26, 14, 30),
         )
-        # config slug wins over monthly rotation
-        assert ctx["featured"].slug == "what-defines-human-existence"
+        # unpinned slug => monthly rotation decides the featured essay
+        from br_insight.config import resolve_featured
+
+        assert ctx["featured"].slug == resolve_featured(
+            site, articles, "202608"
+        ).slug
         assert ctx["featured_month"] == "August"
         picks = ctx["archive_picks"]
         assert len(picks) == 3
-        assert "what-defines-human-existence" not in {a.slug for a in picks}
+        assert ctx["featured"].slug not in {a.slug for a in picks}
         assert picks == sorted(picks, key=lambda a: a.date, reverse=True)
         assert ctx["iso_year_week"] == "2026-W35"
         assert ctx["stats"]["essays"] == len(articles)
@@ -452,15 +457,15 @@ class TestBuildHomePage:
         actual = {p.relative_to(out) for p in written}
         assert actual >= expected
 
-    def test_built_featured_matches_config_slug(self, built_home):
-        title = next(
-            a.title
-            for a in corpus()
-            if a.slug == "what-defines-human-existence"
-        )
+    def test_built_featured_matches_rotation_pick(self, built_home):
+        from br_insight.config import resolve_featured
+
+        site = SiteConfig.load(REPO_ROOT)
+        ym = datetime.datetime.now().strftime("%Y%m")
+        featured = resolve_featured(site, corpus(), ym)
         text = (built_home / "index.html").read_text(encoding="utf-8")
         assert (
-            f'href="/library/what-defines-human-existence/">{title}</a>'
+            f'href="/library/{featured.slug}/">{featured.title}</a>'
             in text
         )
 
@@ -492,7 +497,7 @@ class TestBuildHomePage:
         assert "/topics/tag/noir/" in hrefs
 
     def test_built_archive_row_is_weekly_pick(self, built_home):
-        from br_insight.config import resolve_archive_picks
+        from br_insight.config import resolve_archive_picks, resolve_featured
 
         articles = corpus()
         text = (built_home / "index.html").read_text(encoding="utf-8")
@@ -500,7 +505,8 @@ class TestBuildHomePage:
         assert archive.count('class="card"') == 3
         # build week, injected via the grid hook, drives the fallback pick
         week = re.search(r'data-build-week="([^"]+)"', text).group(1)
-        featured = "postmodernist-view"
+        ym = datetime.datetime.now().strftime("%Y%m")
+        featured = resolve_featured(SiteConfig.load(REPO_ROOT), articles, ym).slug
         expected = {a.slug for a in resolve_archive_picks(articles, week, featured)}
         row_slugs = {
             a.slug for a in articles if f'/library/{a.slug}/">' in archive

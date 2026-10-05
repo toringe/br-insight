@@ -410,8 +410,9 @@ class TestRealSiteYaml:
         assert site.tagline
         assert site.base_url == "https://www.br-insight.com"
         assert site.established == 1996
+        # unpinned slug => deterministic monthly rotation
         assert site.featured == config.FeaturedConfig(
-            slug="what-defines-human-existence", fallback="monthly-rotation"
+            slug="", fallback="monthly-rotation"
         )
         assert site.social.twitter == "brinsight"
         assert site.fx.flicker == config.FlickerFx(enabled=True, welcome=True)
@@ -419,10 +420,13 @@ class TestRealSiteYaml:
             "Home", "Library", "Topics", "About",
         ]
 
-    def test_real_featured_slug_resolves_against_corpus(self, real_corpus):
+    def test_real_featured_resolves_via_rotation_against_corpus(
+        self, real_corpus
+    ):
         site = config.SiteConfig.load(REPO_ROOT)
         article = config.resolve_featured(site, real_corpus, "202608")
-        assert article.slug == "what-defines-human-existence"
+        slugs = sorted(a.slug for a in real_corpus)
+        assert article.slug == slugs[int("202608") % len(slugs)]
 
 
 class TestDevBannerEnabled:
