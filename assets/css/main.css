@@ -1615,12 +1615,54 @@ ul.rev-accordion__list {
 }
 
 @media (min-width: 768px) {
-  /* Spotlight split: cover beside body on wide screens. */
+  /* Spotlight split: cover beside body on wide screens. The cover bleeds
+     edge-to-edge down the card's left side and fades into the card
+     background toward the body column, so padding moves onto the body. */
   .featured__card {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    align-items: start;
-    padding: var(--space-l);
+    align-items: stretch;
+    padding: 0;
+    overflow: hidden;
   }
+
+  .featured__body { padding: var(--space-l); }
+}
+
+.featured__cover {
+  position: relative;
+}
+
+/* Blueprint grid over the cover: 1px lines in the card background color,
+   so the mesh reads as cut-outs from the chrome rather than a tint laid
+   over the photo. Cell size rides the --space-m rhythm. */
+.featured__cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+  background:
+    repeating-linear-gradient(
+      to right, var(--bg-1) 0 1px, transparent 1px var(--space-m)),
+    repeating-linear-gradient(
+      to bottom, var(--bg-1) 0 1px, transparent 1px var(--space-m));
+}
+
+/* HUD target square: 4×4 grid cells, cyan on the outer edges only
+   (hollow, so the mesh shows through), grid-aligned at 10 cells across
+   and 2 cells down. Sits above the grid mesh. */
+.featured__cover::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  width: calc(var(--space-m) * 4);
+  height: calc(var(--space-m) * 4);
+  left: calc(var(--space-m) * 10);
+  top: calc(var(--space-m) * 2);
+  border: 1px solid var(--cyan);
+  box-shadow: var(--glow-cyan);
+  pointer-events: none;
 }
 
 .featured__cover img {
@@ -1630,15 +1672,52 @@ ul.rev-accordion__list {
   border-radius: var(--radius-sm);
 }
 
+@media (min-width: 768px) {
+  /* Placed after the base img rule so the overrides win the cascade.
+     The anchor stretches to the row height (driven by the body column);
+     the img absolutely fills it — percentage heights don't resolve
+     through the stretched anchor reliably. Fades into the card
+     background on its right edge via mask, so the card's own background
+     shows through. */
+  .featured__cover::after { border-radius: 0; }
+
+  .featured__cover img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    -webkit-mask-image: linear-gradient(to right, #000 60%, transparent);
+    mask-image: linear-gradient(to right, #000 60%, transparent);
+  }
+}
+
 .featured__body > :first-child { margin-block-start: 0; }
 .featured__summary {
   color: var(--muted);
-  font-family: var(--font-serif);
+  font-family: var(--font-tagline);
+  font-weight: 100;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
 }
 
 .featured__title { margin-block: var(--space-2xs) var(--space-3xs); }
 
-.featured__read { margin-block-start: var(--space-m); }
+.featured__read {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-block-start: var(--space-m);
+}
+
+/* Read time beside the button wears the muted ink the byline used; the
+   clock rides currentColor so it dims with the text. */
+.featured__read .card__reading-time { color: var(--muted); }
+
+.featured__clock {
+  flex: none;
+  translate: 0 1px;  /* optical alignment against the uppercase label */
+}
 
 .stats-band {
   padding-block: var(--space-m);

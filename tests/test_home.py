@@ -307,12 +307,13 @@ class TestHomeAnatomy:
     def test_featured_section_contract(self, html):
         cover_at = html.index('src="/library/postmodernist-view/cover-crop.jpg"')
         title_at = html.index('href="/library/postmodernist-view/">Postmodernist View</a>')
-        author_at = html.index("K. Deckard")
-        reading_at = html.index("min read")
         summary_at = html.index("A machine to measure empathy.")
         read_at = html.index(">Read essay</a>")
-        assert -1 < cover_at < title_at < author_at < reading_at < summary_at < read_at
+        reading_at = html.index("min read")
+        assert -1 < cover_at < title_at < summary_at < read_at < reading_at
         assert "Featured analysis · August" in html
+        # the featured box carries no byline
+        assert "K. Deckard" not in html[cover_at:reading_at]
 
     def test_featured_skips_when_absent(self):
         from br_insight.render import render_template

@@ -164,14 +164,15 @@ class TestDesignDirectionRetrofit:
 
     def test_serif_applied_to_prose_and_summaries(self, css):
         prose = css[css.index(".prose {"):]
-        # Article prose reads in Lato Light 300; serif stays for card and
-        # featured summaries.
+        # Article prose reads in Lato Light 300; serif stays for card
+        # summaries, the featured ingress rides the Lato Thin tagline face.
         assert "font-family: var(--font-prose)" in prose[:200]
         assert "font-weight: 300" in prose[:200]
         card = css[css.index(".card__summary {"):]
         assert "var(--font-serif)" in card[:300]
         featured = css[css.index(".featured__summary {"):]
-        assert "var(--font-serif)" in featured[:200]
+        assert "var(--font-tagline)" in featured[:200]
+        assert "font-weight: 100" in featured[:200]
 
     def test_welcome_flicker_attr_present_by_default(self, site):
         html = render_template("base.html", site=site)
