@@ -1628,6 +1628,27 @@ ul.rev-accordion__list {
   .featured__body { padding: var(--space-l); }
 }
 
+.featured__cover {
+  position: relative;
+}
+
+/* Blueprint grid over the cover: 1px lines in the card background color,
+   so the mesh reads as cut-outs from the chrome rather than a tint laid
+   over the photo. Cell size rides the --space-m rhythm. */
+.featured__cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: var(--radius-sm);
+  background:
+    repeating-linear-gradient(
+      to right, var(--bg-1) 0 1px, transparent 1px var(--space-m)),
+    repeating-linear-gradient(
+      to bottom, var(--bg-1) 0 1px, transparent 1px var(--space-m));
+}
+
 .featured__cover img {
   display: block;
   width: 100%;
@@ -1642,9 +1663,7 @@ ul.rev-accordion__list {
      through the stretched anchor reliably. Fades into the card
      background on its right edge via mask, so the card's own background
      shows through. */
-  .featured__cover {
-    position: relative;
-  }
+  .featured__cover::after { border-radius: 0; }
 
   .featured__cover img {
     position: absolute;
