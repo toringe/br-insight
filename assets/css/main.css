@@ -1733,6 +1733,13 @@ ul.rev-accordion__list {
     color: var(--text);
     font-family: var(--font-prose);
     font-weight: 300;
+    /* Safari 26 applies `pretty` (inherited from the global p rule) to
+       every line — Chrome only touches the last four — wrapping each
+       line short of the box to even the rag. On the narrow card that
+       reads as wasted width (lines ending 2-4 words early). `wrap`
+       restores first-fit greedy filling; unsupported browsers just keep
+       `pretty`. */
+    text-wrap: wrap;
   }
 }
 
