@@ -1692,6 +1692,28 @@ ul.rev-accordion__list {
   }
 }
 
+/* Mobile: re-center the HUD target square on the cover, snapped to the
+   nearest dark grid lines. The mesh origin shifts so a line passes
+   exactly through the cover's center (offset = (50% - m/2) + m/2 = 50%
+   with an explicit m-sized background tile), and the square centers with
+   left/top at 50% minus 2 cells — being an even 4×4, its edges then lie
+   exactly on the lines running through center±2 cells. Beats fixed-cell
+   offsets, which assume the wide cover column and drift off-grid on the
+   narrow stacked cover. Sits after both base rules so the cascade
+   honors it. */
+@media (max-width: 767.98px) {
+  .featured__cover::after {
+    background-size: var(--space-m) var(--space-m);
+    background-position: calc(50% + var(--space-m) / 2)
+      calc(50% + var(--space-m) / 2);
+  }
+
+  .featured__cover::before {
+    left: calc(50% - var(--space-m) * 2);
+    top: calc(50% - var(--space-m) * 2);
+  }
+}
+
 .featured__body > :first-child { margin-block-start: 0; }
 .featured__summary {
   color: var(--muted);
@@ -1699,6 +1721,19 @@ ul.rev-accordion__list {
   font-weight: 100;
   font-size: var(--fs-sm);
   line-height: 1.5;
+}
+
+/* Same mobile MITM fix as the hero tagline: Lato Thin 100 hairlines get
+   rounded away by phone antialiasing, so swap the ingress to the loaded
+   Light 300 cut and brighten it. Desktop keeps the gossamer look. Must
+   sit after the base rule above — the hero's own mobile block doesn't
+   cover this element and the cascade would let the base rule win. */
+@media (max-width: 767.98px) {
+  .featured__summary {
+    color: var(--text);
+    font-family: var(--font-prose);
+    font-weight: 300;
+  }
 }
 
 .featured__title { margin-block: var(--space-2xs) var(--space-3xs); }
